@@ -1,6 +1,7 @@
 import { db } from './db.js';
 import { surveys, surveyCommonDetails, surveyAuditLogs, inventoryItems, invitations } from './models/schema.js';
-import { residentialAppliances } from './models/residential.js';
+import { residentialAppliances, residentialCommonLoads } from './models/residential.js';
+import { industrialDemandResponse } from './models/demand_response.js';
 import { eq, desc } from 'drizzle-orm';
 import { auth } from './auth.js';
 
@@ -48,8 +49,18 @@ async function runTest() {
       await tx.insert(residentialAppliances).values([
         { surveyId: survey.id, applianceType: "AC", capacity: "1.5", numberOfUnits: 2 }
       ]);
+
+      // Agent adds LIFT common load
+      await tx.insert(residentialCommonLoads).values([
+        { surveyId: survey.id, loadType: "LIFT", numberOfLifts: 2, minimumLiftsRequired: 1, ratedCapacityPerLift: "1000", ratedCapacityPerLiftUnit: "kg" }
+      ]);
+      
+      // Agent adds E4 Industrial Demand Response
+      await tx.insert(industrialDemandResponse).values([
+        { surveyId: survey.id, equipmentDataVerificationConsent: "SUBJECT_TO_APPROVAL", createsNewDemandPeak: "NO" }
+      ]);
     });
-    console.log("✅ Agent Edits Successful. Version is now 2.");
+    console.log("✅ Agent Edits Successful (Appliances, Lifts, Ind-DR). Version is now 2.");
 
     // 3. Agent Submits Survey
     console.log("📩 3. Agent submitting survey...");
@@ -72,6 +83,12 @@ async function runTest() {
 
     if (adminBumpResult.length === 0) throw new Error("OCC Conflict");
 
+    const oldLifts = await db.select().from(residentialCommonLoads).where(eq(residentialCommonLoads.surveyId, survey.id));
+    const oldLift = oldLifts[0];
+
+    const oldInd = await db.select().from(industrialDemandResponse).where(eq(industrialDemandResponse.surveyId, survey.id));
+    const oldIndDR = oldInd[0];
+
     const oldAppliances = await db.select().from(residentialAppliances).where(eq(residentialAppliances.surveyId, survey.id));
     const oldAC = oldAppliances[0];
 
@@ -80,15 +97,36 @@ async function runTest() {
     await db.insert(residentialAppliances).values([
       { surveyId: survey.id, applianceType: "AC", capacity: "2.0", numberOfUnits: 3 }
     ]);
+    
+    // Admin updates Lift capacity
+    await db.delete(residentialCommonLoads).where(eq(residentialCommonLoads.surveyId, survey.id));
+    await db.insert(residentialCommonLoads).values([
+      { surveyId: survey.id, loadType: "LIFT", numberOfLifts: 2, minimumLiftsRequired: 1, ratedCapacityPerLift: "1500", ratedCapacityPerLiftUnit: "kg" }
+    ]);
 
-    // Granular Audit Log logic (mimicking our controller):
+    // Admin updates Industrial DR consent
+    await db.delete(industrialDemandResponse).where(eq(industrialDemandResponse.surveyId, survey.id));
+    await db.insert(industrialDemandResponse).values([
+      { surveyId: survey.id, equipmentDataVerificationConsent: "YES", createsNewDemandPeak: "NO" }
+    ]);
+
+    // Granular Audit Log logic (mimicking our controller `generateElementAudits`):
     const newAC = { applianceType: "AC", capacity: "2.0", numberOfUnits: 3 };
+    const newLift = { loadType: "LIFT", ratedCapacityPerLift: "1500" };
+    const newIndDR = { equipmentDataVerificationConsent: "YES" };
+    
     const audits = [];
     if (oldAC.capacity !== newAC.capacity) {
       audits.push({ surveyId: survey.id, userId: adminId, action: 'UPDATE', section: 'residential_appliances', entityId: 'AC', field: 'capacity', oldValue: oldAC.capacity, newValue: newAC.capacity });
     }
     if (oldAC.numberOfUnits !== newAC.numberOfUnits) {
       audits.push({ surveyId: survey.id, userId: adminId, action: 'UPDATE', section: 'residential_appliances', entityId: 'AC', field: 'numberOfUnits', oldValue: String(oldAC.numberOfUnits), newValue: String(newAC.numberOfUnits) });
+    }
+    if (oldLift.ratedCapacityPerLift !== newLift.ratedCapacityPerLift) {
+      audits.push({ surveyId: survey.id, userId: adminId, action: 'UPDATE', section: 'residential_common_loads', entityId: 'LIFT', field: 'ratedCapacityPerLift', oldValue: oldLift.ratedCapacityPerLift, newValue: newLift.ratedCapacityPerLift });
+    }
+    if (oldIndDR.equipmentDataVerificationConsent !== newIndDR.equipmentDataVerificationConsent) {
+      audits.push({ surveyId: survey.id, userId: adminId, action: 'UPDATE', section: 'industrial_demand_response', entityId: null, field: 'equipmentDataVerificationConsent', oldValue: oldIndDR.equipmentDataVerificationConsent, newValue: newIndDR.equipmentDataVerificationConsent });
     }
     await db.insert(surveyAuditLogs).values(audits);
 
@@ -98,10 +136,10 @@ async function runTest() {
     const logs = await db.select().from(surveyAuditLogs).where(eq(surveyAuditLogs.surveyId, survey.id));
     console.log("🔍 Checking Generated Granular Audit Logs in DB:");
     logs.forEach(log => {
-      console.log(`   - [${log.action}] ${log.section} (ID: ${log.entityId}): Field '${log.field}' changed from '${log.oldValue}' to '${log.newValue}'`);
+      console.log(`   - [${log.action}] ${log.section} (ID: ${log.entityId || 'N/A'}): Field '${log.field}' changed from '${log.oldValue}' to '${log.newValue}'`);
     });
 
-    if (logs.length !== 2) throw new Error("Audit logs not granularly recorded!");
+    if (logs.length !== 4) throw new Error("Audit logs not granularly recorded!");
 
     // 5. Admin Approves Survey
     console.log("✅ 5. Admin approving survey...");

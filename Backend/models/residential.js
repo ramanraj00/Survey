@@ -43,6 +43,9 @@ export const residentialAppliances = pgTable("residential_appliances", {
   typicalUsageTime: text("typical_usage_time"),
   usedDuringPeak: boolean("used_during_peak"),
   possibleAdjustment: text("possible_adjustment"), // SHIFT, REDUCE, SWITCH_OFF, NO_CHANGE
+  maximumDurationOrNewTime: text("max_duration_or_new_time"),
+  constraintsOrRemarks: text("constraints_or_remarks"),
+  otherApplianceName: text("other_appliance_name"),
   remarks: text("remarks"),
 });
 
@@ -85,4 +88,59 @@ export const solarInstallations = pgTable("solar_installations", {
   capacity: text("capacity"),
   capacityUnit: text("capacity_unit"),
   batteryConnected: boolean("battery_connected"),
+});
+
+export const residentialCommonLoadsInfo = pgTable("residential_common_loads_info", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  surveyId: uuid("survey_id").references(() => surveys.id, { onDelete: 'cascade' }).notNull().unique(),
+  
+  hasSeparateConnection: boolean("has_separate_connection"),
+  managementEntity: text("management_entity"),
+  approvalAuthorityName: text("approval_authority_name"),
+  approvalAuthorityRole: text("approval_authority_role"),
+  approvalAuthorityPhone: text("approval_authority_phone"),
+  approvalTime: text("approval_time"),
+});
+
+export const residentialCommonLoads = pgTable("residential_common_loads", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  surveyId: uuid("survey_id").references(() => surveys.id, { onDelete: 'cascade' }).notNull(),
+  loadType: text("load_type").notNull(), // LIFT, WATER_SEWAGE_PUMP, OTHER
+  
+  // LIFT fields
+  numberOfLifts: integer("number_of_lifts"),
+  ratedCapacityPerLift: text("rated_capacity_per_lift"),
+  ratedCapacityPerLiftUnit: text("rated_capacity_per_lift_unit"),
+  minimumLiftsRequired: integer("minimum_lifts_required"),
+  canReduceLiftOperation: boolean("can_reduce_lift_operation"),
+  maximumAcceptableDuration: integer("max_acceptable_duration"),
+  
+  // PUMP fields
+  pumpType: text("pump_type"),
+  numberOfPumps: integer("number_of_pumps"),
+  capacityPerPump: text("capacity_per_pump"),
+  capacityPerPumpUnit: text("capacity_per_pump_unit"),
+  typicalOperatingTime: text("typical_operating_time"), // Also used by OTHER
+  approximateStorageDuration: text("approx_storage_duration"),
+  shiftablePumpingWindow: text("shiftable_pumping_window"),
+  canMoveOutsidePeak: boolean("can_move_outside_peak"),
+  
+  // OTHER fields
+  loadName: text("load_name"),
+  available: boolean("available"),
+  operatesDuringPeak: boolean("operates_during_peak"),
+  possibleAdjustment: text("possible_adjustment"),
+  maximumDuration: integer("maximum_duration"),
+  constraints: text("constraints"),
+});
+
+export const residentialLoadFlexibility = pgTable("residential_load_flexibility", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  surveyId: uuid("survey_id").references(() => surveys.id, { onDelete: 'cascade' }).notNull().unique(),
+  
+  acTemperatureAdjustment: text("ac_temperature_adjustment"),
+  waterHeatingAdjustment: text("water_heating_adjustment"),
+  washingCleaningAdjustment: text("washing_cleaning_adjustment"),
+  evChargingAdjustment: text("ev_charging_adjustment"),
+  waterPumpingAdjustment: text("water_pumping_adjustment"),
 });

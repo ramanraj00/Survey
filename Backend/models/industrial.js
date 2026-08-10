@@ -5,24 +5,28 @@ export const industrialProfiles = pgTable("industrial_profiles", {
   id: uuid("id").primaryKey().defaultRandom(),
   surveyId: uuid("survey_id").references(() => surveys.id, { onDelete: 'cascade' }).notNull().unique(),
   
-  industrySector: text("industry_sector"),
-  products: text("products"),
-  productionNature: text("production_nature"), // Continuous, Batch, etc.
+  industrySector: text("industry_sector"), // E1.1
+  productsManufactured: text("products_manufactured"), // E1.2
+  productionNature: text("production_nature"), // E1.3 Continuous, Batch, etc.
   
-  operatingDays: integer("operating_days"),
-  operatingStartTime: text("operating_start_time"),
-  operatingEndTime: text("operating_end_time"),
+  operatingDays: integer("operating_days"), // E1.4
+  operatingTiming: text("operating_timing"), // E1.4
+  shifts: text("shifts"), // E1.4
+  daysPerWeek: integer("days_per_week"), // E1.5
+  daysClosed: text("days_closed"), // E1.5
   
-  daysPerWeek: integer("days_per_week"),
-  daysClosed: text("days_closed"),
+  operatingHours: integer("operating_hours"), // E1.6
   
-  shiftCount: integer("shift_count"),
-  operates24Hours: boolean("operates_24_hours"),
+  productionShiftCount: integer("production_shift_count"), // E1.7
+  shiftTimings: text("shift_timings"), // E1.8
+  operates24Hours: boolean("operates_24_hours"), // E1.9
   
-  highestProductionMonths: text("highest_production_months"),
-  productionSchedule: text("production_schedule"),
-  canIncreaseBeforePeak: boolean("can_increase_before_peak"),
-  maintenanceSchedule: text("maintenance_schedule"),
+  highestProductionMonths: text("highest_production_months"), // E1.10
+  productionScheduleFlexibility: text("production_schedule_flexibility"), // E1.11
+  canIncreaseProductionBeforePeak: boolean("can_increase_before_peak"), // E1.12
+  
+  maintenanceSchedule: text("maintenance_schedule"), // E1.13
+  maintenanceFrequency: text("maintenance_frequency"), // E1.13
 });
 
 export const industrialShifts = pgTable("industrial_shifts", {
@@ -37,16 +41,15 @@ export const industrialShifts = pgTable("industrial_shifts", {
 export const productionProcesses = pgTable("production_processes", {
   id: uuid("id").primaryKey().defaultRandom(),
   surveyId: uuid("survey_id").references(() => surveys.id, { onDelete: 'cascade' }).notNull(),
-  
   processName: text("process_name"),
   description: text("description"),
   
-  operatesDuringPeak: boolean("operates_during_peak"),
-  mustOperateContinuously: boolean("must_operate_continuously"),
-  
-  canDelay: boolean("can_delay"),
-  canReduce: boolean("can_reduce"),
-  canTemporarilyStop: boolean("can_temporarily_stop"),
+  mainProductionStages: text("main_production_stages"), // E2.1
+  peakOperatingProcesses: text("peak_operating_processes"), // E2.2
+  continuousProcesses: text("continuous_processes"), // E2.3
+  delayableProcesses: text("delayable_processes"), // E2.4
+  reducibleProcesses: text("reducible_processes"), // E2.5
+  stoppableProcesses: text("stoppable_processes"), // E2.6
   
   interruptionImpact: text("interruption_impact"),
   safeStopTime: integer("safe_stop_time"), // minutes

@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, boolean, integer } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, boolean, integer, jsonb } from "drizzle-orm/pg-core";
 import { surveys } from "./schema.js";
 
 export const commercialProfiles = pgTable("commercial_profiles", {
@@ -10,7 +10,7 @@ export const commercialProfiles = pgTable("commercial_profiles", {
   floorCount: integer("floor_count"),
   operationalAreas: text("operational_areas"),
   
-  daysOpen: integer("days_open"),
+  operatingDays: integer("operating_days"),
   daysClosed: text("days_closed"),
   openingTime: text("opening_time"),
   closingTime: text("closing_time"),
@@ -38,9 +38,10 @@ export const commercialControls = pgTable("commercial_controls", {
   surveyId: uuid("survey_id").references(() => surveys.id, { onDelete: 'cascade' }).notNull().unique(),
   
   hasAutomaticControls: boolean("has_automatic_controls"),
-  controlledLoads: text("controlled_loads"),
+  controlledInventoryItemIds: jsonb("controlled_inventory_item_ids"), // Arrays of UUIDs
   
   hasBMS: boolean("has_bms"),
+  canChangeSchedulesCentrally: boolean("can_change_schedules_centrally"),
   centralControlAvailable: boolean("central_control_available"),
   
   hasSolar: boolean("has_solar"),

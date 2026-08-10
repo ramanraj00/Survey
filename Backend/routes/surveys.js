@@ -1,10 +1,10 @@
 import express from 'express';
 import { db } from '../db.js';
 import { surveys, surveyCommonDetails, inventoryItems } from '../models/schema.js';
-import { residentialProfiles, residentialOccupancy, residentialAppliances, evCharging, backupPowerSources, solarInstallations } from '../models/residential.js';
+import { residentialProfiles, residentialOccupancy, residentialAppliances, evCharging, backupPowerSources, solarInstallations, residentialCommonLoadsInfo, residentialCommonLoads, residentialLoadFlexibility } from '../models/residential.js';
 import { commercialProfiles, commercialShifts, commercialControls } from '../models/commercial.js';
 import { industrialProfiles, industrialShifts, productionProcesses, industrialControls } from '../models/industrial.js';
-import { demandResponseProfiles, drLoadSelections } from '../models/demand_response.js';
+import { demandResponseProfiles, drLoadSelections, commercialDemandResponse, industrialDemandResponse } from '../models/demand_response.js';
 import { eq, and, sql } from 'drizzle-orm';
 import { requireAuth, requireRole, checkSurveyOwnership, checkSurveyStatus, checkVersionBody } from '../middlewares.js';
 
@@ -103,7 +103,7 @@ surveyRouter.put('/:id/inventory', checkSurveyOwnership, checkSurveyStatus(['DRA
 
 // PUT /api/surveys/:id/residential
 surveyRouter.put('/:id/residential', checkSurveyOwnership, checkSurveyStatus(['DRAFT']), checkVersionBody, async (req, res) => {
-  const { version, profiles, occupancy, appliances, ev, backup, solar } = req.body;
+  const { version, profiles, occupancy, appliances, ev, backup, solar, commonLoadsInfo, commonLoads, loadFlexibility } = req.body;
   try {
     let newVersion;
     await db.transaction(async (tx) => {
@@ -129,6 +129,15 @@ surveyRouter.put('/:id/residential', checkSurveyOwnership, checkSurveyStatus(['D
       }
       
       if (solar) await tx.insert(solarInstallations).values({ surveyId: req.survey.id, ...solar }).onConflictDoUpdate({ target: solarInstallations.surveyId, set: { ...solar } });
+
+      if (commonLoadsInfo) await tx.insert(residentialCommonLoadsInfo).values({ surveyId: req.survey.id, ...commonLoadsInfo }).onConflictDoUpdate({ target: residentialCommonLoadsInfo.surveyId, set: { ...commonLoadsInfo } });
+      
+      if (commonLoads) {
+        await tx.delete(residentialCommonLoads).where(eq(residentialCommonLoads.surveyId, req.survey.id));
+        if (commonLoads.length > 0) await tx.insert(residentialCommonLoads).values(commonLoads.map(c => ({ surveyId: req.survey.id, ...c })));
+      }
+      
+      if (loadFlexibility) await tx.insert(residentialLoadFlexibility).values({ surveyId: req.survey.id, ...loadFlexibility }).onConflictDoUpdate({ target: residentialLoadFlexibility.surveyId, set: { ...loadFlexibility } });
     });
     res.json({ success: true, newVersion });
   } catch (error) {
@@ -185,12 +194,17 @@ surveyRouter.put('/:id/industrial', checkSurveyOwnership, checkSurveyStatus(['DR
 
 // PUT /api/surveys/:id/demand-response
 surveyRouter.put('/:id/demand-response', checkSurveyOwnership, checkSurveyStatus(['DRAFT']), checkVersionBody, async (req, res) => {
-  const { version, profiles, loadSelections } = req.body;
+  const { version, profiles, loadSelections, commercialDR, industrialDR } = req.body;
   try {
     let newVersion;
     await db.transaction(async (tx) => {
       newVersion = await bumpVersionAtomic(tx, req.survey.id, version);
       if (profiles) await tx.insert(demandResponseProfiles).values({ surveyId: req.survey.id, ...profiles }).onConflictDoUpdate({ target: demandResponseProfiles.surveyId, set: { ...profiles } });
+      
+      if (commercialDR) await tx.insert(commercialDemandResponse).values({ surveyId: req.survey.id, ...commercialDR }).onConflictDoUpdate({ target: commercialDemandResponse.surveyId, set: { ...commercialDR } });
+      
+      if (industrialDR) await tx.insert(industrialDemandResponse).values({ surveyId: req.survey.id, ...industrialDR }).onConflictDoUpdate({ target: industrialDemandResponse.surveyId, set: { ...industrialDR } });
+      
       if (loadSelections) {
         await tx.delete(drLoadSelections).where(eq(drLoadSelections.surveyId, req.survey.id));
         if (loadSelections.length > 0) await tx.insert(drLoadSelections).values(loadSelections.map(l => ({ surveyId: req.survey.id, ...l })));

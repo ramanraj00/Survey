@@ -1,10 +1,10 @@
 import express from 'express';
 import { db } from '../db.js';
 import { surveys, surveyAuditLogs, surveyCommonDetails, inventoryItems } from '../models/schema.js';
-import { residentialProfiles, residentialOccupancy, residentialAppliances, evCharging, backupPowerSources, solarInstallations } from '../models/residential.js';
+import { residentialProfiles, residentialOccupancy, residentialAppliances, evCharging, backupPowerSources, solarInstallations, residentialCommonLoadsInfo, residentialCommonLoads, residentialLoadFlexibility } from '../models/residential.js';
 import { commercialProfiles, commercialShifts, commercialControls } from '../models/commercial.js';
 import { industrialProfiles, industrialShifts, productionProcesses, industrialControls } from '../models/industrial.js';
-import { demandResponseProfiles, drLoadSelections } from '../models/demand_response.js';
+import { demandResponseProfiles, drLoadSelections, commercialDemandResponse, industrialDemandResponse } from '../models/demand_response.js';
 import { eq, and, sql, count } from 'drizzle-orm';
 import { requireAuth, requireRole } from '../middlewares.js';
 
@@ -142,40 +142,106 @@ adminRouter.patch('/surveys/:id/common', async (req, res) => {
 // PATCH /api/admin/surveys/:id/residential (Bulk overwrite with granular Element-level Audit)
 adminRouter.patch('/surveys/:id/residential', async (req, res) => {
   const { id } = req.params;
-  const { version, appliances } = req.body; 
-  if (!version || !appliances) return res.status(400).json({ error: "version and appliances required" });
+  const { version, appliances, commonLoadsInfo, commonLoads, loadFlexibility } = req.body; 
+  if (!version) return res.status(400).json({ error: "version required" });
 
   try {
     let newVersion;
     await db.transaction(async (tx) => {
       newVersion = await bumpVersionAtomicAdmin(tx, id, version);
 
-      const oldAppliances = await tx.select().from(residentialAppliances).where(eq(residentialAppliances.surveyId, id));
+      // --- APPLIANCES ---
+      if (appliances) {
+        const oldAppliances = await tx.select().from(residentialAppliances).where(eq(residentialAppliances.surveyId, id));
+        const oldMap = {};
+        oldAppliances.forEach(a => oldMap[a.id || a.applianceType] = a);
+        const newMap = {};
+        appliances.forEach(a => newMap[a.id || a.applianceType] = a);
 
-      const oldMap = {};
-      oldAppliances.forEach(a => oldMap[a.id || a.applianceType] = a);
+        await tx.delete(residentialAppliances).where(eq(residentialAppliances.surveyId, id));
+        if (appliances.length > 0) {
+          await tx.insert(residentialAppliances).values(appliances.map(a => ({ surveyId: id, ...a })));
+        }
 
-      const newMap = {};
-      appliances.forEach(a => newMap[a.id || a.applianceType] = a);
-
-      // Bulk DB Update
-      await tx.delete(residentialAppliances).where(eq(residentialAppliances.surveyId, id));
-      if (appliances.length > 0) {
-        await tx.insert(residentialAppliances).values(appliances.map(a => ({ surveyId: id, ...a })));
+        const allEntities = new Set([...Object.keys(oldMap), ...Object.keys(newMap)]);
+        for (const entityKey of allEntities) {
+          await generateElementAudits(tx, id, req.user.id, 'residential_appliances', entityKey, oldMap[entityKey], newMap[entityKey]);
+        }
       }
 
-      // Granular Element-level Audits
-      const allEntities = new Set([...Object.keys(oldMap), ...Object.keys(newMap)]);
-      for (const entityKey of allEntities) {
-        const oldObj = oldMap[entityKey];
-        const newObj = newMap[entityKey];
-        await generateElementAudits(tx, id, req.user.id, 'residential_appliances', entityKey, oldObj, newObj);
+      // --- COMMON LOADS INFO ---
+      if (commonLoadsInfo) {
+        const [oldInfo] = await tx.select().from(residentialCommonLoadsInfo).where(eq(residentialCommonLoadsInfo.surveyId, id));
+        await tx.insert(residentialCommonLoadsInfo).values({ surveyId: id, ...commonLoadsInfo }).onConflictDoUpdate({ target: residentialCommonLoadsInfo.surveyId, set: { ...commonLoadsInfo } });
+        await generateElementAudits(tx, id, req.user.id, 'residential_common_loads_info', null, oldInfo, commonLoadsInfo);
+      }
+
+      // --- COMMON LOADS (Arrays) ---
+      if (commonLoads) {
+        const oldLoads = await tx.select().from(residentialCommonLoads).where(eq(residentialCommonLoads.surveyId, id));
+        const oldMapLoads = {};
+        oldLoads.forEach(l => oldMapLoads[l.id || l.loadType + (l.loadName || '')] = l);
+        const newMapLoads = {};
+        commonLoads.forEach(l => newMapLoads[l.id || l.loadType + (l.loadName || '')] = l);
+
+        await tx.delete(residentialCommonLoads).where(eq(residentialCommonLoads.surveyId, id));
+        if (commonLoads.length > 0) {
+          await tx.insert(residentialCommonLoads).values(commonLoads.map(l => ({ surveyId: id, ...l })));
+        }
+
+        const allLoadEntities = new Set([...Object.keys(oldMapLoads), ...Object.keys(newMapLoads)]);
+        for (const entityKey of allLoadEntities) {
+          await generateElementAudits(tx, id, req.user.id, 'residential_common_loads', entityKey, oldMapLoads[entityKey], newMapLoads[entityKey]);
+        }
+      }
+
+      // --- LOAD FLEXIBILITY ---
+      if (loadFlexibility) {
+        const [oldFlex] = await tx.select().from(residentialLoadFlexibility).where(eq(residentialLoadFlexibility.surveyId, id));
+        await tx.insert(residentialLoadFlexibility).values({ surveyId: id, ...loadFlexibility }).onConflictDoUpdate({ target: residentialLoadFlexibility.surveyId, set: { ...loadFlexibility } });
+        await generateElementAudits(tx, id, req.user.id, 'residential_load_flexibility', null, oldFlex, loadFlexibility);
       }
     });
     res.json({ success: true, newVersion });
   } catch (error) {
     if (error.message === "VERSION_MISMATCH_OR_APPROVED") return res.status(409).json({ error: "Conflict: Version mismatch or survey is APPROVED" });
-    res.status(500).json({ error: "Transaction failed" });
+    res.status(500).json({ error: "Transaction failed", details: error.message });
+  }
+});
+
+// PATCH /api/admin/surveys/:id/demand-response
+adminRouter.patch('/surveys/:id/demand-response', async (req, res) => {
+  const { id } = req.params;
+  const { version, profiles, commercialDR, industrialDR } = req.body; 
+  if (!version) return res.status(400).json({ error: "version required" });
+
+  try {
+    let newVersion;
+    await db.transaction(async (tx) => {
+      newVersion = await bumpVersionAtomicAdmin(tx, id, version);
+
+      if (profiles) {
+        const [oldProf] = await tx.select().from(demandResponseProfiles).where(eq(demandResponseProfiles.surveyId, id));
+        await tx.insert(demandResponseProfiles).values({ surveyId: id, ...profiles }).onConflictDoUpdate({ target: demandResponseProfiles.surveyId, set: { ...profiles } });
+        await generateElementAudits(tx, id, req.user.id, 'demand_response_profiles', null, oldProf, profiles);
+      }
+      
+      if (commercialDR) {
+        const [oldCom] = await tx.select().from(commercialDemandResponse).where(eq(commercialDemandResponse.surveyId, id));
+        await tx.insert(commercialDemandResponse).values({ surveyId: id, ...commercialDR }).onConflictDoUpdate({ target: commercialDemandResponse.surveyId, set: { ...commercialDR } });
+        await generateElementAudits(tx, id, req.user.id, 'commercial_demand_response', null, oldCom, commercialDR);
+      }
+      
+      if (industrialDR) {
+        const [oldInd] = await tx.select().from(industrialDemandResponse).where(eq(industrialDemandResponse.surveyId, id));
+        await tx.insert(industrialDemandResponse).values({ surveyId: id, ...industrialDR }).onConflictDoUpdate({ target: industrialDemandResponse.surveyId, set: { ...industrialDR } });
+        await generateElementAudits(tx, id, req.user.id, 'industrial_demand_response', null, oldInd, industrialDR);
+      }
+    });
+    res.json({ success: true, newVersion });
+  } catch (error) {
+    if (error.message === "VERSION_MISMATCH_OR_APPROVED") return res.status(409).json({ error: "Conflict: Version mismatch or survey is APPROVED" });
+    res.status(500).json({ error: "Transaction failed", details: error.message });
   }
 });
 

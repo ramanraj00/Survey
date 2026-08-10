@@ -5,6 +5,7 @@ import { user } from "./auth-schema.js";
 export const surveyStatusEnum = pgEnum('survey_status', ['DRAFT', 'SUBMITTED', 'APPROVED']);
 export const consumerCategoryEnum = pgEnum('consumer_category', ['RESIDENTIAL', 'COMMERCIAL', 'INDUSTRIAL']);
 export const inviteStatusEnum = pgEnum('invite_status', ['PENDING', 'ACCEPTED', 'EXPIRED']);
+export const commonLoadTypeEnum = pgEnum('common_load_type', ['LIFT', 'WATER_SEWAGE_PUMP', 'OTHER']);
 
 // INVITATIONS
 export const invitations = pgTable("invitations", {
@@ -112,6 +113,7 @@ export const surveyCommonDetails = pgTable("survey_common_details", {
   hasRooftopSolar: boolean("has_rooftop_solar"),
   hasDGSet: boolean("has_dg_set"),
   hasBatteryInverter: boolean("has_battery_inverter"),
+  hasNoAlternativeSource: boolean("has_no_alternative_source"),
   
   frequentPowerOutages: boolean("frequent_power_outages"),
   outageRemarks: text("outage_remarks"),

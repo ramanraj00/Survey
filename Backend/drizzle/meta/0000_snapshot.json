@@ -1,0 +1,3255 @@
+{
+  "id": "8b827b66-9e13-4ccd-8d04-a54ff09014a2",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.account": {
+      "name": "account",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "provider_id": {
+          "name": "provider_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "access_token": {
+          "name": "access_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "refresh_token": {
+          "name": "refresh_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "id_token": {
+          "name": "id_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "access_token_expires_at": {
+          "name": "access_token_expires_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "refresh_token_expires_at": {
+          "name": "refresh_token_expires_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "scope": {
+          "name": "scope",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "password": {
+          "name": "password",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "account_userId_idx": {
+          "name": "account_userId_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "account_user_id_user_id_fk": {
+          "name": "account_user_id_user_id_fk",
+          "tableFrom": "account",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.session": {
+      "name": "session",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "token": {
+          "name": "token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ip_address": {
+          "name": "ip_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_agent": {
+          "name": "user_agent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "session_userId_idx": {
+          "name": "session_userId_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "session_user_id_user_id_fk": {
+          "name": "session_user_id_user_id_fk",
+          "tableFrom": "session",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "session_token_unique": {
+          "name": "session_token_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "token"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.user": {
+      "name": "user",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email_verified": {
+          "name": "email_verified",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "image": {
+          "name": "image",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'agent'"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "user_email_unique": {
+          "name": "user_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.verification": {
+      "name": "verification",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "identifier": {
+          "name": "identifier",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "verification_identifier_idx": {
+          "name": "verification_identifier_idx",
+          "columns": [
+            {
+              "expression": "identifier",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.commercial_controls": {
+      "name": "commercial_controls",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "survey_id": {
+          "name": "survey_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "has_automatic_controls": {
+          "name": "has_automatic_controls",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "controlled_inventory_item_ids": {
+          "name": "controlled_inventory_item_ids",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "has_bms": {
+          "name": "has_bms",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "can_change_schedules_centrally": {
+          "name": "can_change_schedules_centrally",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "central_control_available": {
+          "name": "central_control_available",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "has_solar": {
+          "name": "has_solar",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "solar_capacity": {
+          "name": "solar_capacity",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "has_dg": {
+          "name": "has_dg",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dg_capacity": {
+          "name": "dg_capacity",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "has_ups": {
+          "name": "has_ups",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ups_capacity": {
+          "name": "ups_capacity",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "has_ev_charging": {
+          "name": "has_ev_charging",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "charger_count": {
+          "name": "charger_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "commercial_controls_survey_id_surveys_id_fk": {
+          "name": "commercial_controls_survey_id_surveys_id_fk",
+          "tableFrom": "commercial_controls",
+          "tableTo": "surveys",
+          "columnsFrom": [
+            "survey_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "commercial_controls_survey_id_unique": {
+          "name": "commercial_controls_survey_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "survey_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.commercial_profiles": {
+      "name": "commercial_profiles",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "survey_id": {
+          "name": "survey_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "business_type": {
+          "name": "business_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "building_nature": {
+          "name": "building_nature",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "floor_count": {
+          "name": "floor_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "operational_areas": {
+          "name": "operational_areas",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "operating_days": {
+          "name": "operating_days",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "days_closed": {
+          "name": "days_closed",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "opening_time": {
+          "name": "opening_time",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "closing_time": {
+          "name": "closing_time",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "operates_in_shifts": {
+          "name": "operates_in_shifts",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "shift_count": {
+          "name": "shift_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_open_24_hours": {
+          "name": "is_open_24_hours",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "highest_activity_period": {
+          "name": "highest_activity_period",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approver_name": {
+          "name": "approver_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approver_designation": {
+          "name": "approver_designation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "commercial_profiles_survey_id_surveys_id_fk": {
+          "name": "commercial_profiles_survey_id_surveys_id_fk",
+          "tableFrom": "commercial_profiles",
+          "tableTo": "surveys",
+          "columnsFrom": [
+            "survey_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "commercial_profiles_survey_id_unique": {
+          "name": "commercial_profiles_survey_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "survey_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.commercial_shifts": {
+      "name": "commercial_shifts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "survey_id": {
+          "name": "survey_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "shift_number": {
+          "name": "shift_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "start_time": {
+          "name": "start_time",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "end_time": {
+          "name": "end_time",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "commercial_shifts_survey_id_surveys_id_fk": {
+          "name": "commercial_shifts_survey_id_surveys_id_fk",
+          "tableFrom": "commercial_shifts",
+          "tableTo": "surveys",
+          "columnsFrom": [
+            "survey_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.commercial_demand_response": {
+      "name": "commercial_demand_response",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "survey_id": {
+          "name": "survey_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "shifted_load_timing": {
+          "name": "shifted_load_timing",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "participation_barriers": {
+          "name": "participation_barriers",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "incentive_type": {
+          "name": "incentive_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "commercial_demand_response_survey_id_surveys_id_fk": {
+          "name": "commercial_demand_response_survey_id_surveys_id_fk",
+          "tableFrom": "commercial_demand_response",
+          "tableTo": "surveys",
+          "columnsFrom": [
+            "survey_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "commercial_demand_response_survey_id_unique": {
+          "name": "commercial_demand_response_survey_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "survey_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.demand_response_profiles": {
+      "name": "demand_response_profiles",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "survey_id": {
+          "name": "survey_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "willingness": {
+          "name": "willingness",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "estimated_adjustment_duration": {
+          "name": "estimated_adjustment_duration",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "maximum_adjustment_duration": {
+          "name": "maximum_adjustment_duration",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "required_advance_notice": {
+          "name": "required_advance_notice",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "participation_frequency": {
+          "name": "participation_frequency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notification_method": {
+          "name": "notification_method",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bill_savings_influence": {
+          "name": "bill_savings_influence",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "incentive_influence": {
+          "name": "incentive_influence",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "preferred_incentive": {
+          "name": "preferred_incentive",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "automation_interest": {
+          "name": "automation_interest",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "trial_event_willingness": {
+          "name": "trial_event_willingness",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "constraints": {
+          "name": "constraints",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "demand_response_profiles_survey_id_surveys_id_fk": {
+          "name": "demand_response_profiles_survey_id_surveys_id_fk",
+          "tableFrom": "demand_response_profiles",
+          "tableTo": "surveys",
+          "columnsFrom": [
+            "survey_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "demand_response_profiles_survey_id_unique": {
+          "name": "demand_response_profiles_survey_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "survey_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.dr_load_selections": {
+      "name": "dr_load_selections",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "survey_id": {
+          "name": "survey_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "inventory_item_id": {
+          "name": "inventory_item_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "process_id": {
+          "name": "process_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "adjustment_type": {
+          "name": "adjustment_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "adjustment_duration": {
+          "name": "adjustment_duration",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "remarks": {
+          "name": "remarks",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "dr_load_selections_survey_id_surveys_id_fk": {
+          "name": "dr_load_selections_survey_id_surveys_id_fk",
+          "tableFrom": "dr_load_selections",
+          "tableTo": "surveys",
+          "columnsFrom": [
+            "survey_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "dr_load_selections_inventory_item_id_inventory_items_id_fk": {
+          "name": "dr_load_selections_inventory_item_id_inventory_items_id_fk",
+          "tableFrom": "dr_load_selections",
+          "tableTo": "inventory_items",
+          "columnsFrom": [
+            "inventory_item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.industrial_demand_response": {
+      "name": "industrial_demand_response",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "survey_id": {
+          "name": "survey_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "adjustment_scope": {
+          "name": "adjustment_scope",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "non_participation_periods": {
+          "name": "non_participation_periods",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "can_increase_prod_before_peak": {
+          "name": "can_increase_prod_before_peak",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "can_complete_after_peak": {
+          "name": "can_complete_after_peak",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "creates_new_demand_peak": {
+          "name": "creates_new_demand_peak",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "can_decline_individual_requests": {
+          "name": "can_decline_individual_requests",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "equipment_data_verification_consent": {
+          "name": "equipment_data_verification_consent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "industrial_demand_response_survey_id_surveys_id_fk": {
+          "name": "industrial_demand_response_survey_id_surveys_id_fk",
+          "tableFrom": "industrial_demand_response",
+          "tableTo": "surveys",
+          "columnsFrom": [
+            "survey_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "industrial_demand_response_survey_id_unique": {
+          "name": "industrial_demand_response_survey_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "survey_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.industrial_controls": {
+      "name": "industrial_controls",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "survey_id": {
+          "name": "survey_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "has_timers": {
+          "name": "has_timers",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "has_automatic_controls": {
+          "name": "has_automatic_controls",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "has_plc": {
+          "name": "has_plc",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "has_scada": {
+          "name": "has_scada",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "has_central_control": {
+          "name": "has_central_control",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "can_change_schedules_centrally": {
+          "name": "can_change_schedules_centrally",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "individual_machine_monitoring": {
+          "name": "individual_machine_monitoring",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approval_name": {
+          "name": "approval_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approval_designation": {
+          "name": "approval_designation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "implementation_role": {
+          "name": "implementation_role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "industrial_controls_survey_id_surveys_id_fk": {
+          "name": "industrial_controls_survey_id_surveys_id_fk",
+          "tableFrom": "industrial_controls",
+          "tableTo": "surveys",
+          "columnsFrom": [
+            "survey_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "industrial_controls_survey_id_unique": {
+          "name": "industrial_controls_survey_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "survey_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.industrial_profiles": {
+      "name": "industrial_profiles",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "survey_id": {
+          "name": "survey_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "industry_sector": {
+          "name": "industry_sector",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "products_manufactured": {
+          "name": "products_manufactured",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "production_nature": {
+          "name": "production_nature",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "operating_days": {
+          "name": "operating_days",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "operating_timing": {
+          "name": "operating_timing",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "shifts": {
+          "name": "shifts",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "days_per_week": {
+          "name": "days_per_week",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "days_closed": {
+          "name": "days_closed",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "operating_hours": {
+          "name": "operating_hours",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "production_shift_count": {
+          "name": "production_shift_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "shift_timings": {
+          "name": "shift_timings",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "operates_24_hours": {
+          "name": "operates_24_hours",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "highest_production_months": {
+          "name": "highest_production_months",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "production_schedule_flexibility": {
+          "name": "production_schedule_flexibility",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "can_increase_before_peak": {
+          "name": "can_increase_before_peak",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "maintenance_schedule": {
+          "name": "maintenance_schedule",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "maintenance_frequency": {
+          "name": "maintenance_frequency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "industrial_profiles_survey_id_surveys_id_fk": {
+          "name": "industrial_profiles_survey_id_surveys_id_fk",
+          "tableFrom": "industrial_profiles",
+          "tableTo": "surveys",
+          "columnsFrom": [
+            "survey_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "industrial_profiles_survey_id_unique": {
+          "name": "industrial_profiles_survey_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "survey_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.industrial_shifts": {
+      "name": "industrial_shifts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "survey_id": {
+          "name": "survey_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "shift_number": {
+          "name": "shift_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "start_time": {
+          "name": "start_time",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "end_time": {
+          "name": "end_time",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "industrial_shifts_survey_id_surveys_id_fk": {
+          "name": "industrial_shifts_survey_id_surveys_id_fk",
+          "tableFrom": "industrial_shifts",
+          "tableTo": "surveys",
+          "columnsFrom": [
+            "survey_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.process_dependencies": {
+      "name": "process_dependencies",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "process_id": {
+          "name": "process_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "depends_on_process_id": {
+          "name": "depends_on_process_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dependency_explanation": {
+          "name": "dependency_explanation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "process_dependencies_process_id_production_processes_id_fk": {
+          "name": "process_dependencies_process_id_production_processes_id_fk",
+          "tableFrom": "process_dependencies",
+          "tableTo": "production_processes",
+          "columnsFrom": [
+            "process_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "process_dependencies_depends_on_process_id_production_processes_id_fk": {
+          "name": "process_dependencies_depends_on_process_id_production_processes_id_fk",
+          "tableFrom": "process_dependencies",
+          "tableTo": "production_processes",
+          "columnsFrom": [
+            "depends_on_process_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.production_processes": {
+      "name": "production_processes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "survey_id": {
+          "name": "survey_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "process_name": {
+          "name": "process_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "main_production_stages": {
+          "name": "main_production_stages",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "peak_operating_processes": {
+          "name": "peak_operating_processes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "continuous_processes": {
+          "name": "continuous_processes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "delayable_processes": {
+          "name": "delayable_processes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reducible_processes": {
+          "name": "reducible_processes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stoppable_processes": {
+          "name": "stoppable_processes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "interruption_impact": {
+          "name": "interruption_impact",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "safe_stop_time": {
+          "name": "safe_stop_time",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "restart_time": {
+          "name": "restart_time",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "restart_causes_demand_increase": {
+          "name": "restart_causes_demand_increase",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "production_processes_survey_id_surveys_id_fk": {
+          "name": "production_processes_survey_id_surveys_id_fk",
+          "tableFrom": "production_processes",
+          "tableTo": "surveys",
+          "columnsFrom": [
+            "survey_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.backup_power_sources": {
+      "name": "backup_power_sources",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "survey_id": {
+          "name": "survey_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "available": {
+          "name": "available",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "battery_capacity": {
+          "name": "battery_capacity",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "battery_capacity_unit": {
+          "name": "battery_capacity_unit",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "automatic_charging": {
+          "name": "automatic_charging",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "charging_control": {
+          "name": "charging_control",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "backup_power_sources_survey_id_surveys_id_fk": {
+          "name": "backup_power_sources_survey_id_surveys_id_fk",
+          "tableFrom": "backup_power_sources",
+          "tableTo": "surveys",
+          "columnsFrom": [
+            "survey_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.ev_charging": {
+      "name": "ev_charging",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "survey_id": {
+          "name": "survey_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "has_ev": {
+          "name": "has_ev",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vehicle_type": {
+          "name": "vehicle_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vehicle_count": {
+          "name": "vehicle_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "charger_rating": {
+          "name": "charger_rating",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "charger_rating_unit": {
+          "name": "charger_rating_unit",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "usual_charging_start": {
+          "name": "usual_charging_start",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "usual_charging_end": {
+          "name": "usual_charging_end",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "charging_frequency": {
+          "name": "charging_frequency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "peak_shift_ability": {
+          "name": "peak_shift_ability",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "maximum_allowable_delay": {
+          "name": "maximum_allowable_delay",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "ev_charging_survey_id_surveys_id_fk": {
+          "name": "ev_charging_survey_id_surveys_id_fk",
+          "tableFrom": "ev_charging",
+          "tableTo": "surveys",
+          "columnsFrom": [
+            "survey_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ev_charging_survey_id_unique": {
+          "name": "ev_charging_survey_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "survey_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.residential_appliances": {
+      "name": "residential_appliances",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "survey_id": {
+          "name": "survey_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "appliance_type": {
+          "name": "appliance_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "available": {
+          "name": "available",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "number_of_units": {
+          "name": "number_of_units",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "capacity": {
+          "name": "capacity",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "capacity_unit": {
+          "name": "capacity_unit",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "typical_usage_time": {
+          "name": "typical_usage_time",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "used_during_peak": {
+          "name": "used_during_peak",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "possible_adjustment": {
+          "name": "possible_adjustment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "max_duration_or_new_time": {
+          "name": "max_duration_or_new_time",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "constraints_or_remarks": {
+          "name": "constraints_or_remarks",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "other_appliance_name": {
+          "name": "other_appliance_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "remarks": {
+          "name": "remarks",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "residential_appliances_survey_id_surveys_id_fk": {
+          "name": "residential_appliances_survey_id_surveys_id_fk",
+          "tableFrom": "residential_appliances",
+          "tableTo": "surveys",
+          "columnsFrom": [
+            "survey_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.residential_common_loads": {
+      "name": "residential_common_loads",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "survey_id": {
+          "name": "survey_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "load_type": {
+          "name": "load_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "number_of_lifts": {
+          "name": "number_of_lifts",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rated_capacity_per_lift": {
+          "name": "rated_capacity_per_lift",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rated_capacity_per_lift_unit": {
+          "name": "rated_capacity_per_lift_unit",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "minimum_lifts_required": {
+          "name": "minimum_lifts_required",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "can_reduce_lift_operation": {
+          "name": "can_reduce_lift_operation",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "max_acceptable_duration": {
+          "name": "max_acceptable_duration",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pump_type": {
+          "name": "pump_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "number_of_pumps": {
+          "name": "number_of_pumps",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "capacity_per_pump": {
+          "name": "capacity_per_pump",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "capacity_per_pump_unit": {
+          "name": "capacity_per_pump_unit",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "typical_operating_time": {
+          "name": "typical_operating_time",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approx_storage_duration": {
+          "name": "approx_storage_duration",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "shiftable_pumping_window": {
+          "name": "shiftable_pumping_window",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "can_move_outside_peak": {
+          "name": "can_move_outside_peak",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "load_name": {
+          "name": "load_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "available": {
+          "name": "available",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "operates_during_peak": {
+          "name": "operates_during_peak",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "possible_adjustment": {
+          "name": "possible_adjustment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "maximum_duration": {
+          "name": "maximum_duration",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "constraints": {
+          "name": "constraints",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "residential_common_loads_survey_id_surveys_id_fk": {
+          "name": "residential_common_loads_survey_id_surveys_id_fk",
+          "tableFrom": "residential_common_loads",
+          "tableTo": "surveys",
+          "columnsFrom": [
+            "survey_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.residential_common_loads_info": {
+      "name": "residential_common_loads_info",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "survey_id": {
+          "name": "survey_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "has_separate_connection": {
+          "name": "has_separate_connection",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "management_entity": {
+          "name": "management_entity",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approval_authority_name": {
+          "name": "approval_authority_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approval_authority_role": {
+          "name": "approval_authority_role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approval_authority_phone": {
+          "name": "approval_authority_phone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approval_time": {
+          "name": "approval_time",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "residential_common_loads_info_survey_id_surveys_id_fk": {
+          "name": "residential_common_loads_info_survey_id_surveys_id_fk",
+          "tableFrom": "residential_common_loads_info",
+          "tableTo": "surveys",
+          "columnsFrom": [
+            "survey_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "residential_common_loads_info_survey_id_unique": {
+          "name": "residential_common_loads_info_survey_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "survey_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.residential_load_flexibility": {
+      "name": "residential_load_flexibility",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "survey_id": {
+          "name": "survey_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ac_temperature_adjustment": {
+          "name": "ac_temperature_adjustment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "water_heating_adjustment": {
+          "name": "water_heating_adjustment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "washing_cleaning_adjustment": {
+          "name": "washing_cleaning_adjustment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ev_charging_adjustment": {
+          "name": "ev_charging_adjustment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "water_pumping_adjustment": {
+          "name": "water_pumping_adjustment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "residential_load_flexibility_survey_id_surveys_id_fk": {
+          "name": "residential_load_flexibility_survey_id_surveys_id_fk",
+          "tableFrom": "residential_load_flexibility",
+          "tableTo": "surveys",
+          "columnsFrom": [
+            "survey_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "residential_load_flexibility_survey_id_unique": {
+          "name": "residential_load_flexibility_survey_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "survey_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.residential_occupancy": {
+      "name": "residential_occupancy",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "survey_id": {
+          "name": "survey_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "time_period": {
+          "name": "time_period",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "weekday_occupancy": {
+          "name": "weekday_occupancy",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "weekend_occupancy": {
+          "name": "weekend_occupancy",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "residential_occupancy_survey_id_surveys_id_fk": {
+          "name": "residential_occupancy_survey_id_surveys_id_fk",
+          "tableFrom": "residential_occupancy",
+          "tableTo": "surveys",
+          "columnsFrom": [
+            "survey_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.residential_profiles": {
+      "name": "residential_profiles",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "survey_id": {
+          "name": "survey_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "residence_type": {
+          "name": "residence_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "built_area": {
+          "name": "built_area",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "built_area_unit": {
+          "name": "built_area_unit",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "adult_count": {
+          "name": "adult_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "children_count": {
+          "name": "children_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "work_from_home": {
+          "name": "work_from_home",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "work_from_home_people": {
+          "name": "work_from_home_people",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "work_from_home_timings": {
+          "name": "work_from_home_timings",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "more_people_on_weekend": {
+          "name": "more_people_on_weekend",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "highest_usage_period": {
+          "name": "highest_usage_period",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "main_usage_activities": {
+          "name": "main_usage_activities",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bill_checking_frequency": {
+          "name": "bill_checking_frequency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "residential_profiles_survey_id_surveys_id_fk": {
+          "name": "residential_profiles_survey_id_surveys_id_fk",
+          "tableFrom": "residential_profiles",
+          "tableTo": "surveys",
+          "columnsFrom": [
+            "survey_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "residential_profiles_survey_id_unique": {
+          "name": "residential_profiles_survey_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "survey_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.solar_installations": {
+      "name": "solar_installations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "survey_id": {
+          "name": "survey_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "installed": {
+          "name": "installed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "capacity": {
+          "name": "capacity",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "capacity_unit": {
+          "name": "capacity_unit",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "battery_connected": {
+          "name": "battery_connected",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "solar_installations_survey_id_surveys_id_fk": {
+          "name": "solar_installations_survey_id_surveys_id_fk",
+          "tableFrom": "solar_installations",
+          "tableTo": "surveys",
+          "columnsFrom": [
+            "survey_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "solar_installations_survey_id_unique": {
+          "name": "solar_installations_survey_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "survey_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.inventory_items": {
+      "name": "inventory_items",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "survey_id": {
+          "name": "survey_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "consumer_category": {
+          "name": "consumer_category",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "process_or_use": {
+          "name": "process_or_use",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "equipment_description": {
+          "name": "equipment_description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "number_of_units": {
+          "name": "number_of_units",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "rated_capacity": {
+          "name": "rated_capacity",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "capacity_unit": {
+          "name": "capacity_unit",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "typical_start_time": {
+          "name": "typical_start_time",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "typical_end_time": {
+          "name": "typical_end_time",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "operates_during_peak": {
+          "name": "operates_during_peak",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "load_criticality": {
+          "name": "load_criticality",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "shiftable": {
+          "name": "shiftable",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "max_shiftable_duration": {
+          "name": "max_shiftable_duration",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "operational_constraints": {
+          "name": "operational_constraints",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "remarks": {
+          "name": "remarks",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "inventory_items_survey_id_surveys_id_fk": {
+          "name": "inventory_items_survey_id_surveys_id_fk",
+          "tableFrom": "inventory_items",
+          "tableTo": "surveys",
+          "columnsFrom": [
+            "survey_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.invitations": {
+      "name": "invitations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "token_hash": {
+          "name": "token_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'agent'"
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "invite_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'PENDING'"
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "accepted_at": {
+          "name": "accepted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "invitations_created_by_user_id_fk": {
+          "name": "invitations_created_by_user_id_fk",
+          "tableFrom": "invitations",
+          "tableTo": "user",
+          "columnsFrom": [
+            "created_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.survey_audit_logs": {
+      "name": "survey_audit_logs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "survey_id": {
+          "name": "survey_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "action": {
+          "name": "action",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "section": {
+          "name": "section",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "entity_id": {
+          "name": "entity_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "field": {
+          "name": "field",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "old_value": {
+          "name": "old_value",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "new_value": {
+          "name": "new_value",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "survey_audit_logs_survey_id_surveys_id_fk": {
+          "name": "survey_audit_logs_survey_id_surveys_id_fk",
+          "tableFrom": "survey_audit_logs",
+          "tableTo": "surveys",
+          "columnsFrom": [
+            "survey_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "survey_audit_logs_user_id_user_id_fk": {
+          "name": "survey_audit_logs_user_id_user_id_fk",
+          "tableFrom": "survey_audit_logs",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.survey_common_details": {
+      "name": "survey_common_details",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "survey_id": {
+          "name": "survey_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "survey_date": {
+          "name": "survey_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "survey_time": {
+          "name": "survey_time",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "enumerator_name": {
+          "name": "enumerator_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "discom_rep_present": {
+          "name": "discom_rep_present",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "discom_rep_name": {
+          "name": "discom_rep_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "discom_rep_designation": {
+          "name": "discom_rep_designation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "address": {
+          "name": "address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location": {
+          "name": "location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "latitude": {
+          "name": "latitude",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "longitude": {
+          "name": "longitude",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "respondent_name": {
+          "name": "respondent_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "respondent_phone": {
+          "name": "respondent_phone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "respondent_designation": {
+          "name": "respondent_designation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "consent_to_collect": {
+          "name": "consent_to_collect",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "consent_to_photos": {
+          "name": "consent_to_photos",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "service_connection_number": {
+          "name": "service_connection_number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "meter_number": {
+          "name": "meter_number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "metering_type": {
+          "name": "metering_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "supply_classification": {
+          "name": "supply_classification",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "supply_phase": {
+          "name": "supply_phase",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tariff_category": {
+          "name": "tariff_category",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "circle": {
+          "name": "circle",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "division": {
+          "name": "division",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "subdivision": {
+          "name": "subdivision",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "section": {
+          "name": "section",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "substation": {
+          "name": "substation",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "feeder_name": {
+          "name": "feeder_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "feeder_code": {
+          "name": "feeder_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dtr_name": {
+          "name": "dtr_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dtr_code": {
+          "name": "dtr_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "has_multiple_connections": {
+          "name": "has_multiple_connections",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "meter_count": {
+          "name": "meter_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "multiple_conn_supply_type": {
+          "name": "multiple_conn_supply_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sanctioned_load": {
+          "name": "sanctioned_load",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "contracted_demand": {
+          "name": "contracted_demand",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "highest_billed_demand": {
+          "name": "highest_billed_demand",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "avg_monthly_consumption": {
+          "name": "avg_monthly_consumption",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "typical_monthly_bill": {
+          "name": "typical_monthly_bill",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "operating_days": {
+          "name": "operating_days",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "operating_start_time": {
+          "name": "operating_start_time",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "operating_end_time": {
+          "name": "operating_end_time",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "occupancy": {
+          "name": "occupancy",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "seasonality": {
+          "name": "seasonality",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "has_rooftop_solar": {
+          "name": "has_rooftop_solar",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "has_dg_set": {
+          "name": "has_dg_set",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "has_battery_inverter": {
+          "name": "has_battery_inverter",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "has_no_alternative_source": {
+          "name": "has_no_alternative_source",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "frequent_power_outages": {
+          "name": "frequent_power_outages",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "outage_remarks": {
+          "name": "outage_remarks",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "survey_common_details_survey_id_surveys_id_fk": {
+          "name": "survey_common_details_survey_id_surveys_id_fk",
+          "tableFrom": "survey_common_details",
+          "tableTo": "surveys",
+          "columnsFrom": [
+            "survey_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "survey_common_details_survey_id_unique": {
+          "name": "survey_common_details_survey_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "survey_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.surveys": {
+      "name": "surveys",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "survey_number": {
+          "name": "survey_number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "agent_id": {
+          "name": "agent_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "consumer_category": {
+          "name": "consumer_category",
+          "type": "consumer_category",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "consumer_subcategory": {
+          "name": "consumer_subcategory",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "survey_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'DRAFT'"
+        },
+        "version": {
+          "name": "version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "submitted_at": {
+          "name": "submitted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approved_at": {
+          "name": "approved_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approved_by": {
+          "name": "approved_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "surveys_agent_id_user_id_fk": {
+          "name": "surveys_agent_id_user_id_fk",
+          "tableFrom": "surveys",
+          "tableTo": "user",
+          "columnsFrom": [
+            "agent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "surveys_approved_by_user_id_fk": {
+          "name": "surveys_approved_by_user_id_fk",
+          "tableFrom": "surveys",
+          "tableTo": "user",
+          "columnsFrom": [
+            "approved_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "surveys_survey_number_unique": {
+          "name": "surveys_survey_number_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "survey_number"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.common_load_type": {
+      "name": "common_load_type",
+      "schema": "public",
+      "values": [
+        "LIFT",
+        "WATER_SEWAGE_PUMP",
+        "OTHER"
+      ]
+    },
+    "public.consumer_category": {
+      "name": "consumer_category",
+      "schema": "public",
+      "values": [
+        "RESIDENTIAL",
+        "COMMERCIAL",
+        "INDUSTRIAL"
+      ]
+    },
+    "public.invite_status": {
+      "name": "invite_status",
+      "schema": "public",
+      "values": [
+        "PENDING",
+        "ACCEPTED",
+        "EXPIRED"
+      ]
+    },
+    "public.survey_status": {
+      "name": "survey_status",
+      "schema": "public",
+      "values": [
+        "DRAFT",
+        "SUBMITTED",
+        "APPROVED"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
