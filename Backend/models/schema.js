@@ -33,7 +33,8 @@ export const surveys = pgTable("surveys", {
   submittedAt: timestamp("submitted_at"),
   approvedAt: timestamp("approved_at"),
   approvedBy: text("approved_by").references(() => user.id), // Admin ID
-  
+  validationWarnings: jsonb("validation_warnings"), // Persists warnings generated at submit time
+
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

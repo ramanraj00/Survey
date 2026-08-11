@@ -59,6 +59,7 @@ export const productionProcesses = pgTable("production_processes", {
 
 export const processDependencies = pgTable("process_dependencies", {
   id: uuid("id").primaryKey().defaultRandom(),
+  surveyId: uuid("survey_id").references(() => surveys.id, { onDelete: 'cascade' }).notNull(),
   processId: uuid("process_id").references(() => productionProcesses.id, { onDelete: 'cascade' }).notNull(),
   dependsOnProcessId: uuid("depends_on_process_id").references(() => productionProcesses.id, { onDelete: 'cascade' }).notNull(),
   dependencyExplanation: text("dependency_explanation"),

@@ -3,15 +3,17 @@ import { db } from '../db.js';
 import { surveys, surveyCommonDetails, inventoryItems } from '../models/schema.js';
 import { residentialProfiles, residentialOccupancy, residentialAppliances, evCharging, backupPowerSources, solarInstallations, residentialCommonLoadsInfo, residentialCommonLoads, residentialLoadFlexibility } from '../models/residential.js';
 import { commercialProfiles, commercialShifts, commercialControls } from '../models/commercial.js';
-import { industrialProfiles, industrialShifts, productionProcesses, industrialControls } from '../models/industrial.js';
+import { industrialProfiles, industrialShifts, productionProcesses, processDependencies as processDependenciesTable, industrialControls } from '../models/industrial.js';
 import { demandResponseProfiles, drLoadSelections, commercialDemandResponse, industrialDemandResponse } from '../models/demand_response.js';
 import { eq, and, sql } from 'drizzle-orm';
 import { requireAuth, requireRole, checkSurveyOwnership, checkSurveyStatus, checkVersionBody } from '../middlewares.js';
+import { fetchFullSurvey } from '../services/surveyFetcher.js';
+import { validateSurveyData } from '../services/validator.js';
 
 export const surveyRouter = express.Router();
 
 surveyRouter.use(requireAuth);
-surveyRouter.use(requireRole('agent'));
+surveyRouter.use(requireRole(['agent', 'admin']));
 
 // Atomic Version Bumper Helper
 const bumpVersionAtomic = async (tx, surveyId, clientVersion) => {
@@ -27,6 +29,24 @@ const bumpVersionAtomic = async (tx, surveyId, clientVersion) => {
     throw new Error("VERSION_MISMATCH");
   }
   return result[0].newVersion;
+};
+
+
+// Helper to safely upsert sections even if data is empty
+const upsertSection = async (tx, table, surveyId, data) => {
+  // Filter out fields with undefined values to prevent errors
+  const cleanData = {};
+  if (data) {
+    for (const [k, v] of Object.entries(data)) {
+      if (v !== undefined) cleanData[k] = v;
+    }
+  }
+
+  if (Object.keys(cleanData).length > 0) {
+    await tx.insert(table).values({ surveyId, ...cleanData }).onConflictDoUpdate({ target: table.surveyId, set: cleanData });
+  } else {
+    await tx.insert(table).values({ surveyId }).onConflictDoNothing();
+  }
 };
 
 // GET /api/surveys (List Agent's Surveys)
@@ -56,13 +76,21 @@ surveyRouter.post('/', async (req, res) => {
     }).returning();
     res.json(newSurvey);
   } catch (error) {
+    console.error("Survey creation error:", error);
     res.status(500).json({ error: "Failed to create survey" });
   }
 });
 
 // GET /api/surveys/:id (Get Single Survey)
 surveyRouter.get('/:id', checkSurveyOwnership, async (req, res) => {
-  res.json(req.survey); // Currently only returns core survey. Aggregation happens via Admin API or can be added here.
+  try {
+    const fullSurvey = await fetchFullSurvey(req.survey.id);
+    if (!fullSurvey) return res.status(404).json({ error: "Survey not found" });
+
+    res.json(fullSurvey);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch survey details" });
+  }
 });
 
 // PUT /api/surveys/:id/common
@@ -72,13 +100,12 @@ surveyRouter.put('/:id/common', checkSurveyOwnership, checkSurveyStatus(['DRAFT'
     let newVersion;
     await db.transaction(async (tx) => {
       newVersion = await bumpVersionAtomic(tx, req.survey.id, version);
-      await tx.insert(surveyCommonDetails).values({ surveyId: req.survey.id, ...data })
-        .onConflictDoUpdate({ target: surveyCommonDetails.surveyId, set: { ...data } });
+      await upsertSection(tx, surveyCommonDetails, req.survey.id, data);
     });
     res.json({ success: true, newVersion });
   } catch (error) {
     if (error.message === "VERSION_MISMATCH") return res.status(409).json({ error: "Conflict: Version mismatch" });
-    res.status(500).json({ error: "Transaction failed" });
+    console.error("Tx error:", error); res.status(500).json({ error: "Transaction failed" });
   }
 });
 
@@ -97,7 +124,7 @@ surveyRouter.put('/:id/inventory', checkSurveyOwnership, checkSurveyStatus(['DRA
     res.json({ success: true, newVersion });
   } catch (error) {
     if (error.message === "VERSION_MISMATCH") return res.status(409).json({ error: "Conflict: Version mismatch" });
-    res.status(500).json({ error: "Transaction failed" });
+    console.error("Tx error:", error); res.status(500).json({ error: "Transaction failed" });
   }
 });
 
@@ -109,7 +136,7 @@ surveyRouter.put('/:id/residential', checkSurveyOwnership, checkSurveyStatus(['D
     await db.transaction(async (tx) => {
       newVersion = await bumpVersionAtomic(tx, req.survey.id, version);
       
-      if (profiles) await tx.insert(residentialProfiles).values({ surveyId: req.survey.id, ...profiles }).onConflictDoUpdate({ target: residentialProfiles.surveyId, set: { ...profiles } });
+      if (profiles) await upsertSection(tx, residentialProfiles, req.survey.id, profiles);
       
       if (occupancy) {
         await tx.delete(residentialOccupancy).where(eq(residentialOccupancy.surveyId, req.survey.id));
@@ -121,23 +148,23 @@ surveyRouter.put('/:id/residential', checkSurveyOwnership, checkSurveyStatus(['D
         if (appliances.length > 0) await tx.insert(residentialAppliances).values(appliances.map(a => ({ surveyId: req.survey.id, ...a })));
       }
       
-      if (ev) await tx.insert(evCharging).values({ surveyId: req.survey.id, ...ev }).onConflictDoUpdate({ target: evCharging.surveyId, set: { ...ev } });
+      if (ev) await upsertSection(tx, evCharging, req.survey.id, ev);
       
       if (backup) {
         await tx.delete(backupPowerSources).where(eq(backupPowerSources.surveyId, req.survey.id));
         if (backup.length > 0) await tx.insert(backupPowerSources).values(backup.map(b => ({ surveyId: req.survey.id, ...b })));
       }
       
-      if (solar) await tx.insert(solarInstallations).values({ surveyId: req.survey.id, ...solar }).onConflictDoUpdate({ target: solarInstallations.surveyId, set: { ...solar } });
+      if (solar) await upsertSection(tx, solarInstallations, req.survey.id, solar);
 
-      if (commonLoadsInfo) await tx.insert(residentialCommonLoadsInfo).values({ surveyId: req.survey.id, ...commonLoadsInfo }).onConflictDoUpdate({ target: residentialCommonLoadsInfo.surveyId, set: { ...commonLoadsInfo } });
+      if (commonLoadsInfo) await upsertSection(tx, residentialCommonLoadsInfo, req.survey.id, commonLoadsInfo);
       
       if (commonLoads) {
         await tx.delete(residentialCommonLoads).where(eq(residentialCommonLoads.surveyId, req.survey.id));
         if (commonLoads.length > 0) await tx.insert(residentialCommonLoads).values(commonLoads.map(c => ({ surveyId: req.survey.id, ...c })));
       }
       
-      if (loadFlexibility) await tx.insert(residentialLoadFlexibility).values({ surveyId: req.survey.id, ...loadFlexibility }).onConflictDoUpdate({ target: residentialLoadFlexibility.surveyId, set: { ...loadFlexibility } });
+      if (loadFlexibility) await upsertSection(tx, residentialLoadFlexibility, req.survey.id, loadFlexibility);
     });
     res.json({ success: true, newVersion });
   } catch (error) {
@@ -153,28 +180,28 @@ surveyRouter.put('/:id/commercial', checkSurveyOwnership, checkSurveyStatus(['DR
     let newVersion;
     await db.transaction(async (tx) => {
       newVersion = await bumpVersionAtomic(tx, req.survey.id, version);
-      if (profiles) await tx.insert(commercialProfiles).values({ surveyId: req.survey.id, ...profiles }).onConflictDoUpdate({ target: commercialProfiles.surveyId, set: { ...profiles } });
+      if (profiles) await upsertSection(tx, commercialProfiles, req.survey.id, profiles);
       if (shifts) {
         await tx.delete(commercialShifts).where(eq(commercialShifts.surveyId, req.survey.id));
         if (shifts.length > 0) await tx.insert(commercialShifts).values(shifts.map(s => ({ surveyId: req.survey.id, ...s })));
       }
-      if (controls) await tx.insert(commercialControls).values({ surveyId: req.survey.id, ...controls }).onConflictDoUpdate({ target: commercialControls.surveyId, set: { ...controls } });
+      if (controls) await upsertSection(tx, commercialControls, req.survey.id, controls);
     });
     res.json({ success: true, newVersion });
   } catch (error) {
     if (error.message === "VERSION_MISMATCH") return res.status(409).json({ error: "Conflict: Version mismatch" });
-    res.status(500).json({ error: "Transaction failed" });
+    console.error("Tx error:", error); res.status(500).json({ error: "Transaction failed" });
   }
 });
 
 // PUT /api/surveys/:id/industrial
 surveyRouter.put('/:id/industrial', checkSurveyOwnership, checkSurveyStatus(['DRAFT']), checkVersionBody, async (req, res) => {
-  const { version, profiles, shifts, processes, controls } = req.body;
+  const { version, profiles, shifts, processes, processDependencies, controls } = req.body;
   try {
     let newVersion;
     await db.transaction(async (tx) => {
       newVersion = await bumpVersionAtomic(tx, req.survey.id, version);
-      if (profiles) await tx.insert(industrialProfiles).values({ surveyId: req.survey.id, ...profiles }).onConflictDoUpdate({ target: industrialProfiles.surveyId, set: { ...profiles } });
+      if (profiles) await upsertSection(tx, industrialProfiles, req.survey.id, profiles);
       if (shifts) {
         await tx.delete(industrialShifts).where(eq(industrialShifts.surveyId, req.survey.id));
         if (shifts.length > 0) await tx.insert(industrialShifts).values(shifts.map(s => ({ surveyId: req.survey.id, ...s })));
@@ -183,12 +210,20 @@ surveyRouter.put('/:id/industrial', checkSurveyOwnership, checkSurveyStatus(['DR
         await tx.delete(productionProcesses).where(eq(productionProcesses.surveyId, req.survey.id));
         if (processes.length > 0) await tx.insert(productionProcesses).values(processes.map(p => ({ surveyId: req.survey.id, ...p })));
       }
-      if (controls) await tx.insert(industrialControls).values({ surveyId: req.survey.id, ...controls }).onConflictDoUpdate({ target: industrialControls.surveyId, set: { ...controls } });
+      
+      if (processDependencies) {
+        // Need to import processDependencies table model at the top of the file. Wait, I should import it.
+        // I will do that in the next tool call. Let me assume I import it as `processDependenciesTable`.
+        await tx.delete(processDependenciesTable).where(eq(processDependenciesTable.surveyId, req.survey.id));
+        if (processDependencies.length > 0) await tx.insert(processDependenciesTable).values(processDependencies.map(pd => ({ surveyId: req.survey.id, ...pd })));
+      }
+      
+      if (controls) await upsertSection(tx, industrialControls, req.survey.id, controls);
     });
     res.json({ success: true, newVersion });
   } catch (error) {
     if (error.message === "VERSION_MISMATCH") return res.status(409).json({ error: "Conflict: Version mismatch" });
-    res.status(500).json({ error: "Transaction failed" });
+    console.error("Tx error:", error); res.status(500).json({ error: "Transaction failed" });
   }
 });
 
@@ -199,11 +234,11 @@ surveyRouter.put('/:id/demand-response', checkSurveyOwnership, checkSurveyStatus
     let newVersion;
     await db.transaction(async (tx) => {
       newVersion = await bumpVersionAtomic(tx, req.survey.id, version);
-      if (profiles) await tx.insert(demandResponseProfiles).values({ surveyId: req.survey.id, ...profiles }).onConflictDoUpdate({ target: demandResponseProfiles.surveyId, set: { ...profiles } });
+      if (profiles) await upsertSection(tx, demandResponseProfiles, req.survey.id, profiles);
       
-      if (commercialDR) await tx.insert(commercialDemandResponse).values({ surveyId: req.survey.id, ...commercialDR }).onConflictDoUpdate({ target: commercialDemandResponse.surveyId, set: { ...commercialDR } });
+      if (commercialDR) await upsertSection(tx, commercialDemandResponse, req.survey.id, commercialDR);
       
-      if (industrialDR) await tx.insert(industrialDemandResponse).values({ surveyId: req.survey.id, ...industrialDR }).onConflictDoUpdate({ target: industrialDemandResponse.surveyId, set: { ...industrialDR } });
+      if (industrialDR) await upsertSection(tx, industrialDemandResponse, req.survey.id, industrialDR);
       
       if (loadSelections) {
         await tx.delete(drLoadSelections).where(eq(drLoadSelections.surveyId, req.survey.id));
@@ -213,35 +248,18 @@ surveyRouter.put('/:id/demand-response', checkSurveyOwnership, checkSurveyStatus
     res.json({ success: true, newVersion });
   } catch (error) {
     if (error.message === "VERSION_MISMATCH") return res.status(409).json({ error: "Conflict: Version mismatch" });
-    res.status(500).json({ error: "Transaction failed" });
+    console.error("Tx error:", error); res.status(500).json({ error: "Transaction failed" });
   }
 });
 
 // GET /api/surveys/:id/validate (Soft Validation Engine)
 surveyRouter.get('/:id/validate', checkSurveyOwnership, async (req, res) => {
   try {
-    const warnings = [];
-    const { id } = req.params;
-    
-    const [common] = await db.select().from(surveyCommonDetails).where(eq(surveyCommonDetails.surveyId, id));
-    if (!common) {
-      warnings.push({ field: "commonDetails", message: "Common details section is empty" });
-    } else {
-      if (!common.meterNumber) warnings.push({ field: "meterNumber", message: "Meter number is missing" });
-      if (!common.sanctionedLoad) warnings.push({ field: "sanctionedLoad", message: "Sanctioned load is missing" });
-    }
+    const fullSurvey = await fetchFullSurvey(req.params.id);
+    if (!fullSurvey) return res.status(404).json({ error: "Survey not found" });
 
-    const items = await db.select().from(inventoryItems).where(eq(inventoryItems.surveyId, id));
-    if (items.length === 0) {
-      warnings.push({ field: "inventory", message: "Inventory is empty" });
-    } else {
-      items.forEach((item, index) => {
-        if (!item.equipmentDescription) warnings.push({ field: `inventory[${index}].equipmentDescription`, message: "Equipment description is missing" });
-        if (!item.ratedCapacity) warnings.push({ field: `inventory[${index}].ratedCapacity`, message: "Rated capacity is missing" });
-      });
-    }
-    
-    res.json({ valid: true, warnings });
+    const validationResult = validateSurveyData(fullSurvey);
+    res.json(validationResult);
   } catch (error) {
     res.status(500).json({ error: "Failed to validate survey" });
   }
@@ -249,23 +267,32 @@ surveyRouter.get('/:id/validate', checkSurveyOwnership, async (req, res) => {
 
 // POST /api/surveys/:id/submit
 surveyRouter.post('/:id/submit', checkSurveyOwnership, checkSurveyStatus(['DRAFT']), async (req, res) => {
+  const { version } = req.body;
+  if (!version) return res.status(400).json({ error: "version is required to prevent race conditions during submission" });
+
   try {
-    const warnings = [];
-    const [common] = await db.select().from(surveyCommonDetails).where(eq(surveyCommonDetails.surveyId, req.survey.id));
-    if (!common) warnings.push({ field: "commonDetails", message: "Common details section is empty" });
-    else {
-      if (!common.meterNumber) warnings.push({ field: "meterNumber", message: "Meter number is missing" });
-      if (!common.sanctionedLoad) warnings.push({ field: "sanctionedLoad", message: "Sanctioned load is missing" });
-    }
+    // 1. Fetch full state and generate warnings at the exact time of submission
+    const fullSurvey = await fetchFullSurvey(req.survey.id);
+    if (!fullSurvey) return res.status(404).json({ error: "Survey not found" });
 
-    // Atomic submit
+    const validationResult = validateSurveyData(fullSurvey);
+
+    // 2. Atomic submit with optimistic locking
     const result = await db.update(surveys)
-      .set({ status: 'SUBMITTED', submittedAt: new Date(), updatedAt: new Date() })
-      .where(and(eq(surveys.id, req.survey.id), eq(surveys.status, 'DRAFT')));
+      .set({ 
+        status: 'SUBMITTED', 
+        submittedAt: new Date(), 
+        updatedAt: new Date(),
+        validationWarnings: validationResult.warnings,
+        version: sql`${surveys.version} + 1`
+      })
+      .where(and(eq(surveys.id, req.survey.id), eq(surveys.status, 'DRAFT'), eq(surveys.version, version)));
 
-    if (result.count === 0) return res.status(409).json({ error: "Conflict: Survey already submitted or modified" });
+    if (result.count === 0) {
+      return res.status(409).json({ error: "Conflict: Survey already submitted or modified by another process. Please refresh and try again." });
+    }
     
-    res.json({ success: true, status: "SUBMITTED", warnings });
+    res.json({ success: true, status: "SUBMITTED", warnings: validationResult.warnings });
   } catch (error) {
     res.status(500).json({ error: "Failed to submit survey" });
   }

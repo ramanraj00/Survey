@@ -20,8 +20,59 @@ app.post("/api/auth/sign-up/email", (req, res) => {
   res.status(403).json({ error: "Public signup is disabled. Please use an invitation link." });
 });
 
+// Accept Invitation Endpoint
+app.post("/api/auth/accept-invite", async (req, res) => {
+  try {
+    const { token, name, password } = req.body;
+    if (!token || !name || !password) return res.status(400).json({ error: "Missing required fields" });
+
+    const crypto = await import('crypto');
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    const { db } = await import('./db.js');
+    const { invitations } = await import('./models/schema.js');
+    const { eq, and, gt } = await import('drizzle-orm');
+
+    const [invite] = await db.select()
+      .from(invitations)
+      .where(
+        and(
+          eq(invitations.tokenHash, tokenHash),
+          eq(invitations.status, 'PENDING'),
+          gt(invitations.expiresAt, new Date())
+        )
+      );
+
+    if (!invite) return res.status(400).json({ error: "Invalid, expired, or already used invitation token." });
+
+    // Internal sign up using better-auth bypassing HTTP
+    const authRes = await auth.api.signUpEmail({
+      body: {
+        email: invite.email,
+        password,
+        name,
+      }
+    });
+
+    if (!authRes?.user) throw new Error("Failed to create user in auth provider");
+
+    // Update role
+    await db.execute(`UPDATE "user" SET role = '${invite.role}' WHERE email = '${invite.email}'`);
+
+    // Mark invite as used
+    await db.update(invitations)
+      .set({ status: 'ACCEPTED', acceptedAt: new Date() })
+      .where(eq(invitations.id, invite.id));
+
+    res.json({ success: true, message: "Account created successfully. You can now login." });
+  } catch (err) {
+    console.error("Accept invite error:", err);
+    res.status(500).json({ error: "Failed to accept invitation. The email might already be registered." });
+  }
+});
+
 // Better Auth API Route
-app.all("/api/auth/*", toNodeHandler(auth));
+app.use("/api/auth", toNodeHandler(auth));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

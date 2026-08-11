@@ -16,10 +16,12 @@ export const requireAuth = async (req, res, next) => {
   }
 };
 
-export const requireRole = (role) => {
+export const requireRole = (roleOrRoles) => {
   return (req, res, next) => {
-    if (!req.user || req.user.role !== role) {
-      return res.status(403).json({ error: `Forbidden - Requires ${role} role` });
+    if (!req.user) return res.status(403).json({ error: `Forbidden` });
+    const roles = Array.isArray(roleOrRoles) ? roleOrRoles : [roleOrRoles];
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({ error: `Forbidden - Requires one of: ${roles.join(', ')}` });
     }
     next();
   };
@@ -53,6 +55,11 @@ export const checkSurveyStatus = (allowedStatuses) => {
       return res.status(500).json({ error: "checkSurveyStatus must be used after checkSurveyOwnership" });
     }
     
+    // Admins can bypass status locks to edit submitted surveys before approval
+    if (req.user && req.user.role === 'admin') {
+      return next();
+    }
+
     if (!allowedStatuses.includes(req.survey.status)) {
       return res.status(403).json({ error: `Forbidden - Survey is locked in ${req.survey.status} status` });
     }
