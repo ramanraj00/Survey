@@ -42,6 +42,12 @@ adminRouter.post('/invitations', async (req, res) => {
     const { email, role = 'agent' } = req.body;
     if (!email) return res.status(400).json({ error: "Email is required" });
 
+    // Check if invitation already exists
+    const existingInvite = await db.select().from(invitations).where(eq(invitations.email, email)).limit(1);
+    if (existingInvite.length > 0) {
+      return res.status(400).json({ error: "Email already exists." });
+    }
+
     // Generate secure token
     const token = crypto.randomBytes(32).toString('hex');
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
@@ -162,13 +168,28 @@ adminRouter.get('/surveys', async (req, res) => {
     const total = totalResult[0].count;
     
     // Fetch paginated data
-    const paginatedData = await db.select()
+    const { user } = await import('../models/auth-schema.js');
+    const { surveyCommonDetails } = await import('../models/schema.js');
+
+    const paginatedData = await db.select({
+      survey: surveys,
+      agentEmail: user.email,
+      consumerName: surveyCommonDetails.respondentName
+    })
       .from(surveys)
+      .leftJoin(user, eq(surveys.agentId, user.id))
+      .leftJoin(surveyCommonDetails, eq(surveys.id, surveyCommonDetails.surveyId))
       .where(whereClause)
       .limit(Number(limit))
       .offset(offset);
 
-    res.json({ data: paginatedData, pagination: { page: Number(page), limit: Number(limit), total } });
+    const flatData = paginatedData.map(row => ({
+      ...row.survey,
+      agentEmail: row.agentEmail,
+      consumerName: row.consumerName
+    }));
+
+    res.json({ data: flatData, pagination: { page: Number(page), limit: Number(limit), total } });
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch surveys" });
   }

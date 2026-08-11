@@ -7,21 +7,29 @@ import { PieChart, Users, CheckCircle, FileText, Activity } from 'lucide-react';
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
+  const [recentSurveys, setRecentSurveys] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
-    const fetchStats = async () => {
+    const fetchDashboardData = async () => {
       try {
-        const data = await SurveyAPI.getAdminStats();
-        if (mounted) setStats(data);
+        const [statsData, surveysData] = await Promise.all([
+          SurveyAPI.getAdminStats().catch(() => null),
+          SurveyAPI.getAdminSurveys({ limit: 5 }).catch(() => [])
+        ]);
+        
+        if (mounted) {
+          setStats(statsData);
+          setRecentSurveys(Array.isArray(surveysData) ? surveysData : (surveysData?.data || []));
+        }
       } catch (err) {
-        console.error("Failed to load admin stats:", err);
+        console.error("Failed to load admin dashboard data:", err);
       } finally {
         if (mounted) setIsLoading(false);
       }
     };
-    fetchStats();
+    fetchDashboardData();
     return () => { mounted = false; };
   }, []);
 
@@ -120,10 +128,52 @@ export default function AdminDashboard() {
             </button>
           </div>
           
-          <div style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '3rem 1rem' }}>
-            <Activity size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
-            <p>Recent surveys will appear here.</p>
-          </div>
+          {recentSurveys.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {recentSurveys.map(survey => (
+                <div 
+                  key={survey.id}
+                  onClick={() => navigate(`/admin/surveys/${survey.id}`)}
+                  style={{ 
+                    padding: '1rem', 
+                    border: '1px solid var(--border-glass)', 
+                    borderRadius: 'var(--radius-md)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
+                    transition: 'border-color 0.2s',
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.borderColor = 'var(--accent-primary)'}
+                  onMouseOut={(e) => e.currentTarget.style.borderColor = 'var(--border-glass)'}
+                >
+                  <div>
+                    <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>{survey.title || 'Untitled Survey'}</div>
+                    <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>{survey.category || 'N/A'} • Submitted by {survey.createdBy?.name || 'Agent'}</div>
+                  </div>
+                  <div style={{ 
+                    padding: '0.25rem 0.75rem', 
+                    borderRadius: '9999px', 
+                    fontSize: '0.75rem', 
+                    fontWeight: 500,
+                    background: survey.status === 'APPROVED' ? 'rgba(16, 185, 129, 0.1)' : 
+                               survey.status === 'SUBMITTED' ? 'rgba(99, 102, 241, 0.1)' : 
+                               'rgba(245, 158, 11, 0.1)',
+                    color: survey.status === 'APPROVED' ? 'var(--success)' : 
+                           survey.status === 'SUBMITTED' ? '#818cf8' : 
+                           'var(--warning)'
+                  }}>
+                    {survey.status || 'DRAFT'}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '3rem 1rem' }}>
+              <Activity size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+              <p>Recent surveys will appear here.</p>
+            </div>
+          )}
         </Card>
       </div>
     </div>

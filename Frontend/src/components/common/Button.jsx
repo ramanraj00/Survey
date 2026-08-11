@@ -13,13 +13,13 @@ export default function Button({
     alignItems: 'center',
     justifyContent: 'center',
     padding: '0.625rem 1.25rem',
-    borderRadius: 'var(--radius-md)',
+    borderRadius: '9999px',
     fontWeight: '500',
     fontSize: '0.875rem',
     transition: 'all 0.2s ease',
-    opacity: isLoading ? 0.7 : 1,
-    cursor: isLoading ? 'not-allowed' : 'pointer',
-    pointerEvents: isLoading ? 'none' : 'auto'
+    opacity: (isLoading || props.disabled) ? 0.5 : 1,
+    cursor: (isLoading || props.disabled) ? 'not-allowed' : 'pointer',
+    pointerEvents: (isLoading || props.disabled) ? 'none' : 'auto'
   };
 
   const variants = {

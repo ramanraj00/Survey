@@ -71,9 +71,9 @@ export default function SurveyCreate() {
                 width: '100%',
                 padding: '0.75rem 1rem',
                 borderRadius: 'var(--radius-md)',
-                background: 'rgba(15, 23, 42, 0.5)',
+                background: 'var(--bg-primary)',
                 border: '1px solid var(--border-glass)',
-                color: 'white',
+                color: 'var(--text-primary)',
                 fontSize: '0.875rem',
                 outline: 'none'
               }}
@@ -98,9 +98,9 @@ export default function SurveyCreate() {
                 width: '100%',
                 padding: '0.75rem 1rem',
                 borderRadius: 'var(--radius-md)',
-                background: 'rgba(15, 23, 42, 0.5)',
+                background: 'var(--bg-primary)',
                 border: '1px solid var(--border-glass)',
-                color: 'white',
+                color: 'var(--text-primary)',
                 fontSize: '0.875rem',
                 outline: 'none'
               }}

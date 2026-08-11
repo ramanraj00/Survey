@@ -11,18 +11,25 @@ export default function AdminAgentsList() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [newEmail, setNewEmail] = useState('');
   const [copiedToken, setCopiedToken] = useState(null);
+  const [showToast, setShowToast] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredInvitations = invitations.filter(invite => 
+    invite.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   useEffect(() => {
     fetchInvitations();
   }, []);
 
-  const fetchInvitations = async () => {
+  const fetchInvitations = async (showMainLoader = true) => {
     try {
-      setLoading(true);
+      if (showMainLoader) setLoading(true);
       const data = await SurveyAPI.getAdminInvitations();
       setInvitations(data);
     } catch (err) {
       setError(err.message || 'Failed to load invitations');
+      setTimeout(() => setError(null), 3000);
     } finally {
       setLoading(false);
     }
@@ -40,9 +47,10 @@ export default function AdminAgentsList() {
       setCopiedToken(res.token);
       
       setNewEmail('');
-      await fetchInvitations(); // Refresh list
+      await fetchInvitations(false); // Background refresh
     } catch (err) {
       setError(err.message || 'Failed to generate invitation');
+      setTimeout(() => setError(null), 3000);
     } finally {
       setIsGenerating(false);
     }
@@ -53,7 +61,8 @@ export default function AdminAgentsList() {
       const inviteLink = `${window.location.origin}/signup?token=${copiedToken}`;
       try {
         await navigator.clipboard.writeText(inviteLink);
-        alert('Copied to clipboard!'); // Small feedback
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
       } catch (err) {
         console.warn('Could not copy');
       }
@@ -65,23 +74,23 @@ export default function AdminAgentsList() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      <div>
-        <h1 className="gradient-text" style={{ margin: '0 0 0.5rem 0' }}>Manage Agents</h1>
+    <div className="page-container" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', height: 'calc(100vh - 4rem)' }}>
+      <div style={{ flexShrink: 0 }}>
+        <h1 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-primary)', fontWeight: '800' }}>Manage Agents</h1>
         <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
           Generate invitation links to onboard new field agents securely.
         </p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', flex: 1, minHeight: 0 }}>
         {/* Left Column: Generate Invite Form */}
-        <div>
+        <div style={{ flexShrink: 0 }}>
           <Card>
             <h3 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Plus size={18} /> Invite New Agent
             </h3>
-            <form onSubmit={handleGenerateInvite} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
+            <form onSubmit={handleGenerateInvite} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+              <div style={{ flex: '1 1 200px' }}>
                 <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
                   Agent Email Address
                 </label>
@@ -97,29 +106,51 @@ export default function AdminAgentsList() {
                     background: 'var(--bg-tertiary)',
                     border: '1px solid var(--border-glass)',
                     borderRadius: 'var(--radius-md)',
-                    color: 'white',
+                    color: 'var(--text-primary)',
                   }}
                 />
               </div>
               <Button 
                 type="submit" 
-                variant="primary" 
                 disabled={isGenerating || !newEmail}
-                style={{ width: '100%' }}
+                style={{ 
+                  flex: '1 1 150px', 
+                  background: '#000000', 
+                  color: '#FFFFFF', 
+                  fontWeight: 'bold', 
+                  boxShadow: 'none',
+                  padding: '0.875rem',
+                  borderRadius: 'var(--radius-md)'
+                }}
               >
                 {isGenerating ? 'Generating...' : 'Generate Invite Link'}
               </Button>
             </form>
 
-            {copiedToken && (
+            {isGenerating && (
               <div style={{
                 marginTop: '1.5rem',
                 padding: '1rem',
-                background: 'rgba(54, 179, 126, 0.1)',
-                border: '1px solid rgba(54, 179, 126, 0.2)',
+                background: 'transparent',
+                border: '1px solid #E2E8F0',
+                borderRadius: 'var(--radius-md)',
+                animation: 'pulse 1.5s infinite ease-in-out'
+              }}>
+                <div style={{ height: '20px', width: '150px', background: '#CBD5E1', borderRadius: '4px', marginBottom: '1rem' }}></div>
+                <div style={{ height: '16px', width: '250px', background: '#CBD5E1', borderRadius: '4px', marginBottom: '1rem', maxWidth: '100%' }}></div>
+                <div style={{ height: '40px', width: '100%', background: '#CBD5E1', borderRadius: 'var(--radius-md)' }}></div>
+              </div>
+            )}
+
+            {!isGenerating && copiedToken && (
+              <div style={{
+                marginTop: '1.5rem',
+                padding: '1rem',
+                background: 'transparent',
+                border: '1px solid #000000',
                 borderRadius: 'var(--radius-md)',
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#36B37E', fontWeight: 600, marginBottom: '0.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#000000', fontWeight: 700, marginBottom: '0.5rem' }}>
                   <CheckCircle size={16} /> Invite Generated!
                 </div>
                 <p style={{ margin: '0 0 1rem 0', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
@@ -132,15 +163,16 @@ export default function AdminAgentsList() {
                     value={`${window.location.origin}/signup?token=${copiedToken}`}
                     style={{
                       flex: 1,
+                      minWidth: 0,
                       padding: '0.5rem',
-                      background: 'var(--bg-primary)',
+                      background: 'var(--bg-tertiary)',
                       border: '1px solid var(--border-glass)',
                       borderRadius: 'var(--radius-md)',
-                      color: 'var(--text-muted)',
+                      color: 'var(--text-primary)',
                       fontSize: '0.875rem'
                     }}
                   />
-                  <Button variant="secondary" onClick={handleCopy} style={{ padding: '0.5rem 1rem' }}>
+                  <Button variant="secondary" onClick={handleCopy} style={{ padding: '0.5rem 1rem', background: '#000000', color: '#FFFFFF', border: 'none' }}>
                     <Copy size={16} />
                   </Button>
                 </div>
@@ -150,85 +182,153 @@ export default function AdminAgentsList() {
         </div>
 
         {/* Right Column: Invitations List */}
-        <div>
-          <Card>
-            <h3 style={{ margin: '0 0 1.5rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Users size={18} /> Sent Invitations
-            </h3>
+        <div className="glass-panel" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, padding: '1.5rem' }}>
+          <h3 className="hide-on-mobile" style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+            <Users size={18} /> Sent Invitations
+          </h3>
 
-            {error && <div style={{ color: 'var(--error)', marginBottom: '1rem' }}>{error}</div>}
+          <div style={{ flexShrink: 0, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div className="search-text-desktop" style={{ flex: 1, color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: 500 }}>
+              Enter email for finding agent:
+            </div>
+            <div style={{ flex: 1 }}>
+              <input
+                type="text"
+                placeholder="Search by email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  background: 'var(--bg-tertiary)',
+                  border: '1px solid var(--border-glass)',
+                  borderRadius: 'var(--radius-md)',
+                  color: 'var(--text-primary)',
+                }}
+              />
+            </div>
+          </div>
 
-            {invitations.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-                No invitations sent yet.
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {invitations.map((invite) => (
+          {filteredInvitations.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+              No invitations found.
+            </div>
+          ) : (
+            <div className="hide-scrollbar" style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: '1rem',
+              flex: 1,
+              overflowY: 'auto',
+              minHeight: 0,
+              paddingRight: '0'
+            }}>
+              {filteredInvitations.map((invite) => (
                   <div key={invite.id} style={{ 
-                    padding: '1rem', 
-                    background: 'var(--bg-tertiary)', 
-                    borderRadius: 'var(--radius-md)',
+                    padding: '1rem 0', 
+                    background: 'transparent',
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    border: '1px solid var(--border-glass)'
+                    flexDirection: 'column',
+                    gap: '0.5rem',
+                    borderTop: '1px solid #CBD5E1',
+                    borderBottom: '1px solid #CBD5E1',
+                    minWidth: 0
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      <div style={{
-                        width: '40px', height: '40px',
-                        borderRadius: '50%',
-                        background: 'rgba(255,255,255,0.05)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center'
-                      }}>
-                        <Mail size={18} color="var(--text-secondary)" />
-                      </div>
-                      <div>
-                        <div style={{ fontWeight: 500, color: 'white' }}>{invite.email}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                          Sent: {new Date(invite.createdAt).toLocaleDateString()}
-                        </div>
-                      </div>
+                    {/* Row 1: Email */}
+                    <div style={{ 
+                      fontWeight: 600, 
+                      color: 'var(--text-primary)', 
+                      wordBreak: 'break-word',
+                      lineHeight: 1.2
+                    }}>
+                      {invite.email}
                     </div>
                     
-                    <div>
+                    {/* Row 2: Icon + Sent + Date */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      <Mail size={12} />
+                      <span>Sent: {new Date(invite.createdAt).toLocaleDateString()}</span>
+                    </div>
+
+                    {/* Row 3: Badge */}
+                    <div style={{ marginTop: '0.25rem' }}>
                       {invite.status === 'PENDING' ? (
                         <span style={{ 
-                          padding: '0.25rem 0.75rem', 
-                          background: 'rgba(255, 171, 0, 0.1)', 
-                          color: '#FFAB00',
+                          padding: '0.15rem 0.5rem', 
+                          background: '#000000', 
+                          color: '#FFFFFF',
+                          border: 'none',
                           borderRadius: '1rem',
-                          fontSize: '0.75rem',
-                          fontWeight: 500,
-                          display: 'flex',
+                          fontSize: '0.65rem',
+                          fontWeight: 600,
+                          display: 'inline-flex',
                           alignItems: 'center',
-                          gap: '0.25rem'
+                          gap: '0.25rem',
+                          width: 'fit-content'
                         }}>
-                          <Clock size={12} /> Pending
+                          <Clock size={10} /> Pending
                         </span>
                       ) : (
                         <span style={{ 
-                          padding: '0.25rem 0.75rem', 
-                          background: 'rgba(54, 179, 126, 0.1)', 
-                          color: '#36B37E',
+                          padding: '0.15rem 0.5rem', 
+                          background: '#000000', 
+                          color: '#FFFFFF',
+                          border: 'none',
                           borderRadius: '1rem',
-                          fontSize: '0.75rem',
-                          fontWeight: 500,
-                          display: 'flex',
+                          fontSize: '0.65rem',
+                          fontWeight: 600,
+                          display: 'inline-flex',
                           alignItems: 'center',
-                          gap: '0.25rem'
+                          gap: '0.25rem',
+                          width: 'fit-content'
                         }}>
-                          <CheckCircle size={12} /> Accepted
+                          <CheckCircle size={10} /> Accepted
                         </span>
                       )}
                     </div>
                   </div>
                 ))}
-              </div>
-            )}
-          </Card>
+            </div>
+          )}
         </div>
       </div>
+
+      {showToast && (
+        <div style={{
+          position: 'fixed',
+          bottom: '2rem',
+          right: '2rem',
+          background: 'black',
+          color: 'white',
+          padding: '1rem 1.5rem',
+          borderRadius: 'var(--radius-md)',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          zIndex: 9999,
+          fontWeight: 500,
+          animation: 'fadeIn 0.3s ease'
+        }}>
+          Copied to clipboard!
+        </div>
+      )}
+
+      {error && (
+        <div style={{
+          position: 'fixed',
+          top: '2rem',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'black',
+          color: 'white',
+          padding: '1rem 1.5rem',
+          borderRadius: 'var(--radius-md)',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          zIndex: 9999,
+          fontWeight: 500,
+          animation: 'fadeIn 0.3s ease'
+        }}>
+          {error}
+        </div>
+      )}
     </div>
   );
 }

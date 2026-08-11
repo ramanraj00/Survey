@@ -10,9 +10,9 @@ export default function Select({ name, value, onChange, options = [], style, ...
         width: '100%',
         padding: '0.75rem 1rem',
         borderRadius: 'var(--radius-md)',
-        background: 'rgba(15, 23, 42, 0.5)',
+        background: 'var(--bg-secondary)',
         border: '1px solid var(--border-glass)',
-        color: 'white',
+        color: 'var(--text-primary)',
         outline: 'none',
         ...style
       }}

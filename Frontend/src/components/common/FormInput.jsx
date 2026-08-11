@@ -31,7 +31,7 @@ export default function FormInput({
           width: '100%',
           padding: '0.75rem 1rem',
           borderRadius: 'var(--radius-md)',
-          background: 'rgba(15, 23, 42, 0.5)',
+          background: 'var(--bg-secondary)',
           border: `1px solid ${error ? 'var(--error)' : 'var(--border-glass)'}`,
           color: 'var(--text-primary)',
           fontSize: '0.875rem',
