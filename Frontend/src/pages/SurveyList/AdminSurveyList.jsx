@@ -50,7 +50,11 @@ export default function AdminSurveyList() {
       month: 'short'
     });
     
-    const sortKey = dateObj.toISOString().split('T')[0];
+    // Use local time for the grouping key to prevent timezone mismatch
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    const sortKey = `${year}-${month}-${day}`;
     
     if (!acc[sortKey]) {
       acc[sortKey] = {
@@ -69,49 +73,52 @@ export default function AdminSurveyList() {
       
       {/* Header & Quick Status Toggles */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
-        <h1 style={{ margin: 0, fontWeight: 800 }}>All Surveys</h1>
+        <h1 style={{ margin: 0, fontWeight: 700, color: '#000000', fontSize: '2rem' }}>All Surveys</h1>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           <Button 
             onClick={() => setStatus('')}
             style={{ 
-              padding: '0.5rem 1rem', 
-              background: status === '' ? '#000000' : 'var(--bg-secondary)', 
-              color: status === '' ? '#FFFFFF' : 'var(--text-primary)', 
-              border: '2px solid #000000', 
-              fontWeight: 700 
+              padding: '0.5rem 1.25rem', 
+              background: status === '' ? '#000000' : 'transparent', 
+              color: status === '' ? '#FFFFFF' : '#475569', 
+              border: status === '' ? 'none' : '1px solid #CBD5E1', 
+              fontWeight: 600,
+              borderRadius: '8px'
             }}
           >All</Button>
           <Button 
             onClick={() => setStatus('SUBMITTED')}
             style={{ 
-              padding: '0.5rem 1rem', 
-              background: status === 'SUBMITTED' ? '#000000' : 'var(--bg-secondary)', 
-              color: status === 'SUBMITTED' ? '#FFFFFF' : 'var(--text-primary)', 
-              border: '2px solid #000000', 
-              fontWeight: 700 
+              padding: '0.5rem 1.25rem', 
+              background: status === 'SUBMITTED' ? '#000000' : 'transparent', 
+              color: status === 'SUBMITTED' ? '#FFFFFF' : '#475569', 
+              border: status === 'SUBMITTED' ? 'none' : '1px solid #CBD5E1', 
+              fontWeight: 600,
+              borderRadius: '8px'
             }}
           >Submitted</Button>
           <Button 
             onClick={() => setStatus('APPROVED')}
             style={{ 
-              padding: '0.5rem 1rem', 
-              background: status === 'APPROVED' ? '#000000' : 'var(--bg-secondary)', 
-              color: status === 'APPROVED' ? '#FFFFFF' : 'var(--text-primary)', 
-              border: '2px solid #000000', 
-              fontWeight: 700 
+              padding: '0.5rem 1.25rem', 
+              background: status === 'APPROVED' ? '#000000' : 'transparent', 
+              color: status === 'APPROVED' ? '#FFFFFF' : '#475569', 
+              border: status === 'APPROVED' ? 'none' : '1px solid #CBD5E1', 
+              fontWeight: 600,
+              borderRadius: '8px'
             }}
           >Approved</Button>
         </div>
       </div>
 
       {/* Filters & Search Bar */}
-      <Card padding="1.5rem" style={{ marginBottom: '3rem', border: '2px solid #000000', background: 'var(--bg-secondary)', boxShadow: '4px 4px 0px #000000' }}>
+      <Card padding="1.5rem" style={{ marginBottom: '3rem', border: 'none', background: '#EAEFF7', borderRadius: '12px' }}>
         <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
           
           <div style={{ flex: '1 1 300px' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>Search</label>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 600, color: '#475569' }}>Search</label>
             <div style={{ position: 'relative' }}>
-              <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#000000' }} />
+              <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
               <input 
                 type="text" 
                 placeholder="Search Consumer Name, Survey ID, Agent..."
@@ -119,8 +126,8 @@ export default function AdminSurveyList() {
                 onChange={e => setSearch(e.target.value)}
                 style={{
                   width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem',
-                  borderRadius: 'var(--radius-md)', background: '#FFFFFF',
-                  border: '2px solid #000000', color: '#000000', outline: 'none',
+                  borderRadius: '8px', background: '#FFFFFF',
+                  border: '1px solid #E2E8F0', color: '#000000', outline: 'none',
                   fontWeight: 500
                 }}
               />
@@ -128,10 +135,10 @@ export default function AdminSurveyList() {
           </div>
 
           <div style={{ width: '200px' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>Category</label>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 600, color: '#475569' }}>Category</label>
             <select 
               value={category} onChange={e => setCategory(e.target.value)}
-              style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', background: '#FFFFFF', border: '2px solid #000000', color: '#000000', outline: 'none', fontWeight: 600 }}
+              style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '8px', background: '#FFFFFF', border: '1px solid #E2E8F0', color: '#000000', outline: 'none', fontWeight: 500 }}
             >
               <option value="">All Categories</option>
               <option value="RESIDENTIAL">Residential</option>
@@ -140,16 +147,16 @@ export default function AdminSurveyList() {
             </select>
           </div>
 
-          <Button type="submit" variant="primary" style={{ padding: '0.75rem 1.5rem', height: '42px', background: '#000000', color: '#FFFFFF', border: 'none', fontWeight: 'bold' }}>
+          <Button type="submit" variant="primary" style={{ padding: '0.75rem 1.5rem', height: '42px', background: '#000000', color: '#FFFFFF', border: 'none', fontWeight: 600, borderRadius: '8px' }}>
             <Filter size={18} style={{ marginRight: '0.5rem' }} /> Filter
           </Button>
         </form>
       </Card>
 
       {isLoading ? (
-        <div style={{ padding: '4rem 2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</div>
+        <div style={{ padding: '4rem 2rem', textAlign: 'center', color: '#64748B' }}>Loading...</div>
       ) : sortedDates.length === 0 ? (
-        <div style={{ padding: '4rem 2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+        <div style={{ padding: '4rem 2rem', textAlign: 'center', color: '#64748B' }}>
           No surveys found matching your criteria.
         </div>
       ) : (
@@ -158,14 +165,14 @@ export default function AdminSurveyList() {
             const group = groupedSurveys[dateKey];
             return (
               <div key={dateKey} style={{ marginBottom: '3rem' }}>
-                <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                <h3 style={{ marginBottom: '1rem', fontSize: '1.25rem', fontWeight: 700, color: '#000000' }}>
                   {group.displayDate}
                 </h3>
-                <Card padding="0" style={{ border: '2px solid #000000', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+                <Card padding="0" style={{ border: 'none', background: '#EAEFF7', borderRadius: '12px', overflow: 'hidden' }}>
                   <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '900px', background: '#FFFFFF' }}>
-                      <thead style={{ background: 'var(--bg-secondary)' }}>
-                        <tr style={{ borderBottom: '2px solid #000000', textAlign: 'left', color: 'var(--text-primary)', fontSize: '0.875rem', fontWeight: 800 }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '900px', background: '#EAEFF7' }}>
+                      <thead style={{ background: '#EAEFF7' }}>
+                        <tr style={{ borderBottom: '1px solid #CBD5E1', textAlign: 'left', color: '#000000', fontSize: '0.875rem', fontWeight: 700 }}>
                           <th style={{ padding: '1rem 1.5rem' }}>Consumer & Survey ID</th>
                           <th style={{ padding: '1rem 1.5rem' }}>Agent Details</th>
                           <th style={{ padding: '1rem 1.5rem' }}>Category</th>
@@ -175,37 +182,37 @@ export default function AdminSurveyList() {
                         </tr>
                       </thead>
                       <tbody>
-                        {group.items.map(s => (
-                          <tr key={s.id} style={{ borderBottom: '1px solid #E2E8F0' }} className="animate-fade-in hover-row">
+                        {group.items.map((s, index) => (
+                          <tr key={s.id} style={{ borderBottom: index === group.items.length - 1 ? 'none' : '1px solid #CBD5E1' }} className="animate-fade-in hover-row">
                             <td style={{ padding: '1rem 1.5rem' }}>
-                              <div style={{ fontWeight: 700, color: '#000000', display: 'flex', alignItems: 'center', gap: '0.375rem', marginBottom: '0.25rem' }}>
-                                <User size={14} /> {s.consumerName || 'Unknown Consumer'}
+                              <div style={{ fontWeight: 600, color: '#000000', display: 'flex', alignItems: 'center', gap: '0.375rem', marginBottom: '0.25rem' }}>
+                                <User size={14} color="#64748B" /> {s.consumerName || 'Unknown Consumer'}
                               </div>
-                              <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.375rem', fontWeight: 500 }}>
+                              <div style={{ color: '#64748B', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.375rem', fontWeight: 500 }}>
                                 <Hash size={12} /> {s.surveyNumber}
                               </div>
                             </td>
                             <td style={{ padding: '1rem 1.5rem' }}>
-                              <div style={{ fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.375rem', marginBottom: '0.25rem' }}>
-                                <Mail size={14} /> {s.agentEmail || 'Unknown Agent'}
+                              <div style={{ fontWeight: 500, color: '#000000', display: 'flex', alignItems: 'center', gap: '0.375rem', marginBottom: '0.25rem' }}>
+                                <Mail size={14} color="#64748B" /> {s.agentEmail || 'Unknown Agent'}
                               </div>
                             </td>
-                            <td style={{ padding: '1rem 1.5rem', fontWeight: 600 }}>{s.consumerCategory}</td>
+                            <td style={{ padding: '1rem 1.5rem', fontWeight: 500, color: '#000000' }}>{s.consumerCategory}</td>
                             <td style={{ padding: '1rem 1.5rem' }}>
                               <span style={{ 
-                                padding: '0.35rem 0.75rem', borderRadius: '1rem', fontSize: '0.75rem', fontWeight: 700,
+                                padding: '0.35rem 0.75rem', borderRadius: '1rem', fontSize: '0.75rem', fontWeight: 600,
                                 background: '#000000', color: '#FFFFFF', display: 'inline-block'
                               }}>
                                 {s.status}
                               </span>
                             </td>
-                            <td style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
+                            <td style={{ padding: '1rem 1.5rem', color: '#64748B', fontWeight: 500 }}>
                               {new Date(s.updatedAt || s.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </td>
                             <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
                               <Button 
                                 onClick={() => navigate(`/admin/surveys/${s.id}`)}
-                                style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', background: '#000000', color: '#FFFFFF', border: 'none', fontWeight: 600 }}
+                                style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', background: '#000000', color: '#FFFFFF', border: 'none', fontWeight: 600, borderRadius: '6px' }}
                               >
                                 {s.status === 'SUBMITTED' ? 'Review & Approve' : 'View Data'}
                               </Button>

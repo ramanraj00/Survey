@@ -3,8 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Card from '../../../components/common/Card';
 import Button from '../../../components/common/Button';
 import { SurveyAPI } from '../../../services/api';
-import { CheckCircle, Shield, History } from 'lucide-react';
-import DataViewer from '../../../components/common/DataViewer';
+import { CheckCircle, Shield, History, ArrowLeft, Edit3 } from 'lucide-react';
 
 export default function AdminSurveyView() {
   const { id } = useParams();
@@ -46,96 +45,112 @@ export default function AdminSurveyView() {
     }
   };
 
-  if (isLoading) return <div className="flex-center" style={{height: '50vh'}}>Loading Admin View...</div>;
-  if (error) return <div className="flex-center" style={{height: '50vh', color: 'var(--error)'}}>{error}</div>;
+  if (isLoading) return <div className="flex-center" style={{height: '50vh', fontWeight: 500}}>Loading Admin View...</div>;
+  if (error) return <div className="flex-center" style={{height: '50vh', color: '#EF4444', fontWeight: 500}}>{error}</div>;
 
   const isApproved = data?.survey?.status === 'APPROVED';
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '4rem' }}>
+    <div style={{ maxWidth: '1000px', margin: '0 auto', paddingBottom: '4rem' }}>
       
-      <div className="flex-between" style={{ marginBottom: '2rem' }}>
+      {/* Page Header */}
+      <div className="flex-between" style={{ marginBottom: '3rem', flexWrap: 'wrap', gap: '1rem', borderBottom: '1px solid #E5E7EB', paddingBottom: '2rem' }}>
         <div>
-          <h1 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            Survey {data.survey.surveyNumber}
-            {isApproved && <Shield color="var(--accent-primary)" size={24} title="Approved & Locked" />}
+          <h1 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 700, color: '#111827', fontSize: '1.75rem', letterSpacing: '-0.01em' }}>
+            Survey Details
+            <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#4B5563', background: '#F3F4F6', padding: '0.25rem 0.75rem', borderRadius: '6px', border: '1px solid #E5E7EB' }}>
+              {data.survey.surveyNumber}
+            </span>
+            {isApproved && <Shield color="#3B82F6" size={22} title="Approved & Locked" />}
           </h1>
-          <div style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
-            Category: <strong>{data.survey.consumerCategory}</strong> | 
-            Status: <strong style={{ color: isApproved ? 'var(--accent-primary)' : 'var(--warning)' }}>{data.survey.status}</strong>
+          <div style={{ color: '#6B7280', marginTop: '0.75rem', fontSize: '0.875rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+            Category: <strong style={{ color: '#111827', fontWeight: 600 }}>{data.survey.consumerCategory}</strong> | 
+            Status: <span style={{ 
+              padding: '0.15rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600,
+              background: '#111827', color: '#FFFFFF', display: 'inline-block', margin: '0 0.25rem'
+            }}>{data.survey.status}</span>
             {data.agentEmail && (
-              <> | Agent: <strong style={{ color: 'var(--text-primary)' }}>{data.agentEmail}</strong></>
+              <> | Agent: <strong style={{ color: '#111827', fontWeight: 600 }}>{data.agentEmail}</strong></>
             )}
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <Button variant="secondary" onClick={() => navigate('/admin/surveys')}>Back to List</Button>
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <Button 
+            onClick={() => navigate('/admin/surveys')}
+            style={{ background: 'transparent', color: '#111827', border: '1px solid #D1D5DB', fontWeight: 600, padding: '0.5rem 1rem', borderRadius: '6px', fontSize: '0.875rem', display: 'flex', alignItems: 'center' }}
+          >
+            <ArrowLeft size={16} style={{ marginRight: '0.375rem' }} /> Back to List
+          </Button>
           {!isApproved && data.survey.status === 'SUBMITTED' && (
-            <Button onClick={handleApprove} isLoading={isApproving} style={{ background: 'var(--accent-primary)' }}>
-              <CheckCircle size={18} style={{ marginRight: '0.5rem' }} /> Approve Survey
+            <Button onClick={handleApprove} isLoading={isApproving} style={{ background: '#111827', color: '#FFFFFF', border: 'none', fontWeight: 600, padding: '0.5rem 1rem', borderRadius: '6px', fontSize: '0.875rem', display: 'flex', alignItems: 'center' }}>
+              <CheckCircle size={16} style={{ marginRight: '0.375rem' }} /> Approve Survey
             </Button>
           )}
         </div>
       </div>
 
       {isApproved && (
-        <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: 'var(--radius-md)', color: 'var(--accent-primary)', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Shield size={18} /> This survey has been approved. All fields are now read-only and locked from further edits.
+        <div style={{ padding: '1.25rem', background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '12px', color: '#3B82F6', fontWeight: 500, marginBottom: '3rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <Shield size={20} /> This survey has been approved. All fields are now read-only and locked from further edits.
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+      {/* Vertical Stacking for Cards */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
         
-        {/* Left Column: Editor Entry Point */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          <Card padding="2rem" style={{ textAlign: 'center', background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
-            <h3 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>Survey Editor</h3>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: 1.6 }}>
-              To view the survey details in a clean, structured format with perfect visual hierarchy, 
-              please open the Survey Editor. Admins have full access to review and overwrite any data 
-              before final approval.
-            </p>
+        {/* Top Card: Editor Entry Point */}
+        <div style={{ background: '#F3F4F6', borderRadius: '12px', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Edit3 size={18} color="#111827" strokeWidth={2.5} />
+            <h2 style={{ margin: 0, fontWeight: 700, fontSize: '1.125rem', color: '#111827' }}>Survey Editor</h2>
+          </div>
+
+          <p style={{ color: '#4B5563', margin: 0, lineHeight: 1.5, fontWeight: 400, fontSize: '0.95rem', maxWidth: '800px' }}>
+            To view the survey details in a clean, structured format with perfect visual hierarchy, 
+            please open the Survey Editor. Admins have full access to review and overwrite any data 
+            before final approval.
+          </p>
+
+          <div style={{ marginTop: '0.5rem' }}>
             <Button 
               onClick={() => navigate(`/admin/surveys/${id}/edit`)}
-              style={{ background: 'var(--accent-primary)', fontSize: '1.1rem', padding: '0.75rem 2rem' }}
+              style={{ background: '#111827', color: '#FFFFFF', border: 'none', fontSize: '0.875rem', fontWeight: 600, padding: '0.625rem 1.5rem', borderRadius: '6px' }}
             >
               Open Survey Editor
             </Button>
-          </Card>
+          </div>
         </div>
 
-        {/* Right Column: Audit History & Metadata */}
-        <div>
-          <Card padding="1.5rem" style={{ position: 'sticky', top: '2rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-glass)', paddingBottom: '0.75rem' }}>
-              <History size={20} color="var(--text-primary)" />
-              <h3 style={{ margin: 0 }}>Audit History</h3>
+        {/* Bottom Card: Audit History */}
+        <div style={{ background: '#F3F4F6', borderRadius: '12px', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <History size={18} color="#111827" strokeWidth={2.5} />
+            <h2 style={{ margin: 0, fontWeight: 700, fontSize: '1.125rem', color: '#111827' }}>Audit History</h2>
+          </div>
+          
+          {(!data.auditLogs || data.auditLogs.length === 0) ? (
+            <div style={{ color: '#6B7280', fontWeight: 400, fontSize: '0.875rem' }}>
+              No edits have been made by admins yet.
             </div>
-            
-            {(!data.auditLogs || data.auditLogs.length === 0) ? (
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.875rem', textAlign: 'center', padding: '2rem 0' }}>
-                No edits have been made by admins yet.
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '500px', overflowY: 'auto' }}>
-                {data.auditLogs.map(log => (
-                  <div key={log.id} style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '1rem', borderRadius: 'var(--radius-sm)', borderLeft: '2px solid var(--accent-primary)' }}>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
-                      {new Date(log.changedAt).toLocaleString()}
-                    </div>
-                    <div style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem' }}>
-                      {log.section} • {log.field}
-                    </div>
-                    <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-                      <span style={{ textDecoration: 'line-through', color: 'var(--error)', marginRight: '0.5rem' }}>{log.oldValue || 'null'}</span>
-                      →
-                      <span style={{ color: 'var(--success)', marginLeft: '0.5rem' }}>{log.newValue || 'null'}</span>
-                    </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '500px', overflowY: 'auto', paddingRight: '0.5rem', marginTop: '0.5rem' }}>
+              {data.auditLogs.map(log => (
+                <div key={log.id} style={{ background: '#FFFFFF', padding: '1rem', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+                  <div style={{ fontSize: '0.75rem', color: '#6B7280', fontWeight: 500, marginBottom: '0.25rem' }}>
+                    {new Date(log.changedAt).toLocaleString()}
                   </div>
-                ))}
-              </div>
-            )}
-          </Card>
+                  <div style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.125rem', color: '#111827' }}>
+                    {log.section} • {log.field}
+                  </div>
+                  <div style={{ fontSize: '0.8125rem', color: '#4B5563', fontWeight: 400, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ textDecoration: 'line-through', color: '#DC2626' }}>{log.oldValue || 'null'}</span>
+                    <span style={{ color: '#D1D5DB' }}>→</span>
+                    <span style={{ color: '#059669', fontWeight: 500 }}>{log.newValue || 'null'}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
       </div>

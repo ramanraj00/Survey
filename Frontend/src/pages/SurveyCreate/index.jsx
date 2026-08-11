@@ -82,6 +82,7 @@ export default function SurveyCreate() {
               <option value="RESIDENTIAL">Residential</option>
               <option value="COMMERCIAL">Commercial</option>
               <option value="INDUSTRIAL">Industrial</option>
+              <option value="INVENTORY">Inventory</option>
             </select>
           </div>
 

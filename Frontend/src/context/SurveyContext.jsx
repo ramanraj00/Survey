@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { SurveyAPI } from '../services/api';
+import { SurveyAPI, AdminAPI } from '../services/api';
 
 const SurveyContext = createContext();
 
@@ -26,7 +26,10 @@ export function SurveyProvider({ children }) {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await SurveyAPI.getSurvey(id);
+      const userRole = localStorage.getItem('userRole');
+      const data = userRole === 'admin' 
+        ? await AdminAPI.getSurveyFull(id) 
+        : await SurveyAPI.getSurvey(id);
       setSurveyData(data);
     } catch (err) {
       setError(err.message || 'Failed to load survey');
@@ -45,30 +48,35 @@ export function SurveyProvider({ children }) {
     
     const id = surveyData.survey.id;
     const version = surveyData.survey.version;
+    const userRole = localStorage.getItem('userRole');
     
     let result;
     try {
-      switch(section) {
-        case 'common':
-          result = await SurveyAPI.updateCommonDetails(id, version, payload);
-          break;
-        case 'inventory':
-          result = await SurveyAPI.updateInventory(id, version, payload);
-          break;
-        case 'residential':
-          result = await SurveyAPI.updateResidential(id, version, payload);
-          break;
-        case 'commercial':
-          result = await SurveyAPI.updateCommercial(id, version, payload);
-          break;
-        case 'industrial':
-          result = await SurveyAPI.updateIndustrial(id, version, payload);
-          break;
-        case 'demandResponse':
-          result = await SurveyAPI.updateDemandResponse(id, version, payload);
-          break;
-        default:
-          throw new Error(`Unknown section: ${section}`);
+      if (userRole === 'admin') {
+        result = await AdminAPI.updateSurveySection(id, section, version, payload);
+      } else {
+        switch(section) {
+          case 'common':
+            result = await SurveyAPI.updateCommonDetails(id, version, payload);
+            break;
+          case 'inventory':
+            result = await SurveyAPI.updateInventory(id, version, payload);
+            break;
+          case 'residential':
+            result = await SurveyAPI.updateResidential(id, version, payload);
+            break;
+          case 'commercial':
+            result = await SurveyAPI.updateCommercial(id, version, payload);
+            break;
+          case 'industrial':
+            result = await SurveyAPI.updateIndustrial(id, version, payload);
+            break;
+          case 'demandResponse':
+            result = await SurveyAPI.updateDemandResponse(id, version, payload);
+            break;
+          default:
+            throw new Error(`Unknown section: ${section}`);
+        }
       }
 
       // If successful, optimistically bump local version to match DB

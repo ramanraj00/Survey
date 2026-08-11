@@ -3,7 +3,7 @@ import { user } from "./auth-schema.js";
 
 // ENUMS
 export const surveyStatusEnum = pgEnum('survey_status', ['DRAFT', 'SUBMITTED', 'APPROVED']);
-export const consumerCategoryEnum = pgEnum('consumer_category', ['RESIDENTIAL', 'COMMERCIAL', 'INDUSTRIAL']);
+export const consumerCategoryEnum = pgEnum('consumer_category', ['RESIDENTIAL', 'COMMERCIAL', 'INDUSTRIAL', 'INVENTORY']);
 export const inviteStatusEnum = pgEnum('invite_status', ['PENDING', 'ACCEPTED', 'EXPIRED']);
 export const commonLoadTypeEnum = pgEnum('common_load_type', ['LIFT', 'WATER_SEWAGE_PUMP', 'OTHER']);
 
@@ -136,7 +136,7 @@ export const inventoryItems = pgTable("inventory_items", {
   typicalStartTime: text("typical_start_time"),
   typicalEndTime: text("typical_end_time"),
   
-  operatesDuringPeak: boolean("operates_during_peak"),
+  operatesDuringPeak: text("operates_during_peak"),
   loadCriticality: text("load_criticality"),
   shiftable: text("shiftable"), // e.g. YES, NO, PARTLY
   maximumShiftableDuration: integer("max_shiftable_duration"), // minutes

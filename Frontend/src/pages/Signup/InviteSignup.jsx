@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { SurveyAPI } from '../../services/api';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
-import { User, Lock, Mail, AlertCircle, CheckCircle } from 'lucide-react';
+import { User, Lock, Mail, AlertCircle, CheckCircle, Eye, EyeOff } from 'lucide-react';
 
 export default function InviteSignup() {
   const navigate = useNavigate();
@@ -13,6 +13,9 @@ export default function InviteSignup() {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -101,10 +104,10 @@ export default function InviteSignup() {
                     style={{
                       width: '100%',
                       padding: '0.75rem 1rem 0.75rem 2.75rem',
-                      background: 'var(--bg-tertiary)',
-                      border: '1px solid var(--border-glass)',
+                      background: '#F8FAFC',
+                      border: '1px solid #E2E8F0',
                       borderRadius: 'var(--radius-md)',
-                      color: 'white'
+                      color: '#0F172A'
                     }}
                   />
                 </div>
@@ -113,9 +116,9 @@ export default function InviteSignup() {
               <div>
                 <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Password</label>
                 <div style={{ position: 'relative' }}>
-                  <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                  <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -123,22 +126,30 @@ export default function InviteSignup() {
                     placeholder="Create a password"
                     style={{
                       width: '100%',
-                      padding: '0.75rem 1rem 0.75rem 2.75rem',
-                      background: 'var(--bg-tertiary)',
-                      border: '1px solid var(--border-glass)',
+                      padding: '0.75rem 2.75rem 0.75rem 2.75rem',
+                      background: '#F8FAFC',
+                      border: '1px solid #E2E8F0',
                       borderRadius: 'var(--radius-md)',
-                      color: 'white'
+                      color: '#0F172A',
+                      boxSizing: 'border-box'
                     }}
                   />
+                  <button 
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8', display: 'flex', padding: 0 }}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                 </div>
               </div>
 
               <div>
                 <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Confirm Password</label>
                 <div style={{ position: 'relative' }}>
-                  <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                  <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
                   <input
-                    type="password"
+                    type={showConfirmPassword ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
@@ -146,24 +157,45 @@ export default function InviteSignup() {
                     placeholder="Confirm your password"
                     style={{
                       width: '100%',
-                      padding: '0.75rem 1rem 0.75rem 2.75rem',
-                      background: 'var(--bg-tertiary)',
-                      border: '1px solid var(--border-glass)',
+                      padding: '0.75rem 2.75rem 0.75rem 2.75rem',
+                      background: '#F8FAFC',
+                      border: '1px solid #E2E8F0',
                       borderRadius: 'var(--radius-md)',
-                      color: 'white'
+                      color: '#0F172A',
+                      boxSizing: 'border-box'
                     }}
                   />
+                  <button 
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8', display: 'flex', padding: 0 }}
+                  >
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                 </div>
               </div>
 
-              <Button 
+              <button 
                 type="submit" 
-                variant="primary" 
                 disabled={!token || isLoading}
-                style={{ width: '100%', marginTop: '1rem' }}
+                style={{
+                  width: '100%',
+                  marginTop: '1rem',
+                  padding: '0.875rem 2rem',
+                  borderRadius: '9999px',
+                  fontWeight: '600',
+                  backgroundColor: '#2563EB',
+                  color: 'white',
+                  border: 'none',
+                  boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)',
+                  transition: 'all 0.2s ease',
+                  cursor: (!token || isLoading) ? 'not-allowed' : 'pointer',
+                  opacity: (!token || isLoading) ? 0.7 : 1,
+                  fontSize: '0.95rem'
+                }}
               >
                 {isLoading ? 'Creating Account...' : 'Complete Registration'}
-              </Button>
+              </button>
             </form>
           )}
         </Card>

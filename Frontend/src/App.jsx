@@ -18,6 +18,7 @@ import ResidentialForm from './pages/Survey/Residential';
 import CommercialForm from './pages/Survey/Commercial';
 import IndustrialForm from './pages/Survey/Industrial';
 import DemandResponseForm from './pages/Survey/DemandResponse';
+import InventoryForm from './pages/Survey/Inventory';
 import SurveySubmit from './pages/SurveySubmit';
 
 // Admin Pages
@@ -63,6 +64,7 @@ function App() {
               <Route path="residential" element={<ResidentialForm />} />
               <Route path="commercial" element={<CommercialForm />} />
               <Route path="industrial" element={<IndustrialForm />} />
+              <Route path="inventory" element={<InventoryForm />} />
               <Route path="demand-response" element={<DemandResponseForm />} />
               <Route path="submit" element={<SurveySubmit />} />
             </Route>
@@ -92,6 +94,7 @@ function App() {
               <Route path="residential" element={<ResidentialForm />} />
               <Route path="commercial" element={<CommercialForm />} />
               <Route path="industrial" element={<IndustrialForm />} />
+              <Route path="inventory" element={<InventoryForm />} />
               <Route path="demand-response" element={<DemandResponseForm />} />
               <Route path="submit" element={<SurveySubmit isAdmin={true} />} />
             </Route>

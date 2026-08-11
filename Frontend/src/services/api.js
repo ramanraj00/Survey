@@ -120,12 +120,12 @@ export const SurveyAPI = {
   // 4. Update Sections (All require version for Optimistic Concurrency Control)
   updateCommonDetails: (id, version, commonDetails) => apiFetch(`/surveys/${id}/common`, {
     method: 'PUT',
-    body: JSON.stringify({ version, commonDetails })
+    body: JSON.stringify({ version, data: commonDetails })
   }),
 
   updateInventory: (id, version, inventoryItems) => apiFetch(`/surveys/${id}/inventory`, {
     method: 'PUT',
-    body: JSON.stringify({ version, inventoryItems })
+    body: JSON.stringify({ version, items: inventoryItems })
   }),
 
   updateResidential: (id, version, data) => apiFetch(`/surveys/${id}/residential`, {
@@ -166,8 +166,13 @@ export const AdminAPI = {
   }),
   
   // Admin edits share the same OCC requirement as Agents
-  updateSurveySection: (id, sectionPath, version, data) => apiFetch(`/admin/surveys/${id}/${sectionPath}`, {
-    method: 'PATCH',
-    body: JSON.stringify({ version, ...data })
-  }),
+  updateSurveySection: (id, sectionPath, version, data) => {
+    let payload = { version, ...data };
+    if (sectionPath === 'common') payload = { version, data };
+    if (sectionPath === 'inventory') payload = { version, items: data };
+    return apiFetch(`/admin/surveys/${id}/${sectionPath}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload)
+    });
+  },
 };

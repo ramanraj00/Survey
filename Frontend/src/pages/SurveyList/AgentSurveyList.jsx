@@ -8,6 +8,12 @@ export default function AgentSurveyList() {
   const navigate = useNavigate();
   const [surveys, setSurveys] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [toastMessage, setToastMessage] = useState('');
+
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(''), 3000);
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -24,6 +30,18 @@ export default function AgentSurveyList() {
     fetchSurveys();
     return () => { mounted = false; };
   }, []);
+
+  const handleSubmitSurvey = async (id, version) => {
+    try {
+      await SurveyAPI.submitSurvey(id, version);
+      showToast('Survey submitted successfully to Admin!');
+      // Refresh list
+      const data = await SurveyAPI.getSurveys();
+      setSurveys(data);
+    } catch (err) {
+      showToast('Failed to submit survey: ' + err.message);
+    }
+  };
 
   if (isLoading) return <div className="flex-center" style={{height: '50vh'}}>Loading your surveys...</div>;
 
@@ -63,8 +81,8 @@ export default function AgentSurveyList() {
                       fontWeight: 600,
                       background: s.status === 'SUBMITTED' ? 'rgba(16, 185, 129, 0.1)' : 
                                   s.status === 'APPROVED' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-                      color: s.status === 'SUBMITTED' ? 'var(--success)' : 
-                             s.status === 'APPROVED' ? 'var(--accent-primary)' : 'var(--warning)'
+                      color: s.status === 'SUBMITTED' ? '#10B981' : 
+                             s.status === 'APPROVED' ? '#3B82F6' : '#F59E0B'
                     }}>
                       {s.status}
                     </span>
@@ -73,13 +91,25 @@ export default function AgentSurveyList() {
                     {new Date(s.createdAt).toLocaleDateString()}
                   </td>
                   <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
-                    <Button 
-                      variant="secondary" 
-                      onClick={() => navigate(`/agent/surveys/${s.id}`)}
-                      style={{ padding: '0.5rem 1rem', fontSize: '0.75rem' }}
-                    >
-                      {s.status === 'DRAFT' ? 'Continue Editing' : 'View Details'}
-                    </Button>
+                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                      <Button 
+                        variant="secondary" 
+                        onClick={() => navigate(`/agent/surveys/${s.id}`)}
+                        style={{ padding: '0.5rem 1rem', fontSize: '0.75rem' }}
+                      >
+                        {s.status === 'DRAFT' ? 'Continue Editing' : 'View Details'}
+                      </Button>
+                      
+                      {s.status === 'DRAFT' && (
+                        <Button 
+                          variant="primary" 
+                          onClick={() => handleSubmitSurvey(s.id, s.version)}
+                          style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', backgroundColor: '#10B981', color: 'white', border: 'none' }}
+                        >
+                          Submit to Admin
+                        </Button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -87,6 +117,27 @@ export default function AgentSurveyList() {
           </table>
         )}
       </Card>
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div style={{
+          position: 'fixed',
+          bottom: '2rem',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: '#0F172A',
+          color: '#FFFFFF',
+          padding: '1rem 2rem',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          zIndex: 9999,
+          fontWeight: 500,
+          fontSize: '0.9rem',
+          animation: 'fadeIn 0.3s ease-out'
+        }}>
+          {toastMessage}
+        </div>
+      )}
     </div>
   );
 }
