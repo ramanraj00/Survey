@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSurvey } from '../../../context/SurveyContext';
+import Toast from '../../../components/common/Toast';
+import Select from '../../../components/common/Select';
 
 export default function CommonForm() {
   const { id } = useParams();
@@ -9,6 +11,7 @@ export default function CommonForm() {
   const [formData, setFormData] = useState({});
   const [isSaving, setIsSaving] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [toastMessage, setToastMessage] = useState('');
   const totalSteps = 3;
 
   const isReadOnly = surveyData?.survey?.status !== 'DRAFT' && localStorage.getItem('userRole') === 'agent';
@@ -33,6 +36,10 @@ export default function CommonForm() {
   };
 
   const isAdmin = localStorage.getItem('userRole') === 'admin';
+
+  useEffect(() => {
+    document.querySelector('main')?.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentStep]);
 
   const handleSaveAndContinue = async () => {
     // If agent and the survey is submitted, just navigate
@@ -70,7 +77,6 @@ export default function CommonForm() {
       await saveSection('common', sanitizedData);
       if (currentStep < totalSteps) {
         setCurrentStep(prev => prev + 1);
-        window.scrollTo(0, 0);
       } else {
         const cat = surveyData?.survey?.consumerCategory?.toLowerCase();
         if (cat) {
@@ -82,7 +88,7 @@ export default function CommonForm() {
       }
     } catch (error) {
       console.error("Save failed:", error);
-      alert("Failed to save. Please try again.");
+      setToastMessage(error.message || "Failed to save. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -146,11 +152,11 @@ export default function CommonForm() {
       
       {/* DISCOM Rep */}
       <div><label style={labelStyle}>DISCOM Rep Present?</label>
-        <select name="discomRepresentativePresent" value={formData.discomRepresentativePresent || ''} onChange={handleChange} style={inputStyle}>
+        <Select name="discomRepresentativePresent" value={formData.discomRepresentativePresent || ''} onChange={handleChange} style={inputStyle}>
           <option value="">Select</option>
           <option value="true">Yes</option>
           <option value="false">No</option>
-        </select>
+        </Select>
       </div>
       <div><label style={labelStyle}>DISCOM Rep Name</label><input name="discomRepresentativeName" value={formData.discomRepresentativeName || ''} onChange={handleChange} style={inputStyle} /></div>
       <div><label style={labelStyle}>DISCOM Rep Designation</label><input name="discomRepresentativeDesignation" value={formData.discomRepresentativeDesignation || ''} onChange={handleChange} style={inputStyle} /></div>
@@ -167,18 +173,18 @@ export default function CommonForm() {
 
       {/* Consent */}
       <div><label style={labelStyle}>Consent to Collect Info</label>
-        <select name="consentToCollect" value={formData.consentToCollect || ''} onChange={handleChange} style={inputStyle}>
+        <Select name="consentToCollect" value={formData.consentToCollect || ''} onChange={handleChange} style={inputStyle}>
           <option value="">Select</option>
           <option value="true">Yes</option>
           <option value="false">No</option>
-        </select>
+        </Select>
       </div>
       <div><label style={labelStyle}>Consent to Photos</label>
-        <select name="consentToPhotos" value={formData.consentToPhotos || ''} onChange={handleChange} style={inputStyle}>
+        <Select name="consentToPhotos" value={formData.consentToPhotos || ''} onChange={handleChange} style={inputStyle}>
           <option value="">Select</option>
           <option value="true">Yes</option>
           <option value="false">No</option>
-        </select>
+        </Select>
       </div>
     </div>
   );
@@ -203,11 +209,11 @@ export default function CommonForm() {
       <div><label style={labelStyle}>DTR Name/Code</label><input name="dtrName" value={formData.dtrName || ''} onChange={handleChange} style={inputStyle} /></div>
 
       <div style={{ gridColumn: '1 / -1' }}><label style={labelStyle}>More than one electricity connection/meter?</label>
-        <select name="hasMultipleConnections" value={formData.hasMultipleConnections || ''} onChange={handleChange} style={inputStyle}>
+        <Select name="hasMultipleConnections" value={formData.hasMultipleConnections || ''} onChange={handleChange} style={inputStyle}>
           <option value="">Select</option>
           <option value="true">Yes</option>
           <option value="false">No</option>
-        </select>
+        </Select>
       </div>
       {formData.hasMultipleConnections === 'true' && (
         <>
@@ -236,13 +242,13 @@ export default function CommonForm() {
       <div><label style={labelStyle}>Occupancy</label><input name="occupancy" value={formData.occupancy || ''} onChange={handleChange} style={inputStyle} /></div>
       
       <div><label style={labelStyle}>Seasonality</label>
-        <select name="seasonality" value={formData.seasonality || ''} onChange={handleChange} style={inputStyle}>
+        <Select name="seasonality" value={formData.seasonality || ''} onChange={handleChange} style={inputStyle}>
           <option value="">Select</option>
           <option value="Higher in summer">Higher in summer</option>
           <option value="Higher in winter">Higher in winter</option>
           <option value="Higher in monsoon">Higher in monsoon</option>
           <option value="No Major Variation">No Major Variation</option>
-        </select>
+        </Select>
       </div>
 
       <div style={{ gridColumn: '1 / -1' }}><label style={labelStyle}>On Site Alternative Sources</label></div>
@@ -260,11 +266,11 @@ export default function CommonForm() {
       </label></div>
 
       <div style={{ gridColumn: '1 / -1' }}><label style={labelStyle}>Frequent power outages?</label>
-        <select name="frequentPowerOutages" value={formData.frequentPowerOutages || ''} onChange={handleChange} style={inputStyle}>
+        <Select name="frequentPowerOutages" value={formData.frequentPowerOutages || ''} onChange={handleChange} style={inputStyle}>
           <option value="">Select</option>
           <option value="true">Yes</option>
           <option value="false">No</option>
-        </select>
+        </Select>
       </div>
       <div style={{ gridColumn: '1 / -1' }}><label style={labelStyle}>Outage Remarks</label><input name="outageRemarks" value={formData.outageRemarks || ''} onChange={handleChange} style={inputStyle} /></div>
     </div>
@@ -320,6 +326,8 @@ export default function CommonForm() {
         display: 'flex',
         flexDirection: 'column',
       }}>
+        <Toast message={toastMessage} onClose={() => setToastMessage('')} />
+        <fieldset disabled={isReadOnly} style={{ border: 'none', padding: 0, margin: 0, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
         <div className="card-container" style={{
           flex: 1,
           minHeight: 0,
@@ -346,11 +354,9 @@ export default function CommonForm() {
         {renderStepIndicator()}
 
         <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: '0.5rem', marginBottom: '1rem' }}>
-          <fieldset disabled={isReadOnly} style={{ border: 'none', padding: 0, margin: 0 }}>
             {currentStep === 1 && renderA1()}
             {currentStep === 2 && renderA2()}
             {currentStep === 3 && renderA3()}
-          </fieldset>
         </div>
 
         {/* Footer Actions */}
@@ -384,22 +390,23 @@ export default function CommonForm() {
           </button>
 
           <button 
+            type="button"
             onClick={handleSaveAndContinue} 
-            disabled={isSaving}
+            disabled={isSaving || isReadOnly}
             style={{
               padding: '0.75rem 2rem',
               borderRadius: '9999px',
               fontWeight: '600',
-              backgroundColor: '#2563EB',
+              backgroundColor: isReadOnly ? '#94A3B8' : '#2563EB',
               color: 'white',
               border: 'none',
               boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)',
               transition: 'all 0.2s ease',
-              cursor: isSaving ? 'not-allowed' : 'pointer',
+              cursor: isSaving || isReadOnly ? 'not-allowed' : 'pointer',
               opacity: isSaving ? 0.7 : 1
             }}
             onMouseOver={(e) => {
-              if (!isSaving) e.currentTarget.style.transform = 'translateY(-1px)';
+              if (!isSaving && !isReadOnly) e.currentTarget.style.transform = 'translateY(-1px)';
             }}
             onMouseOut={(e) => {
               if (!isSaving) e.currentTarget.style.transform = 'translateY(0)';
@@ -409,6 +416,7 @@ export default function CommonForm() {
           </button>
         </div>
       </div>
+      </fieldset>
     </div>
     </>
   );

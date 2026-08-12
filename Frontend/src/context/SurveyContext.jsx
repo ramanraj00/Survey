@@ -43,11 +43,11 @@ export function SurveyProvider({ children }) {
    * Generic save dispatcher for all sections.
    * Handles the optimistic version injection and bumping.
    */
-  const saveSection = useCallback(async (section, payload) => {
+  const saveSection = useCallback(async (section, payload, overrideVersion = null) => {
     if (!surveyData?.survey?.id) throw new Error("No active survey to save");
     
     const id = surveyData.survey.id;
-    const version = surveyData.survey.version;
+    const version = overrideVersion !== null ? overrideVersion : surveyData.survey.version;
     const userRole = localStorage.getItem('userRole');
     
     let result;
@@ -85,7 +85,7 @@ export function SurveyProvider({ children }) {
           const newState = { ...prev, survey: { ...prev.survey, version: result.newVersion } };
           
           if (section === 'common') newState.commonDetails = { ...prev.commonDetails, ...payload };
-          else if (section === 'inventory') newState.inventoryItems = payload;
+          else if (section === 'inventory') newState.inventoryItems = payload.items || payload;
           else if (section === 'residential') newState.residential = { ...prev.residential, ...payload };
           else if (section === 'commercial') newState.commercial = { ...prev.commercial, ...payload };
           else if (section === 'industrial') newState.industrial = { ...prev.industrial, ...payload };

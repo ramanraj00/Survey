@@ -4,6 +4,7 @@ import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import { SurveyAPI } from '../../services/api';
 import { Search, Filter, Mail, User, Hash } from 'lucide-react';
+import Select from '../../components/common/Select';
 
 export default function AdminSurveyList() {
   const navigate = useNavigate();
@@ -13,7 +14,8 @@ export default function AdminSurveyList() {
   // Filters
   const [status, setStatus] = useState('');
   const [category, setCategory] = useState('');
-  const [search, setSearch] = useState('');
+  const [dateSearch, setDateSearch] = useState('');
+  const [emailSearch, setEmailSearch] = useState('');
 
   const fetchSurveys = async () => {
     setIsLoading(true);
@@ -21,7 +23,8 @@ export default function AdminSurveyList() {
       const params = {};
       if (status) params.status = status;
       if (category) params.category = category;
-      if (search) params.search = search; 
+      if (dateSearch) params.date = dateSearch; 
+      if (emailSearch) params.email = emailSearch;
       
       const res = await SurveyAPI.getAdminSurveys(params);
       setSurveys(res.data || []);
@@ -33,9 +36,12 @@ export default function AdminSurveyList() {
   };
 
   useEffect(() => {
-    fetchSurveys();
+    const timer = setTimeout(() => {
+      fetchSurveys();
+    }, 400);
+    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, category]);
+  }, [status, category, dateSearch, emailSearch]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -69,7 +75,7 @@ export default function AdminSurveyList() {
   const sortedDates = Object.keys(groupedSurveys).sort((a, b) => b.localeCompare(a));
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '4rem' }}>
+    <div style={{ width: '100%', paddingBottom: '4rem' }}>
       
       {/* Header & Quick Status Toggles */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
@@ -112,42 +118,60 @@ export default function AdminSurveyList() {
       </div>
 
       {/* Filters & Search Bar */}
-      <Card padding="1.5rem" style={{ marginBottom: '3rem', border: 'none', background: '#EAEFF7', borderRadius: '12px' }}>
+      <Card padding="1.5rem" style={{ marginBottom: '3rem', border: '1px solid var(--border-glass)', background: '#FFFFFF', borderRadius: '12px', position: 'relative', zIndex: 10 }}>
         <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
           
-          <div style={{ flex: '1 1 300px' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 600, color: '#475569' }}>Search</label>
+          <div style={{ flex: '1 1 150px' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Search by Date</label>
             <div style={{ position: 'relative' }}>
-              <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
               <input 
-                type="text" 
-                placeholder="Search Consumer Name, Survey ID, Agent..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
+                type="date" 
+                value={dateSearch}
+                onChange={e => setDateSearch(e.target.value)}
                 style={{
-                  width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem',
-                  borderRadius: '8px', background: '#FFFFFF',
-                  border: '1px solid #E2E8F0', color: '#000000', outline: 'none',
+                  width: '100%', padding: '0.75rem 1rem',
+                  borderRadius: 'var(--radius-md)', background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-glass)', color: 'var(--text-primary)', outline: 'none',
                   fontWeight: 500
                 }}
               />
             </div>
           </div>
 
-          <div style={{ width: '200px' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 600, color: '#475569' }}>Category</label>
-            <select 
+          <div style={{ flex: '1 1 200px' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Search by Email</label>
+            <div style={{ position: 'relative' }}>
+              <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+              <input 
+                type="text" 
+                placeholder="Agent Email..."
+                value={emailSearch}
+                onChange={e => setEmailSearch(e.target.value)}
+                style={{
+                  width: '100%', padding: '0.75rem 1rem 0.75rem 2.5rem',
+                  borderRadius: 'var(--radius-md)', background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-glass)', color: 'var(--text-primary)', outline: 'none',
+                  fontWeight: 500
+                }}
+              />
+            </div>
+          </div>
+
+          <div style={{ flex: '1 1 200px', maxWidth: '300px' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Category</label>
+            <Select 
               value={category} onChange={e => setCategory(e.target.value)}
-              style={{ width: '100%', padding: '0.75rem 1rem', borderRadius: '8px', background: '#FFFFFF', border: '1px solid #E2E8F0', color: '#000000', outline: 'none', fontWeight: 500 }}
+              style={{ width: '100%', background: 'var(--bg-secondary)', border: '1px solid var(--border-glass)' }}
             >
               <option value="">All Categories</option>
               <option value="RESIDENTIAL">Residential</option>
               <option value="COMMERCIAL">Commercial</option>
               <option value="INDUSTRIAL">Industrial</option>
-            </select>
+              <option value="INVENTORY">Inventory</option>
+            </Select>
           </div>
 
-          <Button type="submit" variant="primary" style={{ padding: '0.75rem 1.5rem', height: '42px', background: '#000000', color: '#FFFFFF', border: 'none', fontWeight: 600, borderRadius: '8px' }}>
+          <Button type="submit" variant="primary" style={{ flex: '0 0 auto', padding: '0 1.5rem', height: '42px', background: '#000000', color: '#FFFFFF', border: 'none', fontWeight: 600, borderRadius: 'var(--radius-md)' }}>
             <Filter size={18} style={{ marginRight: '0.5rem' }} /> Filter
           </Button>
         </form>
@@ -169,58 +193,53 @@ export default function AdminSurveyList() {
                   {group.displayDate}
                 </h3>
                 <Card padding="0" style={{ border: 'none', background: '#EAEFF7', borderRadius: '12px', overflow: 'hidden' }}>
-                  <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '900px', background: '#EAEFF7' }}>
-                      <thead style={{ background: '#EAEFF7' }}>
-                        <tr style={{ borderBottom: '1px solid #CBD5E1', textAlign: 'left', color: '#000000', fontSize: '0.875rem', fontWeight: 700 }}>
-                          <th style={{ padding: '1rem 1.5rem' }}>Consumer & Survey ID</th>
-                          <th style={{ padding: '1rem 1.5rem' }}>Agent Details</th>
-                          <th style={{ padding: '1rem 1.5rem' }}>Category</th>
-                          <th style={{ padding: '1rem 1.5rem' }}>Status</th>
-                          <th style={{ padding: '1rem 1.5rem' }}>Time</th>
-                          <th style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {group.items.map((s, index) => (
-                          <tr key={s.id} style={{ borderBottom: index === group.items.length - 1 ? 'none' : '1px solid #CBD5E1' }} className="animate-fade-in hover-row">
-                            <td style={{ padding: '1rem 1.5rem' }}>
-                              <div style={{ fontWeight: 600, color: '#000000', display: 'flex', alignItems: 'center', gap: '0.375rem', marginBottom: '0.25rem' }}>
-                                <User size={14} color="#64748B" /> {s.consumerName || 'Unknown Consumer'}
-                              </div>
-                              <div style={{ color: '#64748B', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.375rem', fontWeight: 500 }}>
-                                <Hash size={12} /> {s.surveyNumber}
-                              </div>
-                            </td>
-                            <td style={{ padding: '1rem 1.5rem' }}>
-                              <div style={{ fontWeight: 500, color: '#000000', display: 'flex', alignItems: 'center', gap: '0.375rem', marginBottom: '0.25rem' }}>
-                                <Mail size={14} color="#64748B" /> {s.agentEmail || 'Unknown Agent'}
-                              </div>
-                            </td>
-                            <td style={{ padding: '1rem 1.5rem', fontWeight: 500, color: '#000000' }}>{s.consumerCategory}</td>
-                            <td style={{ padding: '1rem 1.5rem' }}>
-                              <span style={{ 
-                                padding: '0.35rem 0.75rem', borderRadius: '1rem', fontSize: '0.75rem', fontWeight: 600,
-                                background: '#000000', color: '#FFFFFF', display: 'inline-block'
-                              }}>
-                                {s.status}
-                              </span>
-                            </td>
-                            <td style={{ padding: '1rem 1.5rem', color: '#64748B', fontWeight: 500 }}>
-                              {new Date(s.updatedAt || s.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </td>
-                            <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
-                              <Button 
-                                onClick={() => navigate(`/admin/surveys/${s.id}`)}
-                                style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', background: '#000000', color: '#FFFFFF', border: 'none', fontWeight: 600, borderRadius: '6px' }}
-                              >
-                                {s.status === 'SUBMITTED' ? 'Review & Approve' : 'View Data'}
-                              </Button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                  <div style={{ display: 'flex', flexDirection: 'column', padding: '1rem', gap: '1rem', background: '#EAEFF7' }}>
+                    {group.items.map((s) => (
+                      <div key={s.id} style={{ border: '1px solid #CBD5E1', borderRadius: '12px', padding: '1.25rem', background: '#FFFFFF', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }} className="animate-fade-in">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                          <div>
+                            <div style={{ fontWeight: 600, color: '#000000', display: 'flex', alignItems: 'center', gap: '0.375rem', marginBottom: '0.25rem', fontSize: '0.9rem' }}>
+                              <User size={14} color="#64748B" /> {s.consumerName || 'Unknown'}
+                            </div>
+                            <div style={{ color: '#64748B', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.375rem', fontWeight: 500 }}>
+                              <Hash size={12} /> {s.surveyNumber}
+                            </div>
+                          </div>
+                          <span style={{ 
+                            padding: '0.25rem 0.5rem', borderRadius: '1rem', fontSize: '0.7rem', fontWeight: 600,
+                            background: '#000000', color: '#FFFFFF', display: 'inline-block'
+                          }}>
+                            {s.status}
+                          </span>
+                        </div>
+                        
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.25rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                            <span style={{ color: '#64748B', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Mail size={12}/> Agent:</span>
+                            <span style={{ fontWeight: 500 }}>{s.agentEmail || 'Unknown'}</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                            <span style={{ color: '#64748B' }}>Category:</span>
+                            <span style={{ fontWeight: 500 }}>{s.consumerCategory}</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                            <span style={{ color: '#64748B' }}>Time:</span>
+                            <span style={{ fontWeight: 500 }}>{new Date(s.updatedAt || s.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          </div>
+                        </div>
+                        
+                        <button 
+                          onClick={() => navigate(`/admin/surveys/${s.id}`)}
+                          style={{ 
+                            padding: '0.625rem 1rem', fontSize: '0.875rem', width: '100%', 
+                            background: 'transparent', color: '#111827', border: '1px solid var(--border-glass)', 
+                            fontWeight: 500, borderRadius: '9999px', cursor: 'pointer', transition: 'all 0.2s'
+                          }}
+                        >
+                          {s.status === 'SUBMITTED' ? 'Review & Approve' : 'View Data'}
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 </Card>
               </div>

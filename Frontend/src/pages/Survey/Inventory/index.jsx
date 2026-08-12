@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSurvey } from '../../../context/SurveyContext';
 import { Plus, Trash2 } from 'lucide-react';
+import Select from '../../../components/common/Select';
 
 export default function InventoryForm() {
   const navigate = useNavigate();
@@ -168,13 +169,13 @@ export default function InventoryForm() {
                 <label style={labelStyle}>Rated Capacity (B5)</label>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <input style={{ ...inputStyle, flex: 2 }} value={item.ratedCapacity || ''} onChange={e => handleChange(index, 'ratedCapacity', e.target.value)} placeholder="e.g. 100" />
-                  <select style={{ ...inputStyle, flex: 1 }} value={item.capacityUnit || ''} onChange={e => handleChange(index, 'capacityUnit', e.target.value)}>
+                  <Select style={{ ...inputStyle, flex: 1 }} value={item.capacityUnit || ''} onChange={e => handleChange(index, 'capacityUnit', e.target.value)}>
                     <option value="">Unit</option>
                     <option value="kW">kW</option>
                     <option value="kVA">kVA</option>
                     <option value="HP">HP</option>
                     <option value="TR">TR</option>
-                  </select>
+                  </Select>
                 </div>
               </div>
               <div>
@@ -187,30 +188,30 @@ export default function InventoryForm() {
               </div>
               <div>
                 <label style={labelStyle}>Operates during peak hours? (B8)</label>
-                <select style={inputStyle} value={item.operatesDuringPeak || ''} onChange={e => handleChange(index, 'operatesDuringPeak', e.target.value)}>
+                <Select style={inputStyle} value={item.operatesDuringPeak || ''} onChange={e => handleChange(index, 'operatesDuringPeak', e.target.value)}>
                   <option value="">Select</option>
                   <option value="Yes">Yes</option>
                   <option value="No">No</option>
                   <option value="Sometimes">Sometimes</option>
-                </select>
+                </Select>
               </div>
               <div>
                 <label style={labelStyle}>Load Criticality (B9)</label>
-                <select style={inputStyle} value={item.loadCriticality || ''} onChange={e => handleChange(index, 'loadCriticality', e.target.value)}>
+                <Select style={inputStyle} value={item.loadCriticality || ''} onChange={e => handleChange(index, 'loadCriticality', e.target.value)}>
                   <option value="">Select</option>
                   <option value="Critical">Critical</option>
                   <option value="Essential">Essential</option>
                   <option value="Non-critical">Non-critical</option>
-                </select>
+                </Select>
               </div>
               <div>
                 <label style={labelStyle}>Can be shifted outside peak? (B10)</label>
-                <select style={inputStyle} value={item.shiftable || ''} onChange={e => handleChange(index, 'shiftable', e.target.value)}>
+                <Select style={inputStyle} value={item.shiftable || ''} onChange={e => handleChange(index, 'shiftable', e.target.value)}>
                   <option value="">Select</option>
                   <option value="Yes">Yes</option>
                   <option value="No">No</option>
                   <option value="Partly">Partly</option>
-                </select>
+                </Select>
               </div>
               <div>
                 <label style={labelStyle}>Max shiftable duration (mins) (B11)</label>

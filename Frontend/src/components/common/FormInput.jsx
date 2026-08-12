@@ -31,12 +31,13 @@ export default function FormInput({
           width: '100%',
           padding: '0.75rem 1rem',
           borderRadius: 'var(--radius-md)',
-          background: 'var(--bg-secondary)',
+          background: disabled ? 'rgba(15, 23, 42, 0.05)' : '#FFFFFF',
           border: `1px solid ${error ? 'var(--error)' : 'var(--border-glass)'}`,
-          color: 'var(--text-primary)',
+          color: disabled ? 'var(--text-muted)' : 'var(--text-primary)',
           fontSize: '0.875rem',
           outline: 'none',
           transition: 'all 0.2s ease',
+          boxShadow: disabled ? 'none' : '0 1px 2px rgba(0, 0, 0, 0.05)',
         }}
         {...props}
       />

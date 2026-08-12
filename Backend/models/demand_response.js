@@ -8,7 +8,7 @@ export const demandResponseProfiles = pgTable("demand_response_profiles", {
   willingness: text("willingness"), // HIGH, MEDIUM, LOW, NOT_INTERESTED
   estimatedAdjustmentDuration: text("estimated_adjustment_duration"), // C4.1
   maximumAdjustmentDuration: integer("maximum_adjustment_duration"), // minutes
-  requiredAdvanceNotice: integer("required_advance_notice"), // minutes
+  requiredAdvanceNotice: text("required_advance_notice"), // text instead of integer to support 'Immediate', '15-30mins', etc.
   
   participationFrequency: text("participation_frequency"), // e.g. "Once a week"
   notificationMethod: text("notification_method"), // SMS, EMAIL, APP
@@ -17,7 +17,7 @@ export const demandResponseProfiles = pgTable("demand_response_profiles", {
   incentiveInfluence: text("incentive_influence"),
   preferredIncentive: text("preferred_incentive"),
   
-  automationInterest: boolean("automation_interest"),
+  automationInterest: text("automation_interest"),
   trialEventWillingness: boolean("trial_event_willingness"),
   
   constraints: text("constraints"),

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import { SurveyAPI } from '../../services/api';
+import Toast from '../../components/common/Toast';
 
 export default function AgentSurveyList() {
   const navigate = useNavigate();
@@ -45,99 +46,90 @@ export default function AgentSurveyList() {
 
   if (isLoading) return <div className="flex-center" style={{height: '50vh'}}>Loading your surveys...</div>;
 
+  const statusOrder = { 'DRAFT': 1, 'SUBMITTED': 2, 'APPROVED': 3 };
+  const sortedSurveys = [...surveys].sort((a, b) => {
+    const diff = (statusOrder[a.status] || 99) - (statusOrder[b.status] || 99);
+    if (diff !== 0) return diff;
+    return new Date(b.createdAt) - new Date(a.createdAt);
+  });
+
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', paddingBottom: '4rem' }}>
+    <div style={{ width: '100%', paddingBottom: '4rem' }}>
       <div className="flex-between" style={{ marginBottom: '2rem' }}>
         <h1 style={{ margin: 0 }}>My Surveys</h1>
         <Button onClick={() => navigate('/agent/surveys/new')}>+ New Survey</Button>
       </div>
 
-      <Card padding="0">
-        {surveys.length === 0 ? (
+      <Card padding="0" style={{ background: '#F1F5F9', border: '1px solid var(--border-glass)', borderRadius: '12px' }}>
+        {sortedSurveys.length === 0 ? (
           <div style={{ padding: '4rem 2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
             You haven't created any surveys yet.
           </div>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border-glass)', textAlign: 'left', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-                <th style={{ padding: '1rem 1.5rem' }}>Survey ID</th>
-                <th style={{ padding: '1rem 1.5rem' }}>Category</th>
-                <th style={{ padding: '1rem 1.5rem' }}>Status</th>
-                <th style={{ padding: '1rem 1.5rem' }}>Date Created</th>
-                <th style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {surveys.map(s => (
-                <tr key={s.id} style={{ borderBottom: '1px solid var(--border-glass)' }} className="animate-fade-in">
-                  <td style={{ padding: '1rem 1.5rem', fontWeight: 500 }}>{s.surveyNumber}</td>
-                  <td style={{ padding: '1rem 1.5rem' }}>{s.consumerCategory}</td>
-                  <td style={{ padding: '1rem 1.5rem' }}>
-                    <span style={{ 
-                      padding: '0.25rem 0.75rem', 
-                      borderRadius: '999px', 
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                      background: s.status === 'SUBMITTED' ? 'rgba(16, 185, 129, 0.1)' : 
-                                  s.status === 'APPROVED' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-                      color: s.status === 'SUBMITTED' ? '#10B981' : 
-                             s.status === 'APPROVED' ? '#3B82F6' : '#F59E0B'
-                    }}>
-                      {s.status}
-                    </span>
-                  </td>
-                  <td style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)' }}>
-                    {new Date(s.createdAt).toLocaleDateString()}
-                  </td>
-                  <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
-                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                      <Button 
-                        variant="secondary" 
-                        onClick={() => navigate(`/agent/surveys/${s.id}`)}
-                        style={{ padding: '0.5rem 1rem', fontSize: '0.75rem' }}
-                      >
-                        {s.status === 'DRAFT' ? 'Continue Editing' : 'View Details'}
-                      </Button>
-                      
-                      {s.status === 'DRAFT' && (
-                        <Button 
-                          variant="primary" 
-                          onClick={() => handleSubmitSurvey(s.id, s.version)}
-                          style={{ padding: '0.5rem 1rem', fontSize: '0.75rem', backgroundColor: '#10B981', color: 'white', border: 'none' }}
-                        >
-                          Submit to Admin
-                        </Button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div style={{ display: 'flex', flexDirection: 'column', padding: '1rem', gap: '1rem' }}>
+            {sortedSurveys.map(s => (
+              <div key={s.id} style={{ border: '1px solid var(--border-glass)', borderRadius: '12px', padding: '1.25rem', background: '#FFFFFF', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }} className="animate-fade-in">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                  <span style={{ fontWeight: 600, fontSize: '1rem', color: '#111827' }}>{s.surveyNumber}</span>
+                  <span style={{ 
+                    padding: '0.25rem 0.75rem', 
+                    borderRadius: '999px', 
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    background: s.status === 'SUBMITTED' ? 'rgba(16, 185, 129, 0.1)' : 
+                                s.status === 'APPROVED' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                    color: s.status === 'SUBMITTED' ? '#10B981' : 
+                           s.status === 'APPROVED' ? '#3B82F6' : '#F59E0B'
+                  }}>
+                    {s.status}
+                  </span>
+                </div>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.25rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>Category:</span>
+                    <span style={{ fontWeight: 500 }}>{s.consumerCategory}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>Created:</span>
+                    <span style={{ fontWeight: 500 }}>{new Date(s.createdAt).toLocaleDateString()}</span>
+                  </div>
+                </div>
+                
+                <div className="card-actions">
+                  <button 
+                    onClick={() => navigate(`/agent/surveys/${s.id}`)}
+                    style={{ 
+                      padding: '0.625rem 1rem', fontSize: '0.875rem', flex: 1, textAlign: 'center', 
+                      background: 'transparent', color: '#111827', border: '1px solid var(--border-glass)', 
+                      borderRadius: '9999px', fontWeight: 500, cursor: 'pointer', transition: 'all 0.2s',
+                      width: '100%'
+                    }}
+                  >
+                    {s.status === 'DRAFT' ? 'Continue Editing' : 'View Details'}
+                  </button>
+                  
+                  {s.status === 'DRAFT' && (
+                    <button 
+                      onClick={() => handleSubmitSurvey(s.id, s.version)}
+                      style={{ 
+                        padding: '0.625rem 1rem', fontSize: '0.875rem', flex: 1, textAlign: 'center', 
+                        backgroundColor: '#10B981', color: 'white', border: 'none', 
+                        borderRadius: '9999px', fontWeight: 500, cursor: 'pointer', transition: 'all 0.2s',
+                        width: '100%'
+                      }}
+                    >
+                      Submit to Admin
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </Card>
 
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div style={{
-          position: 'fixed',
-          bottom: '2rem',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          backgroundColor: '#0F172A',
-          color: '#FFFFFF',
-          padding: '1rem 2rem',
-          borderRadius: '8px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-          zIndex: 9999,
-          fontWeight: 500,
-          fontSize: '0.9rem',
-          animation: 'fadeIn 0.3s ease-out'
-        }}>
-          {toastMessage}
-        </div>
-      )}
+      <Toast message={toastMessage} onClose={() => setToastMessage('')} />
     </div>
   );
 }

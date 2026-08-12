@@ -34,11 +34,13 @@ const bumpVersionAtomic = async (tx, surveyId, clientVersion) => {
 
 // Helper to safely upsert sections even if data is empty
 const upsertSection = async (tx, table, surveyId, data) => {
-  // Filter out fields with undefined values to prevent errors
+  // Filter out fields with undefined values and convert empty strings to null to prevent DB casting errors
   const cleanData = {};
   if (data) {
     for (const [k, v] of Object.entries(data)) {
-      if (v !== undefined) cleanData[k] = v;
+      if (v !== undefined) {
+        cleanData[k] = v === '' ? null : v;
+      }
     }
   }
 
@@ -47,6 +49,19 @@ const upsertSection = async (tx, table, surveyId, data) => {
   } else {
     await tx.insert(table).values({ surveyId }).onConflictDoNothing();
   }
+};
+
+// Helper to clean array data
+const cleanArrayData = (arr) => {
+  return arr.map(item => {
+    const cleanItem = {};
+    for (const [k, v] of Object.entries(item)) {
+      if (v !== undefined) {
+        cleanItem[k] = v === '' ? null : v;
+      }
+    }
+    return cleanItem;
+  });
 };
 
 // GET /api/surveys (List Agent's Surveys)
@@ -105,7 +120,7 @@ surveyRouter.put('/:id/common', checkSurveyOwnership, checkSurveyStatus(['DRAFT'
     res.json({ success: true, newVersion });
   } catch (error) {
     if (error.message === "VERSION_MISMATCH") return res.status(409).json({ error: "Conflict: Version mismatch" });
-    console.error("Tx error:", error); res.status(500).json({ error: "Transaction failed" });
+    console.error("Tx error:", error); res.status(500).json({ error: error.message, stack: error.stack });
   }
 });
 
@@ -118,13 +133,13 @@ surveyRouter.put('/:id/inventory', checkSurveyOwnership, checkSurveyStatus(['DRA
       newVersion = await bumpVersionAtomic(tx, req.survey.id, version);
       await tx.delete(inventoryItems).where(eq(inventoryItems.surveyId, req.survey.id));
       if (items && items.length > 0) {
-        await tx.insert(inventoryItems).values(items.map(item => ({ surveyId: req.survey.id, ...item })));
+        await tx.insert(inventoryItems).values(cleanArrayData(items).map(item => ({ surveyId: req.survey.id, ...item })));
       }
     });
     res.json({ success: true, newVersion });
   } catch (error) {
     if (error.message === "VERSION_MISMATCH") return res.status(409).json({ error: "Conflict: Version mismatch" });
-    console.error("Tx error:", error); res.status(500).json({ error: "Transaction failed" });
+    console.error("Tx error:", error); res.status(500).json({ error: error.message, stack: error.stack });
   }
 });
 
@@ -140,19 +155,19 @@ surveyRouter.put('/:id/residential', checkSurveyOwnership, checkSurveyStatus(['D
       
       if (occupancy) {
         await tx.delete(residentialOccupancy).where(eq(residentialOccupancy.surveyId, req.survey.id));
-        if (occupancy.length > 0) await tx.insert(residentialOccupancy).values(occupancy.map(o => ({ surveyId: req.survey.id, ...o })));
+        if (occupancy.length > 0) await tx.insert(residentialOccupancy).values(cleanArrayData(occupancy).map(o => ({ surveyId: req.survey.id, ...o })));
       }
       
       if (appliances) {
         await tx.delete(residentialAppliances).where(eq(residentialAppliances.surveyId, req.survey.id));
-        if (appliances.length > 0) await tx.insert(residentialAppliances).values(appliances.map(a => ({ surveyId: req.survey.id, ...a })));
+        if (appliances.length > 0) await tx.insert(residentialAppliances).values(cleanArrayData(appliances).map(a => ({ surveyId: req.survey.id, ...a })));
       }
       
       if (ev) await upsertSection(tx, evCharging, req.survey.id, ev);
       
       if (backup) {
         await tx.delete(backupPowerSources).where(eq(backupPowerSources.surveyId, req.survey.id));
-        if (backup.length > 0) await tx.insert(backupPowerSources).values(backup.map(b => ({ surveyId: req.survey.id, ...b })));
+        if (backup.length > 0) await tx.insert(backupPowerSources).values(cleanArrayData(backup).map(b => ({ surveyId: req.survey.id, ...b })));
       }
       
       if (solar) await upsertSection(tx, solarInstallations, req.survey.id, solar);
@@ -161,7 +176,7 @@ surveyRouter.put('/:id/residential', checkSurveyOwnership, checkSurveyStatus(['D
       
       if (commonLoads) {
         await tx.delete(residentialCommonLoads).where(eq(residentialCommonLoads.surveyId, req.survey.id));
-        if (commonLoads.length > 0) await tx.insert(residentialCommonLoads).values(commonLoads.map(c => ({ surveyId: req.survey.id, ...c })));
+        if (commonLoads.length > 0) await tx.insert(residentialCommonLoads).values(cleanArrayData(commonLoads).map(c => ({ surveyId: req.survey.id, ...c })));
       }
       
       if (loadFlexibility) await upsertSection(tx, residentialLoadFlexibility, req.survey.id, loadFlexibility);
@@ -183,14 +198,14 @@ surveyRouter.put('/:id/commercial', checkSurveyOwnership, checkSurveyStatus(['DR
       if (profiles) await upsertSection(tx, commercialProfiles, req.survey.id, profiles);
       if (shifts) {
         await tx.delete(commercialShifts).where(eq(commercialShifts.surveyId, req.survey.id));
-        if (shifts.length > 0) await tx.insert(commercialShifts).values(shifts.map(s => ({ surveyId: req.survey.id, ...s })));
+        if (shifts.length > 0) await tx.insert(commercialShifts).values(cleanArrayData(shifts).map(s => ({ surveyId: req.survey.id, ...s })));
       }
       if (controls) await upsertSection(tx, commercialControls, req.survey.id, controls);
     });
     res.json({ success: true, newVersion });
   } catch (error) {
     if (error.message === "VERSION_MISMATCH") return res.status(409).json({ error: "Conflict: Version mismatch" });
-    console.error("Tx error:", error); res.status(500).json({ error: "Transaction failed" });
+    console.error("Tx error:", error); res.status(500).json({ error: error.message, stack: error.stack });
   }
 });
 
@@ -204,18 +219,18 @@ surveyRouter.put('/:id/industrial', checkSurveyOwnership, checkSurveyStatus(['DR
       if (profiles) await upsertSection(tx, industrialProfiles, req.survey.id, profiles);
       if (shifts) {
         await tx.delete(industrialShifts).where(eq(industrialShifts.surveyId, req.survey.id));
-        if (shifts.length > 0) await tx.insert(industrialShifts).values(shifts.map(s => ({ surveyId: req.survey.id, ...s })));
+        if (shifts.length > 0) await tx.insert(industrialShifts).values(cleanArrayData(shifts).map(s => ({ surveyId: req.survey.id, ...s })));
       }
       if (processes) {
         await tx.delete(productionProcesses).where(eq(productionProcesses.surveyId, req.survey.id));
-        if (processes.length > 0) await tx.insert(productionProcesses).values(processes.map(p => ({ surveyId: req.survey.id, ...p })));
+        if (processes.length > 0) await tx.insert(productionProcesses).values(cleanArrayData(processes).map(p => ({ surveyId: req.survey.id, ...p })));
       }
       
       if (processDependencies) {
         // Need to import processDependencies table model at the top of the file. Wait, I should import it.
         // I will do that in the next tool call. Let me assume I import it as `processDependenciesTable`.
         await tx.delete(processDependenciesTable).where(eq(processDependenciesTable.surveyId, req.survey.id));
-        if (processDependencies.length > 0) await tx.insert(processDependenciesTable).values(processDependencies.map(pd => ({ surveyId: req.survey.id, ...pd })));
+        if (processDependencies.length > 0) await tx.insert(processDependenciesTable).values(cleanArrayData(processDependencies).map(pd => ({ surveyId: req.survey.id, ...pd })));
       }
       
       if (controls) await upsertSection(tx, industrialControls, req.survey.id, controls);
@@ -223,7 +238,7 @@ surveyRouter.put('/:id/industrial', checkSurveyOwnership, checkSurveyStatus(['DR
     res.json({ success: true, newVersion });
   } catch (error) {
     if (error.message === "VERSION_MISMATCH") return res.status(409).json({ error: "Conflict: Version mismatch" });
-    console.error("Tx error:", error); res.status(500).json({ error: "Transaction failed" });
+    console.error("Tx error:", error); res.status(500).json({ error: error.message, stack: error.stack });
   }
 });
 
@@ -242,13 +257,13 @@ surveyRouter.put('/:id/demand-response', checkSurveyOwnership, checkSurveyStatus
       
       if (loadSelections) {
         await tx.delete(drLoadSelections).where(eq(drLoadSelections.surveyId, req.survey.id));
-        if (loadSelections.length > 0) await tx.insert(drLoadSelections).values(loadSelections.map(l => ({ surveyId: req.survey.id, ...l })));
+        if (loadSelections.length > 0) await tx.insert(drLoadSelections).values(cleanArrayData(loadSelections).map(l => ({ surveyId: req.survey.id, ...l })));
       }
     });
     res.json({ success: true, newVersion });
   } catch (error) {
     if (error.message === "VERSION_MISMATCH") return res.status(409).json({ error: "Conflict: Version mismatch" });
-    console.error("Tx error:", error); res.status(500).json({ error: "Transaction failed" });
+    console.error("Tx error:", error); res.status(500).json({ error: error.message, stack: error.stack });
   }
 });
 

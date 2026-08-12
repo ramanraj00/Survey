@@ -1,116 +1,80 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Card from '../../../../components/common/Card';
-import Button from '../../../../components/common/Button';
-import FormInput from '../../../../components/common/FormInput';
 import Select from '../../../../components/common/Select';
-import { Trash2, Plus } from 'lucide-react';
 
 export default function BackupPowerSection({ data = [], onChange }) {
-  
-  const handleAdd = () => {
-    onChange([...data, { 
-      type: '', 
-      available: false, 
-      batteryCapacity: '', 
-      batteryCapacityUnit: 'Ah',
-      automaticCharging: false,
-      chargingControl: ''
-    }]);
-  };
-
-  const handleRemove = (index) => {
-    onChange(data.filter((_, i) => i !== index));
-  };
+  useEffect(() => {
+    if (data.length === 0) {
+      onChange([
+        { sourceType: 'Inverter / UPS', available: null, batteryCapacity: '', batteryCapacityUnit: 'Ah', automaticCharging: null, chargingControl: '' }
+      ]);
+    }
+  }, [data, onChange]);
 
   const handleChange = (index, field, value) => {
     const newData = [...data];
+    if (!newData[index]) return;
     newData[index] = { ...newData[index], [field]: value };
     onChange(newData);
   };
 
   return (
     <Card padding="1.5rem">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <h3>Backup Power Sources</h3>
-        <Button variant="ghost" onClick={handleAdd} type="button">
-          <Plus size={16} style={{ marginRight: '0.5rem' }} /> Add Source
-        </Button>
-      </div>
+      <h3 style={{ marginBottom: '1.5rem', color: '#0F172A', fontSize: '1.25rem' }}>C3.2: Inverter / UPS</h3>
+      
+      {data.map((item, index) => (
+        <div key={index} className="form-grid">
+          <div>
+            <label className="form-label">Available? (C3.2.1)</label>
+            <Select className="form-input" value={item.available === true ? 'true' : item.available === false ? 'false' : ''} onChange={e => handleChange(index, 'available', e.target.value === 'true' ? true : e.target.value === 'false' ? false : null)}>
+              <option value="">Select</option>
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </Select>
+          </div>
 
-      {data.length === 0 ? (
-        <div style={{ padding: '2rem', textAlign: 'center', border: '1px dashed var(--border-glass)', borderRadius: 'var(--radius-md)', color: 'var(--text-secondary)' }}>
-          No entries yet. Click "Add Source" to start.
-        </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {data.map((item, index) => (
-            <div key={index} style={{ padding: '1rem', background: 'rgba(15, 23, 42, 0.4)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-glass)' }}>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.5rem' }}>
-                <button type="button" onClick={() => handleRemove(index)} style={{ background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer' }}>
-                  <Trash2 size={16} />
-                </button>
+          {item.available && (
+            <>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <div style={{ flex: 2 }}>
+                  <label className="form-label">Battery capacity (C3.2.2)</label>
+                  <input className="form-input" value={item.batteryCapacity || ''} onChange={e => handleChange(index, 'batteryCapacity', e.target.value)} />
+                </div>
+                <div style={{ flex: 1 }}>
+                   <label className="form-label">&nbsp;</label>
+                   <Select className="form-input" value={item.batteryCapacityUnit || ''} onChange={e => handleChange(index, 'batteryCapacityUnit', e.target.value)}>
+                     <option value="Ah">Ah</option>
+                     <option value="kWh">kWh</option>
+                   </Select>
+                </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.875rem' }}>Type</label>
-                  <Select 
-                    value={item.type || ''} 
-                    onChange={(e) => handleChange(index, 'type', e.target.value)}
-                    options={[
-                      { value: 'INVERTER', label: 'Inverter' },
-                      { value: 'UPS', label: 'UPS' }
-                    ]}
-                  />
-                </div>
-                
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '1.5rem' }}>
-                  <input 
-                    type="checkbox" 
-                    checked={item.available || false} 
-                    onChange={(e) => handleChange(index, 'available', e.target.checked)}
-                  />
-                  <label style={{ fontSize: '0.875rem' }}>Currently Available</label>
-                </div>
-
-                <FormInput
-                  label="Battery Capacity"
-                  type="number"
-                  value={item.batteryCapacity || ''}
-                  onChange={(e) => handleChange(index, 'batteryCapacity', e.target.value)}
-                />
-                
-                <div>
-                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.875rem' }}>Capacity Unit</label>
-                  <Select 
-                    value={item.batteryCapacityUnit || 'Ah'} 
-                    onChange={(e) => handleChange(index, 'batteryCapacityUnit', e.target.value)}
-                    options={[
-                      { value: 'Ah', label: 'Ah' },
-                      { value: 'kWh', label: 'kWh' }
-                    ]}
-                  />
-                </div>
-                
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '1.5rem' }}>
-                  <input 
-                    type="checkbox" 
-                    checked={item.automaticCharging || false} 
-                    onChange={(e) => handleChange(index, 'automaticCharging', e.target.checked)}
-                  />
-                  <label style={{ fontSize: '0.875rem' }}>Automatic Charging</label>
-                </div>
-                
-                <FormInput
-                  label="Charging Control Mechanism"
-                  type="text"
-                  value={item.chargingControl || ''}
-                  onChange={(e) => handleChange(index, 'chargingControl', e.target.value)}
-                />
+              <div>
+                <label className="form-label">Charges automatically? (C3.2.3)</label>
+                <Select className="form-input" value={item.automaticCharging === true ? 'true' : item.automaticCharging === false ? 'false' : ''} onChange={e => handleChange(index, 'automaticCharging', e.target.value === 'true' ? true : e.target.value === 'false' ? false : null)}>
+                  <option value="">Select</option>
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
+                  <option value="null">Not known</option>
+                </Select>
               </div>
-            </div>
-          ))}
+              <div>
+                <label className="form-label">Can charging be controlled? (C3.2.4)</label>
+                <Select className="form-input" value={item.chargingControl || ''} onChange={e => handleChange(index, 'chargingControl', e.target.value)}>
+                  <option value="">Select</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                  <option value="Not known">Not known</option>
+                </Select>
+              </div>
+            </>
+          )}
         </div>
-      )}
+      ))}
+      <style>{`
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+        .form-label { display: block; font-size: 0.875rem; font-weight: 600; color: #475569; margin-bottom: 0.5rem; }
+        .form-input { width: 100%; padding: 0.875rem 1rem; border-radius: 12px; border: 1px solid #E2E8F0; background-color: #F8FAFC; color: #0F172A; font-size: 0.95rem; box-sizing: border-box; }
+      `}</style>
     </Card>
   );
 }

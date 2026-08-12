@@ -8,8 +8,8 @@ export default function Card({ children, className = '', padding = '2rem', ...pr
   return (
     <div 
       className={`glass-card ${className}`} 
-      style={style}
       {...props}
+      style={{ ...style, ...(props.style || {}) }}
     >
       {children}
     </div>

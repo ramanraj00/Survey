@@ -22,6 +22,9 @@ export default function DemandResponseForm() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
 
+  const isAdmin = localStorage.getItem('userRole') === 'admin';
+  const isReadOnly = !isAdmin && surveyData?.survey?.status !== 'DRAFT';
+
   useEffect(() => {
     if (!surveyData || surveyData.survey?.id !== id) {
       loadSurvey(id);
@@ -56,6 +59,10 @@ export default function DemandResponseForm() {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (isReadOnly) {
+      navigate(`${baseRoute}/surveys/${id}/submit`);
+      return;
+    }
     if (isFormEmpty(formData)) {
       if (!window.confirm("This page is completely blank. Are you sure you want to proceed without entering any data?")) {
         return;
@@ -95,7 +102,7 @@ export default function DemandResponseForm() {
             Back
           </Button>
           <Button type="submit" isLoading={isSaving}>
-            Save & Proceed to Submit
+            {isReadOnly ? 'Proceed to Submit View' : 'Save & Proceed to Submit'}
           </Button>
         </div>
       </form>

@@ -29,6 +29,9 @@ export default function IndustrialForm() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
 
+  const isAdmin = localStorage.getItem('userRole') === 'admin';
+  const isReadOnly = !isAdmin && surveyData?.survey?.status !== 'DRAFT';
+
   useEffect(() => {
     if (!surveyData || surveyData.survey?.id !== id) {
       loadSurvey(id);
@@ -66,6 +69,10 @@ export default function IndustrialForm() {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (isReadOnly) {
+      navigate(`${baseRoute}/surveys/${id}/demand-response`);
+      return;
+    }
     if (isFormEmpty(formData)) {
       if (!window.confirm("This page is completely blank. Are you sure you want to proceed without entering any data?")) {
         return;
@@ -108,7 +115,7 @@ export default function IndustrialForm() {
             Back to Common Details
           </Button>
           <Button type="submit" isLoading={isSaving}>
-            Save & Continue to Demand Response
+            {isReadOnly ? 'Continue to Demand Response' : 'Save & Continue to Demand Response'}
           </Button>
         </div>
       </form>

@@ -7,7 +7,7 @@ import { commercialProfiles, commercialShifts, commercialControls } from '../mod
 import { industrialProfiles, industrialShifts, productionProcesses, industrialControls } from '../models/industrial.js';
 import { demandResponseProfiles, drLoadSelections, commercialDemandResponse, industrialDemandResponse } from '../models/demand_response.js';
 import { processDependencies as processDependenciesTable } from '../models/industrial.js';
-import { eq, and, sql, count, not } from 'drizzle-orm';
+import { eq, and, sql, count, not, gte, lt, or, ilike } from 'drizzle-orm';
 import { requireAuth, requireRole } from '../middlewares.js';
 import { fetchFullSurvey } from '../services/surveyFetcher.js';
 
@@ -149,8 +149,11 @@ adminRouter.get('/stats', async (req, res) => {
 // GET /api/admin/surveys (Paginated List)
 adminRouter.get('/surveys', async (req, res) => {
   try {
-    const { page = 1, limit = 20, status, category, agentId } = req.query;
+    const { page = 1, limit = 20, status, category, agentId, search, date, email } = req.query;
     
+    const { user } = await import('../models/auth-schema.js');
+    const { surveyCommonDetails } = await import('../models/schema.js');
+
     const conditions = [];
     if (status) {
       conditions.push(eq(surveys.status, status));
@@ -159,17 +162,26 @@ adminRouter.get('/surveys', async (req, res) => {
     }
     if (category) conditions.push(eq(surveys.consumerCategory, category));
     if (agentId) conditions.push(eq(surveys.agentId, agentId));
+    if (email) conditions.push(ilike(user.email, `%${email}%`));
+    if (date) {
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+      conditions.push(and(gte(surveys.createdAt, startOfDay), lt(surveys.createdAt, endOfDay)));
+    }
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
     const offset = (Number(page) - 1) * Number(limit);
 
     // Fetch total count matching conditions
-    const totalResult = await db.select({ count: count() }).from(surveys).where(whereClause);
+    const totalResult = await db.select({ count: count() })
+      .from(surveys)
+      .leftJoin(user, eq(surveys.agentId, user.id))
+      .where(whereClause);
     const total = totalResult[0].count;
     
     // Fetch paginated data
-    const { user } = await import('../models/auth-schema.js');
-    const { surveyCommonDetails } = await import('../models/schema.js');
 
     const paginatedData = await db.select({
       survey: surveys,

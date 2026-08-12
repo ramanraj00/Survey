@@ -4,6 +4,7 @@ import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import { SurveyAPI } from '../../services/api';
 import { useSurvey } from '../../context/SurveyContext';
+import Select from '../../components/common/Select';
 
 export default function SurveyCreate() {
   const [category, setCategory] = useState('');
@@ -64,7 +65,7 @@ export default function SurveyCreate() {
             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.875rem' }}>
               Consumer Category <span style={{color: 'var(--error)'}}>*</span>
             </label>
-            <select 
+            <Select 
               value={category} 
               onChange={(e) => setCategory(e.target.value)}
               style={{
@@ -83,7 +84,7 @@ export default function SurveyCreate() {
               <option value="COMMERCIAL">Commercial</option>
               <option value="INDUSTRIAL">Industrial</option>
               <option value="INVENTORY">Inventory</option>
-            </select>
+            </Select>
           </div>
 
           <div>

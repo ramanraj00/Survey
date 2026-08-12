@@ -41,15 +41,15 @@ export default function Button({
     }
   };
 
-  const combinedStyle = { ...baseStyles, ...variants[variant] };
+  const combinedStyle = { ...baseStyles, ...variants[variant], ...(props.style || {}) };
 
   // Micro-animation on hover applied via standard CSS in index.css or inline
   return (
     <button 
-      style={combinedStyle} 
       className={`btn-${variant} ${className}`}
-      disabled={isLoading}
+      disabled={isLoading || props.disabled}
       {...props}
+      style={combinedStyle}
     >
       {isLoading && <Loader2 size={16} className="mr-2 animate-spin" style={{ marginRight: '0.5rem' }} />}
       {children}

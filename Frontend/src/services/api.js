@@ -123,10 +123,13 @@ export const SurveyAPI = {
     body: JSON.stringify({ version, data: commonDetails })
   }),
 
-  updateInventory: (id, version, inventoryItems) => apiFetch(`/surveys/${id}/inventory`, {
-    method: 'PUT',
-    body: JSON.stringify({ version, items: inventoryItems })
-  }),
+  updateInventory: (id, version, inventoryItems) => {
+    const payloadItems = inventoryItems.items ? inventoryItems.items : inventoryItems;
+    return apiFetch(`/surveys/${id}/inventory`, {
+      method: 'PUT',
+      body: JSON.stringify({ version, items: payloadItems })
+    });
+  },
 
   updateResidential: (id, version, data) => apiFetch(`/surveys/${id}/residential`, {
     method: 'PUT',
@@ -169,7 +172,10 @@ export const AdminAPI = {
   updateSurveySection: (id, sectionPath, version, data) => {
     let payload = { version, ...data };
     if (sectionPath === 'common') payload = { version, data };
-    if (sectionPath === 'inventory') payload = { version, items: data };
+    if (sectionPath === 'inventory') {
+      // data might already be { items: [...] } or just an array
+      payload = { version, items: data.items ? data.items : data };
+    }
     return apiFetch(`/admin/surveys/${id}/${sectionPath}`, {
       method: 'PATCH',
       body: JSON.stringify(payload)
