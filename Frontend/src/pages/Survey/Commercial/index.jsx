@@ -108,7 +108,7 @@ export default function CommercialForm() {
       if (currentStep < STEPS.length) {
         setCurrentStep(prev => prev + 1);
       } else {
-        navigate(`${baseRoute}/surveys`);
+        navigate(`${baseRoute}/surveys/${id}/submit`);
       }
       return;
     }
@@ -189,8 +189,8 @@ export default function CommercialForm() {
         commercialDR: commercialDrPayload
       }, version);
 
-      // Successfully saved all sections, navigate out
-      navigate(`${baseRoute}/surveys`);
+      // Successfully saved all sections, navigate to submit
+      navigate(`${baseRoute}/surveys/${id}/submit`);
 
     } catch (err) {
       console.error(err);
@@ -299,7 +299,7 @@ export default function CommercialForm() {
             isLoading={isSaving}
             style={{ background: '#000000', color: 'white' }}
           >
-            {isReadOnly ? 'Finish & Return' : 'Save & Finish'}
+            {isReadOnly ? 'Proceed to Submit View' : 'Save & Finish'}
           </Button>
         )}
       </div>

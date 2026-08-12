@@ -47,11 +47,13 @@ export default function CommonForm() {
       if (currentStep < totalSteps) {
         setCurrentStep(prev => prev + 1);
       } else {
-        const categoryType = getCategoryType(formData.consumerCategory);
-        let routePath = 'commercial';
-        if (categoryType === 'residential') routePath = 'residential';
-        if (categoryType === 'industrial') routePath = 'industrial';
-        navigate(`${baseRoute}/surveys/${id}/${routePath}`);
+        const cat = surveyData?.survey?.consumerCategory?.toLowerCase();
+        if (cat) {
+          const basePath = window.location.pathname.split('/common')[0];
+          navigate(`${basePath}/${cat}`);
+        } else {
+          navigate(-1);
+        }
       }
       return;
     }

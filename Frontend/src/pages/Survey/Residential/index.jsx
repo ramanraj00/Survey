@@ -110,7 +110,7 @@ export default function ResidentialForm() {
   const handleSave = async (e) => {
     e.preventDefault();
     if (isReadOnly) {
-      navigate(`${baseRoute}/surveys`);
+      navigate(`${baseRoute}/surveys/${id}/submit`);
       return;
     }
     if (isFormEmpty(formData) && isFormEmpty(drData)) {
@@ -127,8 +127,8 @@ export default function ResidentialForm() {
       // Pass the newVersion from the first call to avoid OCC conflicts!
       await saveSection('demandResponse', { profiles: drData }, resResult.newVersion);
       
-      // Since this is the agent flow, redirect back to Agent Survey List
-      navigate(`${baseRoute}/surveys`);
+      // Navigate to the submit page
+      navigate(`${baseRoute}/surveys/${id}/submit`);
     } catch (err) {
       setToastMessage(err.message || 'Failed to save residential details');
     } finally {
@@ -234,7 +234,7 @@ export default function ResidentialForm() {
                 onClick={handleSave}
                 disabled={isSaving}
               >
-                {isReadOnly ? 'Close View' : 'Save & Finish Survey'}
+                {isReadOnly ? 'Proceed to Submit View' : 'Save & Finish Survey'}
               </Button>
             )}
           </div>
