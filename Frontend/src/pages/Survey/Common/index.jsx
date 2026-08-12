@@ -47,7 +47,11 @@ export default function CommonForm() {
       if (currentStep < totalSteps) {
         setCurrentStep(prev => prev + 1);
       } else {
-        navigate(-1);
+        const categoryType = getCategoryType(formData.consumerCategory);
+        let routePath = 'commercial';
+        if (categoryType === 'residential') routePath = 'residential';
+        if (categoryType === 'industrial') routePath = 'industrial';
+        navigate(`${baseRoute}/surveys/${id}/${routePath}`);
       }
       return;
     }
@@ -327,7 +331,6 @@ export default function CommonForm() {
         flexDirection: 'column',
       }}>
         <Toast message={toastMessage} onClose={() => setToastMessage('')} />
-        <fieldset disabled={isReadOnly} style={{ border: 'none', padding: 0, margin: 0, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
         <div className="card-container" style={{
           flex: 1,
           minHeight: 0,
@@ -335,6 +338,7 @@ export default function CommonForm() {
           flexDirection: 'column',
           backgroundColor: '#FFFFFF',
         }}>
+        <fieldset disabled={isReadOnly} style={{ border: 'none', padding: 0, margin: 0, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
         <div style={{ marginBottom: '1rem' }}>
           <h2 style={{
@@ -358,6 +362,7 @@ export default function CommonForm() {
             {currentStep === 2 && renderA2()}
             {currentStep === 3 && renderA3()}
         </div>
+        </fieldset>
 
         {/* Footer Actions */}
         <div className="footer-actions" style={{
@@ -392,7 +397,7 @@ export default function CommonForm() {
           <button 
             type="button"
             onClick={handleSaveAndContinue} 
-            disabled={isSaving || isReadOnly}
+            disabled={isSaving}
             style={{
               padding: '0.75rem 2rem',
               borderRadius: '9999px',
@@ -402,7 +407,7 @@ export default function CommonForm() {
               border: 'none',
               boxShadow: '0 4px 12px rgba(37, 99, 235, 0.2)',
               transition: 'all 0.2s ease',
-              cursor: isSaving || isReadOnly ? 'not-allowed' : 'pointer',
+              cursor: isSaving ? 'not-allowed' : 'pointer',
               opacity: isSaving ? 0.7 : 1
             }}
             onMouseOver={(e) => {
@@ -416,7 +421,6 @@ export default function CommonForm() {
           </button>
         </div>
       </div>
-      </fieldset>
     </div>
     </>
   );

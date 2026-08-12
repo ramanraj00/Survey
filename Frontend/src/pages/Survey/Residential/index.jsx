@@ -232,8 +232,7 @@ export default function ResidentialForm() {
                 variant="primary" 
                 isLoading={isSaving} 
                 onClick={handleSave}
-                disabled={isSaving || isReadOnly}
-                style={isReadOnly ? { backgroundColor: '#94A3B8', cursor: 'not-allowed' } : {}}
+                disabled={isSaving}
               >
                 {isReadOnly ? 'Close View' : 'Save & Finish Survey'}
               </Button>
