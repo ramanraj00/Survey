@@ -3,12 +3,10 @@ import { Navigate, useLocation } from 'react-router-dom';
 
 // Note: For now, we mock the auth state. In reality, this would use a hook like useSession() from better-auth/react
 const useAuth = () => {
-  // Mock logged in agent or admin based on localStorage or fixed state for development
-  // Return { user: { role: 'agent' }, isAuthenticated: true }
-  const role = localStorage.getItem('userRole') || 'agent'; // Sync with Login.jsx
+  const role = localStorage.getItem('userRole');
   return { 
-    user: { role }, 
-    isAuthenticated: true 
+    user: role ? { role } : null, 
+    isAuthenticated: !!role 
   };
 };
 

@@ -12,7 +12,7 @@ export default function ProfileSection({ data = {}, onChange }) {
     <Card padding="2rem" style={{ marginBottom: '2rem' }}>
       <h3 style={{ marginBottom: '1.5rem', color: '#0F172A', fontSize: '1.25rem', fontWeight: 600 }}>E1.1 - E1.6: Industry & Production Profile</h3>
       
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
         <FormInput
           label="E1.1 Type of Industry/Sector"
           type="text"
@@ -49,7 +49,7 @@ export default function ProfileSection({ data = {}, onChange }) {
 
       <h4 style={{ marginBottom: '1rem', color: '#334155', fontSize: '1rem', fontWeight: 600 }}>Operations (E1.4 - E1.6)</h4>
       
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: '1.5rem' }}>
         <FormInput
           label="Days of Operation (Days/Week)"
           type="number"

@@ -6,6 +6,26 @@ import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import { AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 
+const formatFieldName = (field) => {
+  if (!field) return '';
+  let cleanField = field.replace(/^(industrial|commercial|residential|ev|demandResponse|commonDetails)\./, '');
+  
+  const arrayMatch = cleanField.match(/(\w+)\[(\d+)\]\.(.+)/);
+  if (arrayMatch) {
+    const [, arrayName, indexStr, property] = arrayMatch;
+    const index = parseInt(indexStr, 10) + 1;
+    const parts = property.split('.');
+    const lastPart = parts[parts.length - 1];
+    const humanProperty = lastPart.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+    const humanArrayName = arrayName.replace(/s$/, '').replace(/^./, str => str.toUpperCase());
+    return `${humanArrayName} ${index} • ${humanProperty}`;
+  }
+  
+  const parts = cleanField.split('.');
+  const lastPart = parts[parts.length - 1];
+  return lastPart.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+};
+
 export default function SurveySubmit({ isAdmin }) {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -60,7 +80,7 @@ export default function SurveySubmit({ isAdmin }) {
           <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem', marginBottom: '2rem' }}>
             This survey is now locked for agent editing and pending admin approval.
           </p>
-          <Button onClick={() => navigate('/agent/surveys')}>Return to Dashboard</Button>
+          <Button onClick={() => navigate('/agent/surveys')} style={{ background: '#0F172A', color: '#fff', border: 'none' }}>Return to Dashboard</Button>
         </Card>
       </div>
     );
@@ -68,7 +88,7 @@ export default function SurveySubmit({ isAdmin }) {
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', paddingBottom: '4rem' }}>
-      <h1 style={{ marginBottom: '1.5rem' }}>Review Survey Data</h1>
+      <h1 style={{ marginBottom: '1.5rem', color: '#0F172A', fontSize: '1.75rem', fontWeight: 700 }}>Review Survey Data</h1>
       
       <Card>
         {submitError && (
@@ -89,10 +109,10 @@ export default function SurveySubmit({ isAdmin }) {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', color: 'var(--warning)' }}>
               <AlertTriangle size={24} />
-              <h3 style={{ margin: 0 }}>Validation Warnings ({warnings.length})</h3>
+              <h3 style={{ margin: 0, color: '#0F172A' }}>Validation Warnings ({warnings.length})</h3>
             </div>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
-              The following soft warnings were found. You can go back and fix them, or choose to finish editing anyway.
+            <p style={{ color: '#64748B', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
+              Some fields were left blank or need your attention. You can go back and complete them, or choose to finish editing anyway.
             </p>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '400px', overflowY: 'auto', paddingRight: '0.5rem' }}>
@@ -103,11 +123,11 @@ export default function SurveySubmit({ isAdmin }) {
                   padding: '1rem',
                   borderRadius: '0 var(--radius-sm) var(--radius-sm) 0'
                 }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.25rem', color: 'var(--text-primary)' }}>
-                    {w.section.replace(/_/g, ' ').toUpperCase()} • {w.field}
+                  <div style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.25rem', color: '#1E293B' }}>
+                    {w.section.replace(/_/g, ' ').toUpperCase()} • {formatFieldName(w.field)}
                   </div>
-                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-                    {w.message}
+                  <div style={{ color: '#475569', fontSize: '0.875rem' }}>
+                    {w.message.replace(/^[a-zA-Z0-9_]+(\[[0-9]+\])?/, "This field")}
                   </div>
                 </div>
               ))}
@@ -115,12 +135,12 @@ export default function SurveySubmit({ isAdmin }) {
           </div>
         )}
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '3rem', paddingTop: '2rem', borderTop: '1px solid var(--border-glass)' }}>
-          <Button type="button" variant="secondary" onClick={() => navigate(-1)}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'space-between', alignItems: 'center', marginTop: '3rem', paddingTop: '2rem', borderTop: '1px solid var(--border-glass)' }}>
+          <Button type="button" variant="secondary" onClick={() => navigate(-1)} style={{ flex: 1, minWidth: '200px' }}>
             Back to Editing
           </Button>
           
-          <Button type="button" onClick={handleSubmit} isLoading={isSubmitting}>
+          <Button type="button" onClick={handleSubmit} isLoading={isSubmitting} style={{ flex: 1, minWidth: '200px', background: '#0F172A', color: '#fff', border: 'none' }}>
             Finish Editing & Return to Dashboard
           </Button>
         </div>

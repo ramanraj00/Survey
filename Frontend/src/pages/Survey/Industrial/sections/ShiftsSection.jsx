@@ -56,27 +56,32 @@ export default function ShiftsSection({ data = [], onChange, profileData = {}, o
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1rem' }}>
             {data.map((shift, index) => (
-              <div key={index} style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <div style={{ width: '40px', textAlign: 'center', fontWeight: 'bold', color: '#475569' }}>#{shift.shiftNumber}</div>
-                <FormInput
-                  type="time"
-                  value={shift.startTime || ''}
-                  onChange={(e) => handleShiftChange(index, 'startTime', e.target.value)}
-                />
-                <span style={{ color: '#64748B' }}>to</span>
-                <FormInput
-                  type="time"
-                  value={shift.endTime || ''}
-                  onChange={(e) => handleShiftChange(index, 'endTime', e.target.value)}
-                />
-                <button 
-                  type="button" 
-                  onClick={() => removeShift(index)}
-                  style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', padding: '0.5rem' }}
-                  title="Remove shift"
-                >
-                  <Trash2 size={20} />
-                </button>
+              <div key={index} style={{ padding: '1rem', background: '#FFFFFF', borderRadius: '8px', border: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ fontWeight: '600', color: '#475569', fontSize: '0.875rem' }}>Shift #{shift.shiftNumber}</div>
+                  <button 
+                    type="button" 
+                    onClick={() => removeShift(index)}
+                    style={{ background: '#FEE2E2', border: 'none', color: '#EF4444', cursor: 'pointer', padding: '0.4rem', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    title="Remove shift"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 130px), 1fr))', gap: '1rem' }}>
+                  <FormInput
+                    label="Start Time"
+                    type="time"
+                    value={shift.startTime || ''}
+                    onChange={(e) => handleShiftChange(index, 'startTime', e.target.value)}
+                  />
+                  <FormInput
+                    label="End Time"
+                    type="time"
+                    value={shift.endTime || ''}
+                    onChange={(e) => handleShiftChange(index, 'endTime', e.target.value)}
+                  />
+                </div>
               </div>
             ))}
           </div>
@@ -86,7 +91,7 @@ export default function ShiftsSection({ data = [], onChange, profileData = {}, o
         </Button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.875rem', color: '#475569' }}>
             E1.9 Does the industry operate continuously for 24 hours?
@@ -111,7 +116,7 @@ export default function ShiftsSection({ data = [], onChange, profileData = {}, o
         />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.875rem', color: '#475569' }}>
             E1.11 Are production schedules fixed or adjustable?

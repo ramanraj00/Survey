@@ -12,7 +12,7 @@ export default function ControlsSection({ data = {}, onChange }) {
     <Card padding="2rem" style={{ marginBottom: '2rem' }}>
       <h3 style={{ marginBottom: '1.5rem', color: '#0F172A', fontSize: '1.25rem', fontWeight: 600 }}>E3.1 - E3.6: Existing Controls and Approvals</h3>
       
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.875rem', color: '#475569' }}>
             E3.1 Are timers or automatic controls used?
@@ -43,7 +43,7 @@ export default function ControlsSection({ data = {}, onChange }) {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
         <div>
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.875rem', color: '#475569' }}>
             E3.3 Can equipment schedules be changed centrally?
@@ -77,7 +77,7 @@ export default function ControlsSection({ data = {}, onChange }) {
 
       <h4 style={{ marginBottom: '1rem', color: '#334155', fontSize: '1rem', fontWeight: 600 }}>Approvals (E3.5 - E3.6)</h4>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 250px), 1fr))', gap: '1.5rem', marginBottom: '1.5rem' }}>
         <FormInput
           label="E3.5 Approver Name (For temporary change)"
           type="text"

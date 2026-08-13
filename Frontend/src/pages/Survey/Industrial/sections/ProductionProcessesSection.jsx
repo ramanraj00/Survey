@@ -63,7 +63,7 @@ export default function ProductionProcessesSection({ data = [], onChange }) {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '1rem' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: '#334155' }}>
                   <input type="checkbox" checked={proc.operatesDuringPeak || false} onChange={(e) => handleChange(index, 'operatesDuringPeak', e.target.checked)} />
                   E2.2 Operates during peak hours
