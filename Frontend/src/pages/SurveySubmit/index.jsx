@@ -43,22 +43,7 @@ export default function SurveySubmit({ isAdmin }) {
   }, [id, surveyData]);
 
   const handleSubmit = async () => {
-    setIsSubmitting(true);
-    setSubmitError(null);
-    try {
-      await SurveyAPI.submitSurvey(id, currentVersion);
-      // Reload survey to reflect SUBMITTED status
-      await loadSurvey(id);
-      navigate(isAdmin ? `/admin/surveys/${id}` : '/agent/surveys');
-    } catch (err) {
-      if (err.status === 409) {
-        setSubmitError("Conflict: Survey was modified elsewhere. Please refresh.");
-      } else {
-        setSubmitError(err.message || 'Failed to submit survey');
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
+    navigate(isAdmin ? `/admin/surveys` : '/agent/surveys');
   };
 
   if (isValidating) return <div className="flex-center" style={{height: '50vh'}}>Running final validation checks...</div>;
@@ -83,7 +68,7 @@ export default function SurveySubmit({ isAdmin }) {
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', paddingBottom: '4rem' }}>
-      <h1 style={{ marginBottom: '1.5rem' }}>Review & Submit</h1>
+      <h1 style={{ marginBottom: '1.5rem' }}>Review Survey Data</h1>
       
       <Card>
         {submitError && (
@@ -97,7 +82,7 @@ export default function SurveySubmit({ isAdmin }) {
             <CheckCircle size={32} color="var(--success)" style={{ margin: '0 auto 1rem' }} />
             <h3 style={{ color: 'var(--success)' }}>All Checks Passed</h3>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-              No missing fields or soft validation issues were found. You are ready to submit!
+              No missing fields or soft validation issues were found. Your survey data looks complete!
             </p>
           </div>
         ) : (
@@ -107,18 +92,18 @@ export default function SurveySubmit({ isAdmin }) {
               <h3 style={{ margin: 0 }}>Validation Warnings ({warnings.length})</h3>
             </div>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
-              The following soft warnings were found. You can go back and fix them, or choose to submit anyway.
+              The following soft warnings were found. You can go back and fix them, or choose to finish editing anyway.
             </p>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '400px', overflowY: 'auto', paddingRight: '0.5rem' }}>
               {warnings.map((w, idx) => (
                 <div key={idx} style={{ 
-                  background: 'rgba(15, 23, 42, 0.6)', 
+                  background: w.severity === 'error' ? 'rgba(239, 68, 68, 0.05)' : 'rgba(245, 158, 11, 0.05)', 
                   borderLeft: `4px solid ${w.severity === 'error' ? 'var(--error)' : 'var(--warning)'}`,
                   padding: '1rem',
                   borderRadius: '0 var(--radius-sm) var(--radius-sm) 0'
                 }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.25rem' }}>
+                  <div style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.25rem', color: 'var(--text-primary)' }}>
                     {w.section.replace(/_/g, ' ').toUpperCase()} • {w.field}
                   </div>
                   <div style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
@@ -136,7 +121,7 @@ export default function SurveySubmit({ isAdmin }) {
           </Button>
           
           <Button type="button" onClick={handleSubmit} isLoading={isSubmitting}>
-            {warnings.length > 0 ? 'Submit Anyway' : 'Submit Survey'}
+            Finish Editing & Return to Dashboard
           </Button>
         </div>
       </Card>

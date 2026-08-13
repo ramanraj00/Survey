@@ -6,6 +6,7 @@ export default function FormInput({
   type = 'text', 
   error, 
   required, 
+  disabled,
   ...props 
 }) {
   return (
@@ -39,6 +40,7 @@ export default function FormInput({
           transition: 'all 0.2s ease',
           boxShadow: disabled ? 'none' : '0 1px 2px rgba(0, 0, 0, 0.05)',
         }}
+        disabled={disabled}
         {...props}
       />
       {error && (

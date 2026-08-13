@@ -47,11 +47,43 @@ export const industrialDemandResponse = pgTable("industrial_demand_response", {
   id: uuid("id").primaryKey().defaultRandom(),
   surveyId: uuid("survey_id").references(() => surveys.id, { onDelete: 'cascade' }).notNull().unique(),
   
+  // Old columns (kept to avoid Drizzle drop/rename prompt)
   adjustmentScope: text("adjustment_scope"),
   nonParticipationPeriods: text("non_participation_periods"),
-  canIncreaseProductionBeforePeak: text("can_increase_prod_before_peak"), // YES, NO, MAYBE
-  canCompleteAfterPeak: text("can_complete_after_peak"), // YES, NO, MAYBE
-  createsNewDemandPeak: text("creates_new_demand_peak"), // YES, NO, NOT_SURE
-  canDeclineIndividualRequests: boolean("can_decline_individual_requests"), // Assuming this is strict YES/NO, if not we can make it text. User didn't flag this one.
-  equipmentDataVerificationConsent: text("equipment_data_verification_consent"), // YES, NO, SUBJECT_TO_APPROVAL
+  canIncreaseProductionBeforePeak: text("can_increase_prod_before_peak"),
+  canCompleteAfterPeak: text("can_complete_after_peak"),
+  createsNewDemandPeak: text("creates_new_demand_peak"),
+  canDeclineIndividualRequests: boolean("can_decline_individual_requests"),
+  equipmentDataVerificationConsent: text("equipment_data_verification_consent"),
+  
+  // New columns
+  drAdjustNonCriticalLoads: text("dr_adjust_non_critical_loads"),
+  drAdjustableProcesses: text("dr_adjustable_processes"),
+  drAdjustmentType: text("dr_adjustment_type"),
+  drLoadAdjustability: text("dr_load_adjustability"),
+  drAdjustmentDurationLimit: text("dr_adjustment_duration_limit"),
+  drAdvanceNoticeRequired: text("dr_advance_notice_required"),
+  drParticipationFrequency: text("dr_participation_frequency"),
+  drImpossibleParticipationPeriods: text("dr_impossible_participation_periods"),
+  drParticipationBarriers: text("dr_participation_barriers"),
+  drSeasonalPreference: text("dr_seasonal_preference"),
+  drIncreaseProductionBeforePeak: text("dr_increase_production_before_peak"),
+  drCompleteDelayedProductionAfterPeak: text("dr_complete_delayed_production_after_peak"),
+  drDelayedProductionNewPeak: text("dr_delayed_production_new_peak"),
+  drOptionToDeclineRequests: text("dr_option_to_decline_requests"),
+  drPreferredNotificationMethod: text("dr_preferred_notification_method"),
+  drSavingsInfoIncreasesWillingness: text("dr_savings_info_increases_willingness"),
+  drIncentiveIncreasesWillingness: text("dr_incentive_increases_willingness"),
+  drPreferredIncentiveType: text("dr_preferred_incentive_type"),
+  drConsiderAutomatedControls: text("dr_consider_automated_controls"),
+  drWillingToParticipateInTrial: text("dr_willing_to_participate_in_trial"),
+  drEquipmentDataVerification: text("dr_equipment_data_verification"),
+  
+  // Wrongly named fields (kept temporarily to bypass Drizzle drop prompt)
+  drPenaltyConcern: text("dr_penalty_concern"),
+  drPriorParticipation: text("dr_prior_participation"),
+  drIncentivePreference: text("dr_incentive_preference"),
+  drFinancialIncentive: text("dr_financial_incentive"),
+  drNotificationMethod: text("dr_notification_method"),
+  drAutomationLevel: text("dr_automation_level"),
 });

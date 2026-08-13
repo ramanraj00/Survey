@@ -51,16 +51,81 @@ export default function IndustrialForm() {
 
   useEffect(() => {
     if (surveyData?.industrial) {
+      const dbProfiles = surveyData.industrial.profiles || {};
+      const dbProcesses = surveyData.industrial.processes || [];
+      const dbDeps = surveyData.industrial.processDependencies || [];
+      const dbControls = surveyData.industrial.controls || {};
+
       setFormData({
-        profiles: surveyData.industrial.profiles || {},
+        profiles: {
+          industryType: dbProfiles.industrySector || '',
+          products: dbProfiles.productsManufactured || '',
+          natureOfProduction: dbProfiles.productionNature || '',
+          daysOfOperationPerWeek: dbProfiles.daysPerWeek ? dbProfiles.daysPerWeek.toString() : '',
+          daysClosed: dbProfiles.daysClosed || '',
+          operatingHours: dbProfiles.operatingHours || '',
+          numberOfShifts: dbProfiles.productionShiftCount || '',
+          operates24Hours: dbProfiles.operates24Hours || '',
+          highestProductionMonths: dbProfiles.highestProductionMonths || '',
+          productionSchedules: dbProfiles.productionScheduleFlexibility || '',
+          productionIncreaseFlexibility: dbProfiles.canIncreaseProductionBeforePeak || '',
+          plannedShutdowns: dbProfiles.maintenanceSchedule || ''
+        },
         shifts: surveyData.industrial.shifts || [],
-        processes: surveyData.industrial.processes || [],
-        processDependencies: surveyData.industrial.processDependencies || [],
-        controls: surveyData.industrial.controls || {}
+        processes: dbProcesses.map(p => ({
+          processName: p.processName || '',
+          operatesDuringPeak: p.peakOperatingProcesses === 'Yes',
+          mustOperateContinuously: p.continuousProcesses === 'Yes',
+          canBeDelayed: p.delayableProcesses === 'Yes',
+          canBeReduced: p.reducibleProcesses === 'Yes',
+          canBeStopped: p.stoppableProcesses === 'Yes',
+        })),
+        processDependencies: dbDeps.map(pd => ({
+          processName: pd.processName || '',
+          dependencyExplanation: pd.dependencyExplanation || '',
+          hasDependencies: pd.hasDependencies || '',
+          interruptionImpact: pd.interruptionImpact || '',
+          timeToStop: pd.timeToStop || '',
+          timeToRestart: pd.timeToRestart || '',
+          restartingDemandSpike: pd.restartingDemandSpike || '',
+        })),
+        controls: {
+          automaticControlsUsed: dbControls.hasTimers || '',
+          centralControlAvailable: dbControls.hasPLC || '',
+          centrallyChangedSettings: dbControls.canChangeSchedulesCentrally || '',
+          individualMonitoring: dbControls.individualMachineMonitoring || '',
+          approvalAuthorityName: dbControls.approvalName || '',
+          approvalAuthorityDesignation: dbControls.approvalDesignation || '',
+          implementer: dbControls.implementationRole || ''
+        }
       });
     }
-    if (surveyData?.demandResponse?.profiles) {
-      setDrData(surveyData.demandResponse.profiles);
+    
+    if (surveyData?.demandResponse?.industrialDR) {
+      const dbDr = surveyData.demandResponse.industrialDR || {};
+      setDrData({
+        drAdjustNonCriticalLoads: dbDr.drAdjustNonCriticalLoads || '',
+        drAdjustableProcesses: dbDr.drAdjustableProcesses || '',
+        drAdjustmentType: dbDr.drAdjustmentType || '',
+        drLoadAdjustability: dbDr.drLoadAdjustability || '',
+        drAdjustmentDurationLimit: dbDr.drAdjustmentDurationLimit || '',
+        drAdvanceNoticeRequired: dbDr.drAdvanceNoticeRequired || '',
+        drParticipationFrequency: dbDr.drParticipationFrequency || '',
+        drImpossibleParticipationPeriods: dbDr.drImpossibleParticipationPeriods || '',
+        drParticipationBarriers: dbDr.drParticipationBarriers || '',
+        drSeasonalPreference: dbDr.drSeasonalPreference || '',
+        drIncreaseProductionBeforePeak: dbDr.drIncreaseProductionBeforePeak || '',
+        drCompleteDelayedProductionAfterPeak: dbDr.drCompleteDelayedProductionAfterPeak || '',
+        drDelayedProductionNewPeak: dbDr.drDelayedProductionNewPeak || '',
+        drOptionToDeclineRequests: dbDr.drOptionToDeclineRequests || '',
+        drPreferredNotificationMethod: dbDr.drPreferredNotificationMethod || '',
+        drSavingsInfoIncreasesWillingness: dbDr.drSavingsInfoIncreasesWillingness || '',
+        drIncentiveIncreasesWillingness: dbDr.drIncentiveIncreasesWillingness || '',
+        drPreferredIncentiveType: dbDr.drPreferredIncentiveType || '',
+        drConsiderAutomatedControls: dbDr.drConsiderAutomatedControls || '',
+        drWillingToParticipateInTrial: dbDr.drWillingToParticipateInTrial || '',
+        drEquipmentDataVerification: dbDr.drEquipmentDataVerification || '',
+      });
     }
   }, [surveyData]);
 
@@ -112,14 +177,89 @@ export default function IndustrialForm() {
     setIsSaving(true);
     setSaveError(null);
     try {
-      // Clean up empty strings to null for strict schema matching if needed
-      // 1. Save Industrial data
-      const indResult = await saveSection('industrial', formData);
+      const mappedProfiles = {
+        industrySector: formData.profiles.industryType,
+        productsManufactured: formData.profiles.products,
+        productionNature: formData.profiles.natureOfProduction,
+        daysPerWeek: parseInt(formData.profiles.daysOfOperationPerWeek) || null,
+        daysClosed: formData.profiles.daysClosed,
+        operatingHours: formData.profiles.operatingHours,
+        productionShiftCount: formData.profiles.numberOfShifts,
+        operates24Hours: formData.profiles.operates24Hours,
+        highestProductionMonths: formData.profiles.highestProductionMonths,
+        productionScheduleFlexibility: formData.profiles.productionSchedules,
+        canIncreaseProductionBeforePeak: formData.profiles.productionIncreaseFlexibility,
+        maintenanceSchedule: formData.profiles.plannedShutdowns
+      };
+
+      const mappedProcesses = formData.processes.map(p => ({
+        processName: p.processName,
+        peakOperatingProcesses: p.operatesDuringPeak ? 'Yes' : 'No',
+        continuousProcesses: p.mustOperateContinuously ? 'Yes' : 'No',
+        delayableProcesses: p.canBeDelayed ? 'Yes' : 'No',
+        reducibleProcesses: p.canBeReduced ? 'Yes' : 'No',
+        stoppableProcesses: p.canBeStopped ? 'Yes' : 'No',
+      }));
+
+      const mappedDependencies = formData.processDependencies.map(pd => ({
+        processName: pd.processName,
+        dependencyExplanation: pd.dependencyExplanation,
+        hasDependencies: pd.hasDependencies,
+        interruptionImpact: pd.interruptionImpact,
+        timeToStop: pd.timeToStop,
+        timeToRestart: pd.timeToRestart,
+        restartingDemandSpike: pd.restartingDemandSpike,
+      }));
+
+      const mappedControls = {
+        hasTimers: formData.controls.automaticControlsUsed,
+        hasAutomaticControls: formData.controls.automaticControlsUsed,
+        hasPLC: formData.controls.centralControlAvailable,
+        hasSCADA: formData.controls.centralControlAvailable,
+        hasCentralControl: formData.controls.centralControlAvailable,
+        canChangeSchedulesCentrally: formData.controls.centrallyChangedSettings,
+        individualMachineMonitoring: formData.controls.individualMonitoring,
+        approvalName: formData.controls.approvalAuthorityName,
+        approvalDesignation: formData.controls.approvalAuthorityDesignation,
+        implementationRole: formData.controls.implementer
+      };
+
+      const mappedIndustrialData = {
+        profiles: mappedProfiles,
+        shifts: formData.shifts,
+        processes: mappedProcesses,
+        processDependencies: formData.processDependencies,
+        controls: mappedControls
+      };
+
+      const indResult = await saveSection('industrial', mappedIndustrialData);
       
-      // 2. Save DR data
-      await saveSection('demandResponse', { profiles: drData }, indResult.newVersion);
+      const mappedDR = {
+        drAdjustNonCriticalLoads: drData.drAdjustNonCriticalLoads,
+        drAdjustableProcesses: drData.drAdjustableProcesses,
+        drAdjustmentType: drData.drAdjustmentType,
+        drLoadAdjustability: drData.drLoadAdjustability,
+        drAdjustmentDurationLimit: drData.drAdjustmentDurationLimit,
+        drAdvanceNoticeRequired: drData.drAdvanceNoticeRequired,
+        drParticipationFrequency: drData.drParticipationFrequency,
+        drImpossibleParticipationPeriods: drData.drImpossibleParticipationPeriods,
+        drParticipationBarriers: drData.drParticipationBarriers,
+        drSeasonalPreference: drData.drSeasonalPreference,
+        drIncreaseProductionBeforePeak: drData.drIncreaseProductionBeforePeak,
+        drCompleteDelayedProductionAfterPeak: drData.drCompleteDelayedProductionAfterPeak,
+        drDelayedProductionNewPeak: drData.drDelayedProductionNewPeak,
+        drOptionToDeclineRequests: drData.drOptionToDeclineRequests,
+        drPreferredNotificationMethod: drData.drPreferredNotificationMethod,
+        drSavingsInfoIncreasesWillingness: drData.drSavingsInfoIncreasesWillingness,
+        drIncentiveIncreasesWillingness: drData.drIncentiveIncreasesWillingness,
+        drPreferredIncentiveType: drData.drPreferredIncentiveType,
+        drConsiderAutomatedControls: drData.drConsiderAutomatedControls,
+        drWillingToParticipateInTrial: drData.drWillingToParticipateInTrial,
+        drEquipmentDataVerification: drData.drEquipmentDataVerification,
+      };
       
-      // Finished
+      await saveSection('demandResponse', { industrialDR: mappedDR }, indResult.newVersion);
+      
       navigate(`${baseRoute}/surveys/${id}/submit`);
     } catch (err) {
       setSaveError(err.message || 'Failed to save industrial details');

@@ -15,15 +15,15 @@ export const industrialProfiles = pgTable("industrial_profiles", {
   daysPerWeek: integer("days_per_week"), // E1.5
   daysClosed: text("days_closed"), // E1.5
   
-  operatingHours: integer("operating_hours"), // E1.6
+  operatingHours: text("operating_hours"), // E1.6
   
-  productionShiftCount: integer("production_shift_count"), // E1.7
+  productionShiftCount: text("production_shift_count"), // E1.7
   shiftTimings: text("shift_timings"), // E1.8
-  operates24Hours: boolean("operates_24_hours"), // E1.9
+  operates24Hours: text("operates_24_hours"), // E1.9
   
   highestProductionMonths: text("highest_production_months"), // E1.10
   productionScheduleFlexibility: text("production_schedule_flexibility"), // E1.11
-  canIncreaseProductionBeforePeak: boolean("can_increase_before_peak"), // E1.12
+  canIncreaseProductionBeforePeak: text("can_increase_before_peak"), // E1.12
   
   maintenanceSchedule: text("maintenance_schedule"), // E1.13
   maintenanceFrequency: text("maintenance_frequency"), // E1.13
@@ -52,32 +52,40 @@ export const productionProcesses = pgTable("production_processes", {
   stoppableProcesses: text("stoppable_processes"), // E2.6
   
   interruptionImpact: text("interruption_impact"),
-  safeStopTime: integer("safe_stop_time"), // minutes
-  restartTime: integer("restart_time"), // minutes
-  restartCausesDemandIncrease: boolean("restart_causes_demand_increase"),
+  safeStopTime: text("safe_stop_time"), // minutes
+  restartTime: text("restart_time"), // minutes
+  restartCausesDemandIncrease: text("restart_causes_demand_increase"),
 });
 
 export const processDependencies = pgTable("process_dependencies", {
   id: uuid("id").primaryKey().defaultRandom(),
   surveyId: uuid("survey_id").references(() => surveys.id, { onDelete: 'cascade' }).notNull(),
-  processId: uuid("process_id").references(() => productionProcesses.id, { onDelete: 'cascade' }).notNull(),
-  dependsOnProcessId: uuid("depends_on_process_id").references(() => productionProcesses.id, { onDelete: 'cascade' }).notNull(),
+  processId: uuid("process_id").references(() => productionProcesses.id, { onDelete: 'cascade' }),
+  dependsOnProcessId: uuid("depends_on_process_id").references(() => productionProcesses.id, { onDelete: 'cascade' }),
+  processName: text("process_name"),
+  dependsOnProcessName: text("depends_on_process_name"),
   dependencyExplanation: text("dependency_explanation"),
+  
+  hasDependencies: text("has_dependencies"),
+  interruptionImpact: text("interruption_impact"),
+  timeToStop: text("time_to_stop"),
+  timeToRestart: text("time_to_restart"),
+  restartingDemandSpike: text("restarting_demand_spike"),
 });
 
 export const industrialControls = pgTable("industrial_controls", {
   id: uuid("id").primaryKey().defaultRandom(),
   surveyId: uuid("survey_id").references(() => surveys.id, { onDelete: 'cascade' }).notNull().unique(),
   
-  hasTimers: boolean("has_timers"),
-  hasAutomaticControls: boolean("has_automatic_controls"),
+  hasTimers: text("has_timers"),
+  hasAutomaticControls: text("has_automatic_controls"),
   
-  hasPLC: boolean("has_plc"),
-  hasSCADA: boolean("has_scada"),
-  hasCentralControl: boolean("has_central_control"),
+  hasPLC: text("has_plc"),
+  hasSCADA: text("has_scada"),
+  hasCentralControl: text("has_central_control"),
   
-  canChangeSchedulesCentrally: boolean("can_change_schedules_centrally"),
-  individualMachineMonitoring: boolean("individual_machine_monitoring"),
+  canChangeSchedulesCentrally: text("can_change_schedules_centrally"),
+  individualMachineMonitoring: text("individual_machine_monitoring"),
   
   approvalName: text("approval_name"),
   approvalDesignation: text("approval_designation"),
