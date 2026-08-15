@@ -1,8 +1,19 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { LogOut, Home, FileText, PlusCircle, Settings, Users } from 'lucide-react';
 
-export default function AppLayout() {
+const agentLinks = [
+  { to: '/agent/dashboard', label: 'Dashboard', icon: <Home size={18} /> },
+  { to: '/agent/surveys', label: 'My Surveys', icon: <FileText size={18} /> },
+];
+
+const adminLinks = [
+  { to: '/admin/dashboard', label: 'Overview', icon: <Home size={18} /> },
+  { to: '/admin/surveys', label: 'All Surveys', icon: <FileText size={18} /> },
+  { to: '/admin/agents', label: 'Manage Agents', icon: <Users size={18} /> },
+];
+
+const AppLayout = memo(function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const role = localStorage.getItem('userRole') || 'agent';
@@ -12,17 +23,6 @@ export default function AppLayout() {
     localStorage.removeItem('userRole');
     navigate('/login');
   };
-
-  const agentLinks = [
-    { to: '/agent/dashboard', label: 'Dashboard', icon: <Home size={18} /> },
-    { to: '/agent/surveys', label: 'My Surveys', icon: <FileText size={18} /> },
-  ];
-
-  const adminLinks = [
-    { to: '/admin/dashboard', label: 'Overview', icon: <Home size={18} /> },
-    { to: '/admin/surveys', label: 'All Surveys', icon: <FileText size={18} /> },
-    { to: '/admin/agents', label: 'Manage Agents', icon: <Users size={18} /> },
-  ];
 
   const links = role === 'admin' ? adminLinks : agentLinks;
 
@@ -71,4 +71,6 @@ export default function AppLayout() {
       </main>
     </div>
   );
-}
+});
+
+export default AppLayout;

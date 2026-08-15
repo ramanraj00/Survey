@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, memo } from 'react';
 import { ChevronDown } from 'lucide-react';
 
-export default function Select({ 
+const Select = memo(function Select({ 
   name, 
   value, 
   onChange, 
@@ -140,4 +140,6 @@ export default function Select({
       )}
     </div>
   );
-}
+});
+
+export default Select;

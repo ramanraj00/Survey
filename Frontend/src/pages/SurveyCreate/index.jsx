@@ -1,10 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import { SurveyAPI } from '../../services/api';
 import { useSurvey } from '../../context/SurveyContext';
 import Select from '../../components/common/Select';
+
+const CATEGORY_OPTIONS = [
+  { value: '', label: '-- Select Category --' },
+  { value: 'RESIDENTIAL', label: 'Residential' },
+  { value: 'COMMERCIAL', label: 'Commercial' },
+  { value: 'INDUSTRIAL', label: 'Industrial' },
+  { value: 'INVENTORY', label: 'Inventory' },
+];
 
 export default function SurveyCreate() {
   const [category, setCategory] = useState('');
@@ -14,6 +22,14 @@ export default function SurveyCreate() {
   
   const navigate = useNavigate();
   const { setSurveyData } = useSurvey();
+
+  const handleCategoryChange = useCallback((e) => {
+    setCategory(e.target ? e.target.value : e);
+  }, []);
+
+  const handleSubcategoryChange = useCallback((e) => {
+    setSubcategory(e.target.value);
+  }, []);
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -67,7 +83,8 @@ export default function SurveyCreate() {
             </label>
             <Select 
               value={category} 
-              onChange={(e) => setCategory(e.target.value)}
+              onChange={handleCategoryChange}
+              options={CATEGORY_OPTIONS}
               style={{
                 width: '100%',
                 padding: '0.75rem 1rem',
@@ -76,15 +93,10 @@ export default function SurveyCreate() {
                 border: '1px solid var(--border-glass)',
                 color: 'var(--text-primary)',
                 fontSize: '0.875rem',
-                outline: 'none'
+                outline: 'none',
+                transition: 'border-color 0.2s, box-shadow 0.2s'
               }}
-            >
-              <option value="">-- Select Category --</option>
-              <option value="RESIDENTIAL">Residential</option>
-              <option value="COMMERCIAL">Commercial</option>
-              <option value="INDUSTRIAL">Industrial</option>
-              <option value="INVENTORY">Inventory</option>
-            </Select>
+            />
           </div>
 
           <div>
@@ -94,7 +106,7 @@ export default function SurveyCreate() {
             <input 
               type="text" 
               value={subcategory}
-              onChange={(e) => setSubcategory(e.target.value)}
+              onChange={handleSubcategoryChange}
               placeholder="e.g. IT Park, Steel Plant, etc."
               style={{
                 width: '100%',
@@ -104,13 +116,22 @@ export default function SurveyCreate() {
                 border: '1px solid var(--border-glass)',
                 color: 'var(--text-primary)',
                 fontSize: '0.875rem',
-                outline: 'none'
+                outline: 'none',
+                transition: 'border-color 0.2s, box-shadow 0.2s'
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = 'var(--accent-primary)';
+                e.target.style.boxShadow = '0 0 0 2px rgba(59, 130, 246, 0.2)';
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = 'var(--border-glass)';
+                e.target.style.boxShadow = 'none';
               }}
             />
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
-            <Button type="submit" isLoading={isLoading}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
+            <Button type="submit" isLoading={isLoading} style={{ width: '100%', maxWidth: '300px', height: '48px', fontSize: '1rem' }}>
               Create & Proceed
             </Button>
           </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
@@ -20,6 +20,10 @@ export default function AgentSurveyList() {
   const [surveys, setSurveys] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [toastMessage, setToastMessage] = useState('');
+
+  const handleNewSurvey = useCallback(() => {
+    navigate('/agent/surveys/new');
+  }, [navigate]);
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -115,9 +119,9 @@ export default function AgentSurveyList() {
 
   return (
     <div style={{ width: '100%', paddingBottom: '4rem' }}>
-      <div className="flex-between" style={{ marginBottom: '2rem' }}>
-        <h1 style={{ margin: 0 }}>My Surveys</h1>
-        <Button onClick={() => navigate('/agent/surveys/new')}>+ New Survey</Button>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
+        <h1 style={{ margin: 0, lineHeight: '1', display: 'flex', alignItems: 'center' }}>My Surveys</h1>
+        <Button onClick={handleNewSurvey}>+ New Survey</Button>
       </div>
 
       <Card padding="0" style={{ background: '#F1F5F9', border: '1px solid var(--border-glass)', borderRadius: '12px' }}>

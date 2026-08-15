@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Loader2 } from 'lucide-react';
 
-export default function Button({ 
+const Button = memo(function Button({ 
   children, 
   variant = 'primary', 
   isLoading = false, 
@@ -16,6 +16,7 @@ export default function Button({
     borderRadius: '9999px',
     fontWeight: '500',
     fontSize: '0.875rem',
+    whiteSpace: 'nowrap',
     transition: 'all 0.2s ease',
     opacity: (isLoading || props.disabled) ? 0.5 : 1,
     cursor: (isLoading || props.disabled) ? 'not-allowed' : 'pointer',
@@ -24,10 +25,10 @@ export default function Button({
 
   const variants = {
     primary: {
-      background: 'var(--accent-glow)',
+      background: 'var(--accent-primary)',
       color: 'white',
       border: 'none',
-      boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
+      boxShadow: '0 4px 12px rgba(59, 130, 246, 0.2)'
     },
     secondary: {
       background: 'var(--bg-tertiary)',
@@ -55,4 +56,6 @@ export default function Button({
       {children}
     </button>
   );
-}
+});
+
+export default Button;
