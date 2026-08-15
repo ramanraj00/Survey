@@ -98,9 +98,9 @@ export function SurveyProvider({ children }) {
       return result;
     } catch (err) {
       // Catch OCC Conflicts (409)
-      if (err.status === 409) {
+      if (err.status === 409 || err.response?.status === 409) {
         console.error("OCC Conflict Detected! State is stale.");
-        setError("This survey was modified elsewhere. Please refresh the page to get the latest data.");
+        throw new Error("This survey was modified elsewhere. Please refresh the page to get the latest data.");
       }
       throw err;
     }

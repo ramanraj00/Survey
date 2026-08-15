@@ -5,6 +5,16 @@ import Button from '../../components/common/Button';
 import { SurveyAPI } from '../../services/api';
 import Toast from '../../components/common/Toast';
 
+const getCategoryStyle = (category) => {
+  switch(category) {
+    case 'RESIDENTIAL': return { background: '#A855F7', color: '#FFFFFF' };
+    case 'COMMERCIAL': return { background: '#10B981', color: '#FFFFFF' };
+    case 'INVENTORY': return { background: '#FEEBC8', color: '#C05621' };
+    case 'INDUSTRIAL': return { background: '#FF6B00', color: '#FFFFFF' };
+    default: return { background: '#3B82F6', color: '#FFFFFF' };
+  }
+};
+
 export default function AgentSurveyList() {
   const navigate = useNavigate();
   const [surveys, setSurveys] = useState([]);
@@ -44,7 +54,57 @@ export default function AgentSurveyList() {
     }
   };
 
-  if (isLoading) return <div className="flex-center" style={{height: '50vh'}}>Loading your surveys...</div>;
+  if (isLoading) {
+    return (
+      <div style={{ padding: '2rem 0', animation: 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}>
+        <style>
+          {`
+            @keyframes pulse {
+              0%, 100% { opacity: 1; }
+              50% { opacity: 0.5; }
+            }
+            .skeleton-box {
+              background: #E2E8F0;
+              border-radius: 4px;
+            }
+          `}
+        </style>
+        
+        <div className="flex-between" style={{ marginBottom: '2rem' }}>
+          <div className="skeleton-box" style={{ width: '150px', height: '32px', borderRadius: '8px' }} />
+          <div className="skeleton-box" style={{ width: '120px', height: '40px', borderRadius: '8px' }} />
+        </div>
+
+        <Card padding="0" style={{ background: '#F1F5F9', border: '1px solid var(--border-glass)', borderRadius: '12px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', padding: '1rem', gap: '1rem' }}>
+            {[1, 2, 3].map(i => (
+              <div key={i} style={{ border: '1px solid var(--border-glass)', borderRadius: '12px', padding: '1.25rem', background: '#FFFFFF' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                  <div className="skeleton-box" style={{ width: '120px', height: '24px' }} />
+                  <div className="skeleton-box" style={{ width: '80px', height: '24px', borderRadius: '999px' }} />
+                </div>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.25rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div className="skeleton-box" style={{ width: '70px', height: '16px' }} />
+                    <div className="skeleton-box" style={{ width: '100px', height: '16px' }} />
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div className="skeleton-box" style={{ width: '60px', height: '16px' }} />
+                    <div className="skeleton-box" style={{ width: '80px', height: '16px' }} />
+                  </div>
+                </div>
+                
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  <div className="skeleton-box" style={{ flex: 1, height: '40px', borderRadius: '9999px' }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   const statusOrder = { 'DRAFT': 1, 'SUBMITTED': 2, 'APPROVED': 3 };
   const sortedSurveys = [...surveys].sort((a, b) => {
@@ -68,56 +128,74 @@ export default function AgentSurveyList() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', padding: '1rem', gap: '1rem' }}>
             {sortedSurveys.map(s => (
-              <div key={s.id} style={{ border: '1px solid var(--border-glass)', borderRadius: '12px', padding: '1.25rem', background: '#FFFFFF', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }} className="animate-fade-in">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                  <span style={{ fontWeight: 600, fontSize: '1rem', color: '#111827' }}>{s.surveyNumber}</span>
-                  <span style={{ 
-                    padding: '0.25rem 0.75rem', 
-                    borderRadius: '999px', 
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    background: s.status === 'SUBMITTED' ? 'rgba(16, 185, 129, 0.1)' : 
-                                s.status === 'APPROVED' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-                    color: s.status === 'SUBMITTED' ? '#10B981' : 
-                           s.status === 'APPROVED' ? '#3B82F6' : '#F59E0B'
-                  }}>
-                    {s.status}
-                  </span>
-                </div>
+              <div key={s.id} style={{ border: '1px solid #E2E8F0', borderRadius: '12px', padding: '1.25rem', background: '#FFFFFF', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)', transition: 'transform 0.2s', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '1rem' }} className="hover-lift" onClick={() => navigate(`/agent/surveys/${s.id}`)}>
                 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.25rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
-                    <span style={{ color: 'var(--text-secondary)' }}>Category:</span>
-                    <span style={{ fontWeight: 500 }}>{s.consumerCategory}</span>
+                {/* Header Row */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#F8FAFC', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <span style={{ fontSize: '1.25rem' }}>📄</span>
+                    </div>
+                    <span style={{ 
+                      padding: '0.35rem 0.75rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.025em',
+                      background: s.status === 'SUBMITTED' ? '#FFFBEB' : s.status === 'APPROVED' ? '#ECFDF5' : '#F1F5F9', 
+                      color: s.status === 'SUBMITTED' ? '#B45309' : s.status === 'APPROVED' ? '#047857' : '#475569',
+                      border: `1px solid ${s.status === 'SUBMITTED' ? '#FEF3C7' : s.status === 'APPROVED' ? '#D1FAE5' : '#E2E8F0'}`,
+                      whiteSpace: 'nowrap', flexShrink: 0
+                    }}>
+                      {s.status}
+                    </span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
-                    <span style={{ color: 'var(--text-secondary)' }}>Created:</span>
-                    <span style={{ fontWeight: 500 }}>{new Date(s.createdAt).toLocaleDateString()}</span>
+                  <div>
+                    <h4 style={{ margin: 0, fontWeight: 600, color: '#0F172A', fontSize: '1.25rem', wordBreak: 'break-word', lineHeight: '1.4' }}>
+                      {s.consumerName || 'Unknown Contact'}
+                    </h4>
                   </div>
                 </div>
                 
-                <div className="card-actions">
+                <div style={{ height: '1px', background: '#F1F5F9', width: '100%' }} />
+                
+                {/* Info Grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1.25rem' }}>
+                  <div>
+                    <div style={{ fontSize: '0.7rem', color: '#475569', marginBottom: '0.4rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Category</div>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <span style={{ padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.025em', ...getCategoryStyle(s.consumerCategory) }}>
+                        {s.consumerCategory}
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.7rem', color: '#475569', marginBottom: '0.4rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Created Date</div>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 500, color: '#0F172A' }}>{new Date(s.createdAt).toLocaleDateString()}</div>
+                  </div>
+                </div>
+                
+                {/* Action Buttons */}
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
                   <button 
-                    onClick={() => navigate(`/agent/surveys/${s.id}`)}
+                    onClick={(e) => { e.stopPropagation(); navigate(`/agent/surveys/${s.id}`); }}
                     style={{ 
-                      padding: '0.625rem 1rem', fontSize: '0.875rem', flex: 1, textAlign: 'center', 
-                      background: 'transparent', color: '#111827', border: '1px solid var(--border-glass)', 
-                      borderRadius: '9999px', fontWeight: 500, cursor: 'pointer', transition: 'all 0.2s',
-                      width: '100%'
+                      padding: '0.75rem 1rem', fontSize: '0.9rem', flex: 1, 
+                      background: '#FFFFFF', color: '#0F172A', border: '1px solid #E2E8F0', 
+                      fontWeight: 500, borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s'
                     }}
+                    onMouseOver={(e) => { e.currentTarget.style.background = '#F8FAFC'; }}
+                    onMouseOut={(e) => { e.currentTarget.style.background = '#FFFFFF'; }}
                   >
                     {s.status === 'DRAFT' ? 'Continue Editing' : 'View Details'}
                   </button>
                   
                   {s.status === 'DRAFT' && (
                     <button 
-                      onClick={() => handleSubmitSurvey(s.id, s.version)}
+                      onClick={(e) => { e.stopPropagation(); handleSubmitSurvey(s.id, s.version); }}
                       style={{ 
-                        padding: '0.625rem 1rem', fontSize: '0.875rem', flex: 1, textAlign: 'center', 
-                        backgroundColor: '#10B981', color: 'white', border: 'none', 
-                        borderRadius: '9999px', fontWeight: 500, cursor: 'pointer', transition: 'all 0.2s',
-                        width: '100%'
+                        padding: '0.75rem 1rem', fontSize: '0.9rem', flex: 1, 
+                        background: '#000000', color: '#FFFFFF', border: '1px solid #000000', 
+                        fontWeight: 500, borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s'
                       }}
+                      onMouseOver={(e) => { e.currentTarget.style.background = '#333333'; }}
+                      onMouseOut={(e) => { e.currentTarget.style.background = '#000000'; }}
                     >
                       Submit to Admin
                     </button>

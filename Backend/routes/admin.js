@@ -121,14 +121,25 @@ async function generateElementAudits(tx, surveyId, userId, section, entityId, ol
 // GET /api/admin/stats
 adminRouter.get('/stats', async (req, res) => {
   try {
-    const totalResult = await db.select({ count: count() }).from(surveys);
-    const draftResult = await db.select({ count: count() }).from(surveys).where(eq(surveys.status, 'DRAFT'));
-    const submittedResult = await db.select({ count: count() }).from(surveys).where(eq(surveys.status, 'SUBMITTED'));
-    const approvedResult = await db.select({ count: count() }).from(surveys).where(eq(surveys.status, 'APPROVED'));
-    
-    const residentialResult = await db.select({ count: count() }).from(surveys).where(eq(surveys.consumerCategory, 'RESIDENTIAL'));
-    const commercialResult = await db.select({ count: count() }).from(surveys).where(eq(surveys.consumerCategory, 'COMMERCIAL'));
-    const industrialResult = await db.select({ count: count() }).from(surveys).where(eq(surveys.consumerCategory, 'INDUSTRIAL'));
+    const [
+      totalResult,
+      draftResult,
+      submittedResult,
+      approvedResult,
+      residentialResult,
+      commercialResult,
+      industrialResult,
+      inventoryResult
+    ] = await Promise.all([
+      db.select({ count: count() }).from(surveys),
+      db.select({ count: count() }).from(surveys).where(eq(surveys.status, 'DRAFT')),
+      db.select({ count: count() }).from(surveys).where(eq(surveys.status, 'SUBMITTED')),
+      db.select({ count: count() }).from(surveys).where(eq(surveys.status, 'APPROVED')),
+      db.select({ count: count() }).from(surveys).where(eq(surveys.consumerCategory, 'RESIDENTIAL')),
+      db.select({ count: count() }).from(surveys).where(eq(surveys.consumerCategory, 'COMMERCIAL')),
+      db.select({ count: count() }).from(surveys).where(eq(surveys.consumerCategory, 'INDUSTRIAL')),
+      db.select({ count: count() }).from(surveys).where(eq(surveys.consumerCategory, 'INVENTORY'))
+    ]);
 
     res.json({
       totalSurveys: totalResult[0].count,
@@ -138,7 +149,8 @@ adminRouter.get('/stats', async (req, res) => {
       byCategory: {
         residential: residentialResult[0].count,
         commercial: commercialResult[0].count,
-        industrial: industrialResult[0].count
+        industrial: industrialResult[0].count,
+        inventory: inventoryResult[0].count
       }
     });
   } catch (error) {
@@ -165,35 +177,34 @@ adminRouter.get('/surveys', async (req, res) => {
     if (email) conditions.push(ilike(user.email, `%${email}%`));
     if (date) {
       const startOfDay = new Date(date);
-      startOfDay.setHours(0, 0, 0, 0);
+      startOfDay.setUTCHours(0, 0, 0, 0);
       const endOfDay = new Date(date);
-      endOfDay.setHours(23, 59, 59, 999);
+      endOfDay.setUTCHours(23, 59, 59, 999);
       conditions.push(and(gte(surveys.createdAt, startOfDay), lt(surveys.createdAt, endOfDay)));
     }
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
     const offset = (Number(page) - 1) * Number(limit);
 
-    // Fetch total count matching conditions
-    const totalResult = await db.select({ count: count() })
-      .from(surveys)
-      .leftJoin(user, eq(surveys.agentId, user.id))
-      .where(whereClause);
+    // Fetch total count and paginated data in parallel
+    const [totalResult, paginatedData] = await Promise.all([
+      db.select({ count: count() })
+        .from(surveys)
+        .leftJoin(user, eq(surveys.agentId, user.id))
+        .where(whereClause),
+      db.select({
+        survey: surveys,
+        agentEmail: user.email,
+        consumerName: surveyCommonDetails.respondentName
+      })
+        .from(surveys)
+        .leftJoin(user, eq(surveys.agentId, user.id))
+        .leftJoin(surveyCommonDetails, eq(surveys.id, surveyCommonDetails.surveyId))
+        .where(whereClause)
+        .limit(Number(limit))
+        .offset(offset)
+    ]);
     const total = totalResult[0].count;
-    
-    // Fetch paginated data
-
-    const paginatedData = await db.select({
-      survey: surveys,
-      agentEmail: user.email,
-      consumerName: surveyCommonDetails.respondentName
-    })
-      .from(surveys)
-      .leftJoin(user, eq(surveys.agentId, user.id))
-      .leftJoin(surveyCommonDetails, eq(surveys.id, surveyCommonDetails.surveyId))
-      .where(whereClause)
-      .limit(Number(limit))
-      .offset(offset);
 
     const flatData = paginatedData.map(row => ({
       ...row.survey,

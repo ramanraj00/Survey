@@ -61,8 +61,10 @@ export default function ResidentialForm() {
   const [isSaving, setIsSaving] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
-  const isReadOnly = surveyData?.survey?.status !== 'DRAFT' && localStorage.getItem('userRole') === 'agent';
   const isAdmin = localStorage.getItem('userRole') === 'admin';
+  const surveyStatus = surveyData?.survey?.status;
+  const isReadOnly = (!isAdmin && surveyStatus !== 'DRAFT') || (isAdmin && surveyStatus === 'APPROVED');
+
 
   useEffect(() => {
     if (!surveyData || surveyData.survey?.id !== id) {

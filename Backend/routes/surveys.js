@@ -67,8 +67,20 @@ const cleanArrayData = (arr) => {
 // GET /api/surveys (List Agent's Surveys)
 surveyRouter.get('/', async (req, res) => {
   try {
-    const list = await db.select().from(surveys).where(eq(surveys.agentId, req.user.id));
-    res.json(list);
+    const list = await db.select({
+      survey: surveys,
+      consumerName: surveyCommonDetails.respondentName
+    })
+    .from(surveys)
+    .leftJoin(surveyCommonDetails, eq(surveys.id, surveyCommonDetails.surveyId))
+    .where(eq(surveys.agentId, req.user.id));
+    
+    const flatList = list.map(row => ({
+      ...row.survey,
+      consumerName: row.consumerName
+    }));
+    
+    res.json(flatList);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch surveys" });
   }

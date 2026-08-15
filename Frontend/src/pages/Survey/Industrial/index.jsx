@@ -41,7 +41,8 @@ export default function IndustrialForm() {
   const [currentStep, setCurrentStep] = useState(1);
 
   const isAdmin = localStorage.getItem('userRole') === 'admin';
-  const isReadOnly = !isAdmin && surveyData?.survey?.status !== 'DRAFT';
+  const surveyStatus = surveyData?.survey?.status;
+  const isReadOnly = (!isAdmin && surveyStatus !== 'DRAFT') || (isAdmin && surveyStatus === 'APPROVED');
 
   useEffect(() => {
     if (!surveyData || surveyData.survey?.id !== id) {

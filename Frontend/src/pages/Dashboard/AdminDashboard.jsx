@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Card from '../../components/common/Card';
 import { SurveyAPI } from '../../services/api';
-import { PieChart, Users, CheckCircle, FileText, Activity } from 'lucide-react';
+import { PieChart, Users, CheckCircle, FileText, Activity, ChevronRight } from 'lucide-react';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -16,7 +15,7 @@ export default function AdminDashboard() {
       try {
         const [statsData, surveysData] = await Promise.all([
           SurveyAPI.getAdminStats().catch(() => null),
-          SurveyAPI.getAdminSurveys({ limit: 5 }).catch(() => [])
+          SurveyAPI.getAdminSurveys({ limit: 3 }).catch(() => [])
         ]);
         
         if (mounted) {
@@ -33,135 +32,233 @@ export default function AdminDashboard() {
     return () => { mounted = false; };
   }, []);
 
-  if (isLoading) return <div className="flex-center" style={{height: '50vh'}}>Loading Admin Dashboard...</div>;
+  if (isLoading) {
+    return (
+      <div style={{ height: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+        <div style={{ width: '40px', height: '40px', border: '4px solid rgba(59, 130, 246, 0.2)', borderTopColor: '#3B82F6', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        <div style={{ color: '#64748B', fontWeight: 500 }}>Loading Admin Overview...</div>
+      </div>
+    );
+  }
 
-  const totalSurveys = stats?.total || 0;
+  const totalSurveys = stats?.totalSurveys || 0;
   
+  const dashboardStyle = `
+    .dashboard-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      height: calc(100vh - 80px);
+    }
+    .metric-card {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .metric-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 15px 20px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .recent-item:hover {
+      background: #F8FAFC;
+    }
+    @media (max-width: 768px) {
+      .dashboard-container {
+        height: auto;
+        overflow-y: auto;
+      }
+    }
+  `;
+
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '4rem' }}>
-      <h1 style={{ marginBottom: '2rem' }}>Admin Dashboard</h1>
+    <div className="dashboard-container">
+      <style>{dashboardStyle}</style>
+
+      {/* Header Section */}
+      <div style={{ marginBottom: '0.5rem', marginTop: '1rem' }}>
+        <h1 style={{ color: '#0F172A', fontSize: '2.25rem', fontWeight: 800, marginBottom: '0.5rem', letterSpacing: '-0.025em' }}>
+          Admin Dashboard
+        </h1>
+        <p style={{ color: '#64748B', fontSize: '1.1rem', margin: 0 }}>
+          Overview of all incoming surveys and their status.
+        </p>
+      </div>
       
       {/* Top Metrics Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
         
-        <Card padding="1.5rem" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '1rem', borderRadius: 'var(--radius-md)', color: 'var(--accent-primary)' }}>
-            <FileText size={32} />
+        {/* Total Surveys Card */}
+        <div className="metric-card" style={{ 
+          padding: '1.5rem', 
+          background: 'linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%)', 
+          borderRadius: '16px', 
+          color: 'white',
+          boxShadow: '0 8px 12px -3px rgba(59, 130, 246, 0.3)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <div style={{ position: 'absolute', top: '-10%', right: '-10%', background: 'rgba(255,255,255,0.1)', width: '120px', height: '120px', borderRadius: '50%' }} />
+          <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)', fontWeight: 500, marginBottom: '0.25rem' }}>Total Surveys</div>
+              <div style={{ fontSize: '2.5rem', fontWeight: 800, lineHeight: 1 }}>{totalSurveys}</div>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.2)', padding: '0.75rem', borderRadius: '12px', backdropFilter: 'blur(10px)' }}>
+              <FileText size={28} color="#FFFFFF" />
+            </div>
           </div>
-          <div>
-            <div style={{ fontSize: '2rem', fontWeight: 700 }}>{totalSurveys}</div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Total Surveys</div>
-          </div>
-        </Card>
+        </div>
 
-        <Card padding="1.5rem" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <div style={{ background: 'rgba(245, 158, 11, 0.1)', padding: '1rem', borderRadius: 'var(--radius-md)', color: 'var(--warning)' }}>
-            <Activity size={32} />
+        {/* Pending Approval Card */}
+        <div className="metric-card" style={{ 
+          padding: '1.5rem', 
+          background: 'linear-gradient(135deg, #78350F 0%, #F59E0B 100%)', 
+          borderRadius: '16px', 
+          color: 'white',
+          boxShadow: '0 8px 12px -3px rgba(245, 158, 11, 0.3)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <div style={{ position: 'absolute', top: '-10%', right: '-10%', background: 'rgba(255,255,255,0.1)', width: '120px', height: '120px', borderRadius: '50%' }} />
+          <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)', fontWeight: 500, marginBottom: '0.25rem' }}>Pending Approval</div>
+              <div style={{ fontSize: '2.5rem', fontWeight: 800, lineHeight: 1 }}>{stats?.submitted || 0}</div>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.2)', padding: '0.75rem', borderRadius: '12px', backdropFilter: 'blur(10px)' }}>
+              <Users size={28} color="#FFFFFF" />
+            </div>
           </div>
-          <div>
-            <div style={{ fontSize: '2rem', fontWeight: 700 }}>{stats?.byStatus?.DRAFT || 0}</div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Active Drafts</div>
-          </div>
-        </Card>
+        </div>
 
-        <Card padding="1.5rem" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '1rem', borderRadius: 'var(--radius-md)', color: 'var(--success)' }}>
-            <Users size={32} />
+        {/* Approved Card */}
+        <div className="metric-card" style={{ 
+          padding: '1.5rem', 
+          background: 'linear-gradient(135deg, #064E3B 0%, #10B981 100%)', 
+          borderRadius: '16px', 
+          color: 'white',
+          boxShadow: '0 8px 12px -3px rgba(16, 185, 129, 0.3)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <div style={{ position: 'absolute', top: '-10%', right: '-10%', background: 'rgba(255,255,255,0.1)', width: '120px', height: '120px', borderRadius: '50%' }} />
+          <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)', fontWeight: 500, marginBottom: '0.25rem' }}>Approved</div>
+              <div style={{ fontSize: '2.5rem', fontWeight: 800, lineHeight: 1 }}>{stats?.approved || 0}</div>
+            </div>
+            <div style={{ background: 'rgba(255,255,255,0.2)', padding: '0.75rem', borderRadius: '12px', backdropFilter: 'blur(10px)' }}>
+              <CheckCircle size={28} color="#FFFFFF" />
+            </div>
           </div>
-          <div>
-            <div style={{ fontSize: '2rem', fontWeight: 700 }}>{stats?.byStatus?.SUBMITTED || 0}</div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Pending Approval</div>
-          </div>
-        </Card>
-
-        <Card padding="1.5rem" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <div style={{ background: 'rgba(99, 102, 241, 0.1)', padding: '1rem', borderRadius: 'var(--radius-md)', color: '#818cf8' }}>
-            <CheckCircle size={32} />
-          </div>
-          <div>
-            <div style={{ fontSize: '2rem', fontWeight: 700 }}>{stats?.byStatus?.APPROVED || 0}</div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Approved</div>
-          </div>
-        </Card>
+        </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', flex: 1, minHeight: 0 }}>
         {/* Category Breakdown */}
-        <Card padding="1.5rem">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-            <PieChart size={20} color="var(--accent-primary)" />
-            <h3 style={{ margin: 0 }}>Category Breakdown</h3>
+        <div style={{ 
+          background: '#FFFFFF', 
+          borderRadius: '20px', 
+          padding: '1.5rem', 
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+          border: '1px solid #F1F5F9',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
+            <div style={{ background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)', padding: '0.5rem', borderRadius: '10px' }}>
+              <PieChart size={20} color="#FFFFFF" />
+            </div>
+            <h3 style={{ margin: 0, color: '#0F172A', fontSize: '1.1rem', fontWeight: 700 }}>Category Breakdown</h3>
           </div>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {['RESIDENTIAL', 'COMMERCIAL', 'INDUSTRIAL'].map(cat => {
-              const count = stats?.byCategory?.[cat] || 0;
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1, justifyContent: 'center' }}>
+            {['RESIDENTIAL', 'COMMERCIAL', 'INDUSTRIAL', 'INVENTORY'].map(cat => {
+              const count = stats?.byCategory?.[cat.toLowerCase()] || 0;
               const percentage = totalSurveys > 0 ? (count / totalSurveys) * 100 : 0;
               return (
                 <div key={cat}>
-                  <div className="flex-between" style={{ marginBottom: '0.5rem', fontSize: '0.875rem' }}>
-                    <span style={{ fontWeight: 500 }}>{cat}</span>
-                    <span style={{ color: 'var(--text-muted)' }}>{count} ({percentage.toFixed(1)}%)</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem', fontSize: '0.8rem' }}>
+                    <span style={{ fontWeight: 600, color: '#1E293B' }}>{cat}</span>
+                    <span style={{ color: '#64748B', fontWeight: 500 }}>{count} ({percentage.toFixed(1)}%)</span>
                   </div>
-                  <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '999px', overflow: 'hidden' }}>
+                  <div style={{ width: '100%', height: '8px', background: '#F1F5F9', borderRadius: '999px', overflow: 'hidden' }}>
                     <div style={{ 
                       width: `${percentage}%`, 
                       height: '100%', 
-                      background: cat === 'RESIDENTIAL' ? 'var(--accent-primary)' : cat === 'COMMERCIAL' ? 'var(--success)' : '#818cf8' 
+                      background: cat === 'RESIDENTIAL' ? 'linear-gradient(90deg, #A855F7, #9333EA)' : 
+                                  cat === 'COMMERCIAL' ? 'linear-gradient(90deg, #34D399, #10B981)' : 
+                                  cat === 'INDUSTRIAL' ? 'linear-gradient(90deg, #F97316, #EA580C)' :
+                                  'linear-gradient(90deg, #FBBF24, #F59E0B)',
+                      borderRadius: '999px',
+                      transition: 'width 1s ease-out'
                     }} />
                   </div>
                 </div>
               );
             })}
           </div>
-        </Card>
+        </div>
 
         {/* Quick Actions & Recent */}
-        <Card padding="1.5rem">
-          <div className="flex-between" style={{ marginBottom: '1.5rem' }}>
-            <h3 style={{ margin: 0 }}>Recent Activity</h3>
+        <div style={{ 
+          background: '#FFFFFF', 
+          borderRadius: '20px', 
+          padding: '1.5rem', 
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+          border: '1px solid #F1F5F9',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+            <h3 style={{ margin: 0, color: '#0F172A', fontSize: '1.1rem', fontWeight: 700 }}>Recent Activity</h3>
             <button 
               onClick={() => navigate('/admin/surveys')}
-              style={{ background: 'none', border: 'none', color: 'var(--accent-primary)', cursor: 'pointer', fontSize: '0.875rem' }}
+              style={{ background: 'none', border: 'none', color: '#3B82F6', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600, display: 'flex', alignItems: 'center' }}
             >
-              View All Surveys →
+              View All <ChevronRight size={14} />
             </button>
           </div>
           
           {recentSurveys.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {recentSurveys.map(survey => (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1, overflowY: 'auto' }}>
+              {recentSurveys.slice(0, 4).map(survey => (
                 <div 
                   key={survey.id}
+                  className="recent-item"
                   onClick={() => navigate(`/admin/surveys/${survey.id}`)}
                   style={{ 
-                    padding: '1rem', 
-                    border: '1px solid var(--border-glass)', 
-                    borderRadius: 'var(--radius-md)',
+                    padding: '0.75rem 1rem', 
+                    border: '1px solid #E2E8F0', 
+                    borderRadius: '12px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     cursor: 'pointer',
-                    transition: 'border-color 0.2s',
                   }}
-                  onMouseOver={(e) => e.currentTarget.style.borderColor = 'var(--accent-primary)'}
-                  onMouseOut={(e) => e.currentTarget.style.borderColor = 'var(--border-glass)'}
                 >
                   <div>
-                    <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>{survey.title || 'Untitled Survey'}</div>
-                    <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>{survey.category || 'N/A'} • Submitted by {survey.createdBy?.name || 'Agent'}</div>
+                    <div style={{ fontWeight: 600, color: '#0F172A', marginBottom: '0.1rem', fontSize: '0.85rem' }}>{survey.surveyNumber || 'Untitled Survey'}</div>
+                    <div style={{ fontSize: '0.75rem', color: '#64748B', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span style={{ background: '#F1F5F9', padding: '0.1rem 0.5rem', borderRadius: '4px', fontWeight: 500 }}>{survey.consumerCategory || 'N/A'}</span>
+                    </div>
                   </div>
                   <div style={{ 
-                    padding: '0.25rem 0.75rem', 
+                    padding: '0.2rem 0.6rem', 
                     borderRadius: '9999px', 
-                    fontSize: '0.75rem', 
-                    fontWeight: 500,
+                    fontSize: '0.65rem', 
+                    fontWeight: 700,
+                    letterSpacing: '0.025em',
                     background: survey.status === 'APPROVED' ? 'rgba(16, 185, 129, 0.1)' : 
-                               survey.status === 'SUBMITTED' ? 'rgba(99, 102, 241, 0.1)' : 
-                               'rgba(245, 158, 11, 0.1)',
-                    color: survey.status === 'APPROVED' ? 'var(--success)' : 
-                           survey.status === 'SUBMITTED' ? '#818cf8' : 
-                           'var(--warning)'
+                               survey.status === 'SUBMITTED' ? 'rgba(245, 158, 11, 0.1)' : 
+                               'rgba(226, 232, 240, 0.8)',
+                    color: survey.status === 'APPROVED' ? '#059669' : 
+                           survey.status === 'SUBMITTED' ? '#D97706' : 
+                           '#475569'
                   }}>
                     {survey.status || 'DRAFT'}
                   </div>
@@ -169,12 +266,12 @@ export default function AdminDashboard() {
               ))}
             </div>
           ) : (
-            <div style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '3rem 1rem' }}>
-              <Activity size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
-              <p>Recent surveys will appear here.</p>
+            <div style={{ color: '#94A3B8', textAlign: 'center', padding: '2rem 1rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+              <Activity size={32} style={{ opacity: 0.2, marginBottom: '0.5rem' }} />
+              <p style={{ fontWeight: 500, fontSize: '0.875rem' }}>Recent surveys will appear here.</p>
             </div>
           )}
-        </Card>
+        </div>
       </div>
     </div>
   );

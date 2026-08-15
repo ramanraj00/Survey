@@ -32,7 +32,7 @@ export default function AppLayout() {
       <aside className="glass-panel app-sidebar">
         <div className="app-sidebar-header">
           <div>
-            <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700, color: '#2563EB', letterSpacing: '-0.025em' }}>SmartMeter</h2>
+            <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700, color: '#2563EB', letterSpacing: '-0.025em' }}>Survey</h2>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '0.25rem' }}>
               {role.toUpperCase()} PORTAL
             </p>

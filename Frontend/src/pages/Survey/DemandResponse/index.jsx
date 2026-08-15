@@ -23,7 +23,8 @@ export default function DemandResponseForm() {
   const [saveError, setSaveError] = useState(null);
 
   const isAdmin = localStorage.getItem('userRole') === 'admin';
-  const isReadOnly = !isAdmin && surveyData?.survey?.status !== 'DRAFT';
+  const surveyStatus = surveyData?.survey?.status;
+  const isReadOnly = (!isAdmin && surveyStatus !== 'DRAFT') || (isAdmin && surveyStatus === 'APPROVED');
 
   useEffect(() => {
     if (!surveyData || surveyData.survey?.id !== id) {

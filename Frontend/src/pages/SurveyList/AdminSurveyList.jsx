@@ -6,6 +6,16 @@ import { SurveyAPI } from '../../services/api';
 import { Search, Filter, Mail, User, Hash } from 'lucide-react';
 import Select from '../../components/common/Select';
 
+const getCategoryStyle = (category) => {
+  switch(category) {
+    case 'RESIDENTIAL': return { background: '#A855F7', color: '#FFFFFF' };
+    case 'COMMERCIAL': return { background: '#10B981', color: '#FFFFFF' };
+    case 'INVENTORY': return { background: '#FEEBC8', color: '#C05621' };
+    case 'INDUSTRIAL': return { background: '#FF6B00', color: '#FFFFFF' };
+    default: return { background: '#3B82F6', color: '#FFFFFF' };
+  }
+};
+
 export default function AdminSurveyList() {
   const navigate = useNavigate();
   const [surveys, setSurveys] = useState([]);
@@ -36,9 +46,12 @@ export default function AdminSurveyList() {
   };
 
   useEffect(() => {
+    const isInitial = !status && !category && !dateSearch && !emailSearch;
+    const delay = isInitial ? 0 : 400; // Load instantly on first visit
+
     const timer = setTimeout(() => {
       fetchSurveys();
-    }, 400);
+    }, delay);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, category, dateSearch, emailSearch]);
@@ -171,14 +184,76 @@ export default function AdminSurveyList() {
             </Select>
           </div>
 
-          <Button type="submit" variant="primary" style={{ flex: '0 0 auto', padding: '0 1.5rem', height: '42px', background: '#000000', color: '#FFFFFF', border: 'none', fontWeight: 600, borderRadius: 'var(--radius-md)' }}>
-            <Filter size={18} style={{ marginRight: '0.5rem' }} /> Filter
-          </Button>
+          <div style={{ display: 'flex', gap: '0.75rem', flex: '1 1 200px', minWidth: '200px' }}>
+            <Button type="button" onClick={() => { setDateSearch(''); setEmailSearch(''); setCategory(''); setStatus(''); }} style={{ flex: 1, padding: '0 1.25rem', height: '42px', background: '#F1F5F9', color: '#475569', border: '1px solid #E2E8F0', fontWeight: 600, borderRadius: 'var(--radius-md)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              Clear
+            </Button>
+            <Button type="submit" variant="primary" style={{ flex: 1, padding: '0 1.5rem', height: '42px', background: '#000000', color: '#FFFFFF', border: 'none', fontWeight: 600, borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Filter size={18} style={{ marginRight: '0.5rem' }} /> Filter
+            </Button>
+          </div>
         </form>
       </Card>
 
       {isLoading ? (
-        <div style={{ padding: '4rem 2rem', textAlign: 'center', color: '#64748B' }}>Loading...</div>
+        <div style={{ padding: '2rem 0', animation: 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}>
+          <style>
+            {`
+              @keyframes pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.5; }
+              }
+              .skeleton-box {
+                background: #E2E8F0;
+                border-radius: 4px;
+              }
+            `}
+          </style>
+          
+          <div style={{ marginBottom: '3rem' }}>
+            {/* Skeleton Date Header */}
+            <div className="skeleton-box" style={{ width: '150px', height: '24px', marginBottom: '1rem', borderRadius: '6px' }} />
+            
+            <Card padding="0" style={{ border: 'none', background: '#EAEFF7', borderRadius: '12px', overflow: 'hidden' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', padding: '1rem', gap: '1rem', background: '#EAEFF7' }}>
+                
+                {/* 3 Skeleton Cards */}
+                {[1, 2, 3].map(i => (
+                  <div key={i} style={{ border: '1px solid #CBD5E1', borderRadius: '12px', padding: '1.25rem', background: '#FFFFFF' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                      <div>
+                        {/* Name & ID Skeleton */}
+                        <div className="skeleton-box" style={{ width: '120px', height: '16px', marginBottom: '0.5rem' }} />
+                        <div className="skeleton-box" style={{ width: '100px', height: '12px' }} />
+                      </div>
+                      {/* Status Badge Skeleton */}
+                      <div className="skeleton-box" style={{ width: '70px', height: '20px', borderRadius: '1rem' }} />
+                    </div>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.25rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <div className="skeleton-box" style={{ width: '60px', height: '12px' }} />
+                        <div className="skeleton-box" style={{ width: '140px', height: '12px' }} />
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <div className="skeleton-box" style={{ width: '70px', height: '12px' }} />
+                        <div className="skeleton-box" style={{ width: '90px', height: '12px' }} />
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <div className="skeleton-box" style={{ width: '40px', height: '12px' }} />
+                        <div className="skeleton-box" style={{ width: '60px', height: '12px' }} />
+                      </div>
+                    </div>
+                    
+                    {/* Button Skeleton */}
+                    <div className="skeleton-box" style={{ width: '100%', height: '36px', borderRadius: '9999px' }} />
+                  </div>
+                ))}
+                
+              </div>
+            </Card>
+          </div>
+        </div>
       ) : sortedDates.length === 0 ? (
         <div style={{ padding: '4rem 2rem', textAlign: 'center', color: '#64748B' }}>
           No surveys found matching your criteria.
@@ -195,49 +270,79 @@ export default function AdminSurveyList() {
                 <Card padding="0" style={{ border: 'none', background: '#EAEFF7', borderRadius: '12px', overflow: 'hidden' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', padding: '1rem', gap: '1rem', background: '#EAEFF7' }}>
                     {group.items.map((s) => (
-                      <div key={s.id} style={{ border: '1px solid #CBD5E1', borderRadius: '12px', padding: '1.25rem', background: '#FFFFFF', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }} className="animate-fade-in">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                      <div key={s.id} style={{ border: '1px solid #E2E8F0', borderRadius: '12px', padding: '1.25rem', background: '#FFFFFF', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)', transition: 'transform 0.2s', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '1rem' }} className="hover-lift" onClick={() => navigate(`/admin/surveys/${s.id}`)}>
+                        
+                        {/* Header Row */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#F8FAFC', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                              <User size={20} color="#475569" />
+                            </div>
+                            <span style={{ 
+                              padding: '0.35rem 0.75rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.025em',
+                              background: s.status === 'SUBMITTED' ? '#FFFBEB' : s.status === 'APPROVED' ? '#ECFDF5' : '#F1F5F9', 
+                              color: s.status === 'SUBMITTED' ? '#B45309' : s.status === 'APPROVED' ? '#047857' : '#475569',
+                              border: `1px solid ${s.status === 'SUBMITTED' ? '#FEF3C7' : s.status === 'APPROVED' ? '#D1FAE5' : '#E2E8F0'}`,
+                              whiteSpace: 'nowrap', flexShrink: 0
+                            }}>
+                              {s.status}
+                            </span>
+                          </div>
                           <div>
-                            <div style={{ fontWeight: 600, color: '#000000', display: 'flex', alignItems: 'center', gap: '0.375rem', marginBottom: '0.25rem', fontSize: '0.9rem' }}>
-                              <User size={14} color="#64748B" /> {s.consumerName || 'Unknown'}
-                            </div>
-                            <div style={{ color: '#64748B', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.375rem', fontWeight: 500 }}>
-                              <Hash size={12} /> {s.surveyNumber}
-                            </div>
-                          </div>
-                          <span style={{ 
-                            padding: '0.25rem 0.5rem', borderRadius: '1rem', fontSize: '0.7rem', fontWeight: 600,
-                            background: '#000000', color: '#FFFFFF', display: 'inline-block'
-                          }}>
-                            {s.status}
-                          </span>
-                        </div>
-                        
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.25rem' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                            <span style={{ color: '#64748B', display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Mail size={12}/> Agent:</span>
-                            <span style={{ fontWeight: 500 }}>{s.agentEmail || 'Unknown'}</span>
-                          </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                            <span style={{ color: '#64748B' }}>Category:</span>
-                            <span style={{ fontWeight: 500 }}>{s.consumerCategory}</span>
-                          </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                            <span style={{ color: '#64748B' }}>Time:</span>
-                            <span style={{ fontWeight: 500 }}>{new Date(s.updatedAt || s.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                            <h4 style={{ margin: 0, fontWeight: 600, color: '#0F172A', fontSize: '1.25rem', wordBreak: 'break-word', lineHeight: '1.4' }}>
+                              {s.consumerName || 'Unknown Contact'}
+                            </h4>
                           </div>
                         </div>
                         
-                        <button 
-                          onClick={() => navigate(`/admin/surveys/${s.id}`)}
-                          style={{ 
-                            padding: '0.625rem 1rem', fontSize: '0.875rem', width: '100%', 
-                            background: 'transparent', color: '#111827', border: '1px solid var(--border-glass)', 
-                            fontWeight: 500, borderRadius: '9999px', cursor: 'pointer', transition: 'all 0.2s'
-                          }}
-                        >
-                          {s.status === 'SUBMITTED' ? 'Review & Approve' : 'View Data'}
-                        </button>
+                        <div style={{ height: '1px', background: '#F1F5F9', width: '100%' }} />
+                        
+                        {/* Info Grid (Responsive) */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1.25rem' }}>
+                          
+                          {/* Agent */}
+                          <div>
+                            <div style={{ fontSize: '0.7rem', color: '#475569', marginBottom: '0.4rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Agent Email</div>
+                            <div style={{ fontSize: '0.9rem', fontWeight: 500, color: '#0F172A', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                              <Mail size={14} color="#94A3B8" />
+                              <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.agentEmail || 'Unknown'}</span>
+                            </div>
+                          </div>
+
+                          {/* Category */}
+                          <div>
+                            <div style={{ fontSize: '0.7rem', color: '#475569', marginBottom: '0.4rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Category</div>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                              <span style={{ padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.025em', ...getCategoryStyle(s.consumerCategory) }}>
+                                {s.consumerCategory}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Time */}
+                          <div>
+                            <div style={{ fontSize: '0.7rem', color: '#475569', marginBottom: '0.4rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Time</div>
+                            <div style={{ fontSize: '0.9rem', fontWeight: 500, color: '#0F172A' }}>{new Date(s.updatedAt || s.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                          </div>
+                        </div>
+                        
+                        {/* Action Button */}
+                        <div style={{ marginTop: '0.5rem' }}>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); navigate(`/admin/surveys/${s.id}`); }}
+                            style={{ 
+                              padding: '0.75rem 1rem', fontSize: '0.9rem', width: '100%', 
+                              background: s.status === 'SUBMITTED' ? '#000000' : '#FFFFFF', 
+                              color: s.status === 'SUBMITTED' ? '#FFFFFF' : '#0F172A', 
+                              border: s.status === 'SUBMITTED' ? '1px solid #000000' : '1px solid #E2E8F0', 
+                              fontWeight: 500, borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s'
+                            }}
+                            onMouseOver={(e) => { if(s.status === 'SUBMITTED') { e.currentTarget.style.background = '#333333'; } else { e.currentTarget.style.background = '#F8FAFC'; } }}
+                            onMouseOut={(e) => { if(s.status === 'SUBMITTED') { e.currentTarget.style.background = '#000000'; } else { e.currentTarget.style.background = '#FFFFFF'; } }}
+                          >
+                            {s.status === 'SUBMITTED' ? 'Review & Approve' : 'View Data'}
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>

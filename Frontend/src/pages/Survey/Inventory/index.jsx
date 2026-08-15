@@ -49,8 +49,10 @@ export default function InventoryForm() {
     setItems(newItems);
   };
 
-  const isReadOnly = surveyData?.survey?.status !== 'DRAFT';
   const isAdmin = localStorage.getItem('userRole') === 'admin';
+  const surveyStatus = surveyData?.survey?.status;
+  const isReadOnly = (!isAdmin && surveyStatus !== 'DRAFT') || (isAdmin && surveyStatus === 'APPROVED');
+
 
   const handleSaveAndContinue = async () => {
     if (isReadOnly) {

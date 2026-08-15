@@ -89,7 +89,8 @@ export default function CommercialForm() {
   }, [currentStep]);
 
   const isAdmin = localStorage.getItem('userRole') === 'admin';
-  const isReadOnly = !isAdmin && surveyData?.survey?.status !== 'DRAFT';
+  const surveyStatus = surveyData?.survey?.status;
+  const isReadOnly = (!isAdmin && surveyStatus !== 'DRAFT') || (isAdmin && surveyStatus === 'APPROVED');
 
   const handleNext = () => {
     setCurrentStep(prev => Math.min(prev + 1, STEPS.length));

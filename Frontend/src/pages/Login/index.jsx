@@ -49,14 +49,7 @@ export default function Login() {
         navigate('/agent/dashboard');
       }
     } catch (err) {
-      // Mock login for demo purposes
-      if (email === 'admin@test.com' || email === 'agent@test.com') {
-        const role = email === 'admin@test.com' ? 'admin' : 'agent';
-        localStorage.setItem('userRole', role);
-        navigate(`/${role}/dashboard`);
-        return;
-      }
-      setError(err.message || "Invalid credentials. Try admin@test.com for demo.");
+      setError(err.message || "Invalid credentials.");
       setStep('PASSWORD'); // Go back to password state on error
     }
   };

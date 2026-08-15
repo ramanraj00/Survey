@@ -59,7 +59,7 @@ export default function InviteSignup() {
     }}>
       <div style={{ width: '100%', maxWidth: '400px' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <h1 className="gradient-text" style={{ margin: '0 0 0.5rem 0' }}>SmartMeter</h1>
+          <h1 className="gradient-text" style={{ margin: '0 0 0.5rem 0' }}>Survey</h1>
           <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Agent Registration</p>
         </div>
         

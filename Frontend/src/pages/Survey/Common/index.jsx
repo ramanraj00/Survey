@@ -14,7 +14,9 @@ export default function CommonForm() {
   const [toastMessage, setToastMessage] = useState('');
   const totalSteps = 3;
 
-  const isReadOnly = surveyData?.survey?.status !== 'DRAFT' && localStorage.getItem('userRole') === 'agent';
+  const isAdmin = localStorage.getItem('userRole') === 'admin';
+  const surveyStatus = surveyData?.survey?.status;
+  const isReadOnly = (!isAdmin && surveyStatus !== 'DRAFT') || (isAdmin && surveyStatus === 'APPROVED');
 
   useEffect(() => {
     if (!surveyData || surveyData.survey?.id !== id) {
@@ -35,7 +37,7 @@ export default function CommonForm() {
     setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
-  const isAdmin = localStorage.getItem('userRole') === 'admin';
+
 
   useEffect(() => {
     document.querySelector('main')?.scrollTo({ top: 0, behavior: 'smooth' });
@@ -419,7 +421,7 @@ export default function CommonForm() {
               if (!isSaving) e.currentTarget.style.transform = 'translateY(0)';
             }}
           >
-            {isSaving ? 'Saving...' : currentStep === totalSteps ? (isReadOnly ? 'Finish' : 'Save & Finish') : (isReadOnly || isAdmin ? 'Next' : 'Save & Continue')}
+            {isSaving ? 'Saving...' : currentStep === totalSteps ? (isReadOnly ? 'Next' : 'Save & Finish') : (isReadOnly || isAdmin ? 'Next' : 'Save & Continue')}
           </button>
         </div>
       </div>
