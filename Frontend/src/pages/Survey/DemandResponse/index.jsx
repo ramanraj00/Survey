@@ -61,7 +61,7 @@ export default function DemandResponseForm() {
   const handleSave = async (e) => {
     e.preventDefault();
     if (isReadOnly) {
-      navigate(`${baseRoute}/surveys/${id}/submit`);
+      navigate(`${baseRoute}/surveys/${id}${isAdmin ? '/edit' : ''}/submit`);
       return;
     }
     if (isFormEmpty(formData)) {
@@ -73,7 +73,7 @@ export default function DemandResponseForm() {
     setSaveError(null);
     try {
       await saveSection('demandResponse', formData);
-      navigate(`${baseRoute}/surveys/${id}/submit`);
+      navigate(`${baseRoute}/surveys/${id}${isAdmin ? '/edit' : ''}/submit`);
     } catch (err) {
       setSaveError(err.message || 'Failed to save demand response details');
     } finally {

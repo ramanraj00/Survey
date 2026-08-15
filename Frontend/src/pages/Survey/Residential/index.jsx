@@ -112,7 +112,7 @@ export default function ResidentialForm() {
   const handleSave = async (e) => {
     e.preventDefault();
     if (isReadOnly) {
-      navigate(`${baseRoute}/surveys/${id}/submit`);
+      navigate(`${baseRoute}/surveys/${id}${isAdmin ? '/edit' : ''}/submit`);
       return;
     }
     if (isFormEmpty(formData) && isFormEmpty(drData)) {
@@ -130,7 +130,7 @@ export default function ResidentialForm() {
       await saveSection('demandResponse', { profiles: drData }, resResult.newVersion);
       
       // Navigate to the submit page
-      navigate(`${baseRoute}/surveys/${id}/submit`);
+      navigate(`${baseRoute}/surveys/${id}${isAdmin ? '/edit' : ''}/submit`);
     } catch (err) {
       setToastMessage(err.message || 'Failed to save residential details');
     } finally {
@@ -142,7 +142,7 @@ export default function ResidentialForm() {
   if (contextError) return <div className="glass-card" style={{padding: '2rem', color: 'var(--error)'}}>{contextError}</div>;
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', paddingBottom: '4rem' }}>
+    <div style={{ maxWidth: '1300px', margin: '0 auto', paddingBottom: '4rem' }}>
       <h1 style={{ marginBottom: '0.5rem', color: '#0F172A', fontSize: '1.75rem', fontWeight: 700 }}>Residential Consumer Form</h1>
       <p style={{ color: '#64748B', marginBottom: '2rem' }}>Fill out the details for residential consumers.</p>
       
@@ -213,7 +213,7 @@ export default function ResidentialForm() {
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', paddingTop: '1.5rem', borderTop: '1px solid #E2E8F0' }}>
           <div>
             {currentStep === 1 ? (
-              <Button type="button" variant="secondary" onClick={() => navigate(`${baseRoute}/surveys/${id}/common`)}>
+              <Button type="button" variant="secondary" onClick={() => navigate(`${baseRoute}/surveys/${id}${isAdmin ? '/edit' : ''}/common`)}>
                 Back to Common Details
               </Button>
             ) : (

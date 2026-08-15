@@ -176,7 +176,12 @@ export const AdminAPI = {
       // data might already be { items: [...] } or just an array
       payload = { version, items: data.items ? data.items : data };
     }
-    return apiFetch(`/admin/surveys/${id}/${sectionPath}`, {
+    
+    // Map camelCase to kebab-case to match backend route
+    const routePath = sectionPath === 'demandResponse' ? 'demand-response' : 
+                      sectionPath === 'commonDetails' ? 'common-details' : sectionPath;
+                      
+    return apiFetch(`/admin/surveys/${id}/${routePath}`, {
       method: 'PATCH',
       body: JSON.stringify(payload)
     });

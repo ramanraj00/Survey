@@ -132,8 +132,8 @@ export default function CommonLoadsSection({ data = [], onChange }) {
       {/* OTHER COMMON LOADS */}
       <div>
         <h4 style={{ marginBottom: '1rem', color: '#334155' }}>C4.17 Other Common Loads</h4>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1000px' }}>
+        <div className="table-wrapper" style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center', minWidth: '1000px' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid #E2E8F0', color: '#475569', fontSize: '0.8rem' }}>
                 <th style={{ padding: '1rem' }}>Load Name</th>
@@ -159,15 +159,15 @@ export default function CommonLoadsSection({ data = [], onChange }) {
                     </td>
                     {row.available === true ? (
                       <>
-                        <td data-label="Operating Time" style={{ padding: '0.5rem' }}><input type="text" className="form-input" value={row.typicalOperatingTime || ''} onChange={e => handleChange(idx, 'typicalOperatingTime', e.target.value)} /></td>
+                        <td data-label="Operating Time" style={{ padding: '0.5rem' }}><input type="text" className="form-input" style={{ textAlign: 'left' }} value={row.typicalOperatingTime || ''} onChange={e => handleChange(idx, 'typicalOperatingTime', e.target.value)} /></td>
                         <td data-label="Used in peak?" style={{ padding: '0.5rem' }}>
                           <Select className="form-input" value={row.operatesDuringPeak === true ? 'true' : row.operatesDuringPeak === false ? 'false' : ''} onChange={e => handleChange(idx, 'operatesDuringPeak', e.target.value === 'true' ? true : e.target.value === 'false' ? false : null)}>
                             <option value="">-</option><option value="true">Yes</option><option value="false">No</option>
                           </Select>
                         </td>
-                        <td data-label="Adjustment" style={{ padding: '0.5rem' }}><input type="text" className="form-input" value={row.possibleAdjustment || ''} onChange={e => handleChange(idx, 'possibleAdjustment', e.target.value)} /></td>
-                        <td data-label="Max Duration" style={{ padding: '0.5rem' }}><input type="number" className="form-input" value={row.maximumDuration || ''} onChange={e => handleChange(idx, 'maximumDuration', e.target.value)} /></td>
-                        <td data-label="Constraints" style={{ padding: '0.5rem' }}><input type="text" className="form-input" value={row.constraints || ''} onChange={e => handleChange(idx, 'constraints', e.target.value)} /></td>
+                        <td data-label="Adjustment" style={{ padding: '0.5rem' }}><input type="text" className="form-input" style={{ textAlign: 'left' }} value={row.possibleAdjustment || ''} onChange={e => handleChange(idx, 'possibleAdjustment', e.target.value)} /></td>
+                        <td data-label="Max Duration" style={{ padding: '0.5rem' }}><input type="number" className="form-input" style={{ textAlign: 'left' }} value={row.maximumDuration || ''} onChange={e => handleChange(idx, 'maximumDuration', e.target.value)} /></td>
+                        <td data-label="Constraints" style={{ padding: '0.5rem' }}><input type="text" className="form-input" style={{ textAlign: 'left' }} value={row.constraints || ''} onChange={e => handleChange(idx, 'constraints', e.target.value)} /></td>
                       </>
                     ) : (
                       <td colSpan="5" className="not-applicable-td">Not applicable</td>
@@ -183,17 +183,55 @@ export default function CommonLoadsSection({ data = [], onChange }) {
       <style>{`
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
         .form-label { display: block; font-size: 0.875rem; font-weight: 600; color: #475569; margin-bottom: 0.5rem; }
-        .form-input { width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid #E2E8F0; background-color: #FFFFFF; color: #0F172A; font-size: 0.85rem; box-sizing: border-box; }
+        .table-wrapper .form-input, .table-wrapper .custom-select-trigger.form-input { width: 100%; padding: 0.5rem 0.5rem; border-radius: 6px; border: 1px solid #E2E8F0; background-color: #FFFFFF; color: #0F172A; font-size: 0.85rem; box-sizing: border-box; min-height: 38px; height: 38px; text-align: center; }
+        .table-wrapper select.form-input { height: 38px; padding: 0 0.5rem; text-align: center; }
+        
+        @media (min-width: 769px) {
+          .table-wrapper table td, .table-wrapper table th { padding: 1.25rem 0.5rem !important; vertical-align: middle !important; text-align: center !important; }
+        }
         .responsive-tr { border-bottom: 1px solid #F1F5F9; }
         .not-applicable-td { padding: 0.5rem; color: #94A3B8; font-size: 0.85rem; text-align: center; background-color: #transparent; }
         
         @media (max-width: 768px) {
+          .table-wrapper { overflow: visible !important; overflow-x: visible !important; overflow-y: visible !important; }
+          .table-wrapper .form-input, .table-wrapper .custom-select-trigger.form-input { padding: 0.875rem 1rem; border-radius: 12px; background-color: #F8FAFC; font-size: 0.95rem; min-height: auto; height: auto; }
+          .table-wrapper select.form-input { height: auto; padding: 0.875rem 1rem; }
           table, thead, tbody, th, td, tr { display: block; }
+          table { min-width: unset !important; }
           thead tr { display: none; }
-          .responsive-tr { margin-bottom: 1rem; border: 1px solid #E2E8F0; border-radius: 8px; padding: 0.5rem; background: #fff; }
-          td { position: relative; padding: 0.5rem !important; padding-top: 2rem !important; border-bottom: none !important; }
-          td:before { position: absolute; top: 0.5rem; left: 0.5rem; font-size: 0.75rem; font-weight: 600; color: #64748B; content: attr(data-label); }
-          .not-applicable-td { padding-top: 1rem !important; background: #F8FAFC; border-radius: 4px; margin-top: 0.5rem; }
+          
+          .responsive-tr { 
+            margin-bottom: 2rem; 
+            border: none;
+            border-bottom: 1px solid #E2E8F0;
+            border-radius: 0; 
+            padding: 0 0 2rem 0; 
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+          }
+          .responsive-tr:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+          }
+          .table-wrapper table td { 
+            display: flex !important; 
+            flex-direction: column; 
+            gap: 0.5rem;
+            padding: 0 !important; 
+            border-bottom: none !important;
+            text-align: left !important;
+          }
+          .table-wrapper table td:before { 
+            content: attr(data-label);
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #475569;
+            position: static !important;
+          }
+          .not-applicable-td { padding: 1rem !important; background: #F8FAFC; border-radius: 12px; margin-top: 0; }
         }
       `}</style>
     </Card>

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
@@ -13,6 +13,37 @@ const CATEGORY_OPTIONS = [
   { value: 'INDUSTRIAL', label: 'Industrial' },
   { value: 'INVENTORY', label: 'Inventory' },
 ];
+
+const SELECT_STYLE = {
+  width: '100%',
+  padding: '0.75rem 1rem',
+  borderRadius: 'var(--radius-md)',
+  background: 'var(--bg-primary)',
+  border: '1px solid var(--border-glass)',
+  color: 'var(--text-primary)',
+  fontSize: '0.875rem',
+  outline: 'none',
+  transition: 'border-color 0.2s, box-shadow 0.2s'
+};
+
+const INPUT_STYLE = {
+  width: '100%',
+  padding: '0.75rem 1rem',
+  borderRadius: 'var(--radius-md)',
+  background: 'var(--bg-primary)',
+  border: '1px solid var(--border-glass)',
+  color: 'var(--text-primary)',
+  fontSize: '0.875rem',
+  outline: 'none',
+  transition: 'border-color 0.2s, box-shadow 0.2s'
+};
+
+const BUTTON_STYLE = { 
+  width: '100%', 
+  maxWidth: '300px', 
+  height: '48px', 
+  fontSize: '1rem' 
+};
 
 export default function SurveyCreate() {
   const [category, setCategory] = useState('');
@@ -85,17 +116,7 @@ export default function SurveyCreate() {
               value={category} 
               onChange={handleCategoryChange}
               options={CATEGORY_OPTIONS}
-              style={{
-                width: '100%',
-                padding: '0.75rem 1rem',
-                borderRadius: 'var(--radius-md)',
-                background: 'var(--bg-primary)',
-                border: '1px solid var(--border-glass)',
-                color: 'var(--text-primary)',
-                fontSize: '0.875rem',
-                outline: 'none',
-                transition: 'border-color 0.2s, box-shadow 0.2s'
-              }}
+              style={SELECT_STYLE}
             />
           </div>
 
@@ -108,17 +129,7 @@ export default function SurveyCreate() {
               value={subcategory}
               onChange={handleSubcategoryChange}
               placeholder="e.g. IT Park, Steel Plant, etc."
-              style={{
-                width: '100%',
-                padding: '0.75rem 1rem',
-                borderRadius: 'var(--radius-md)',
-                background: 'var(--bg-primary)',
-                border: '1px solid var(--border-glass)',
-                color: 'var(--text-primary)',
-                fontSize: '0.875rem',
-                outline: 'none',
-                transition: 'border-color 0.2s, box-shadow 0.2s'
-              }}
+              style={INPUT_STYLE}
               onFocus={(e) => {
                 e.target.style.borderColor = 'var(--accent-primary)';
                 e.target.style.boxShadow = '0 0 0 2px rgba(59, 130, 246, 0.2)';
@@ -131,9 +142,11 @@ export default function SurveyCreate() {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
-            <Button type="submit" isLoading={isLoading} style={{ width: '100%', maxWidth: '300px', height: '48px', fontSize: '1rem' }}>
-              Create & Proceed
-            </Button>
+            {useMemo(() => (
+              <Button type="submit" isLoading={isLoading} style={BUTTON_STYLE}>
+                Create & Proceed
+              </Button>
+            ), [isLoading])}
           </div>
         </form>
       </Card>

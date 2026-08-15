@@ -137,7 +137,7 @@ export default function AdminSurveyView() {
               {data.auditLogs.map(log => (
                 <div key={log.id} style={{ background: '#FFFFFF', padding: '1rem', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
                   <div style={{ fontSize: '0.75rem', color: '#6B7280', fontWeight: 500, marginBottom: '0.25rem' }}>
-                    {new Date(log.changedAt).toLocaleString()}
+                    {new Date(log.createdAt).toLocaleString()}
                   </div>
                   <div style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.125rem', color: '#111827' }}>
                     {log.section} • {log.field}

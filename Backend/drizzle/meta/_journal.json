@@ -8,6 +8,13 @@
       "when": 1786405606457,
       "tag": "0000_redundant_vision",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1786828363536,
+      "tag": "0001_good_boom_boom",
+      "breakpoints": true
     }
   ]
 }

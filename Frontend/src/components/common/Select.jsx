@@ -21,12 +21,11 @@ const Select = memo(function Select({
     if (!children) return [];
     
     const opts = [];
-    React.Children.forEach(children, child => {
-      if (React.isValidElement(child) && child.type === 'option') {
-        opts.push({
-          value: child.props.value !== undefined ? child.props.value : child.props.children,
-          label: child.props.children
-        });
+    React.Children.toArray(children).forEach(child => {
+      if (React.isValidElement(child)) {
+        const val = child.props.value !== undefined ? child.props.value : child.props.children;
+        const label = child.props.children;
+        opts.push({ value: val, label: label });
       }
     });
     return opts;
@@ -59,27 +58,37 @@ const Select = memo(function Select({
     <div 
       ref={containerRef} 
       style={{ position: position || 'relative', zIndex: isOpen ? 50 : 1, width: width || '100%', flex, margin, marginTop, marginBottom, marginLeft, marginRight }} 
-      className={`custom-select-container ${disabled ? 'disabled' : ''} ${className || ''}`}
+      className={`custom-select-container ${disabled ? 'disabled' : ''}`}
+      data-open={isOpen}
     >
+      <style>{`
+        .custom-select-trigger-default {
+          width: 100%;
+          padding: 0.75rem 1rem;
+          border-radius: var(--radius-md, 8px);
+          background: #FFFFFF;
+          border: 1px solid var(--border-glass, #E2E8F0);
+          color: var(--text-primary, #0F172A);
+          cursor: pointer;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          min-height: 42px;
+          user-select: none;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+          box-sizing: border-box;
+        }
+        .custom-select-trigger-default.disabled {
+          background: rgba(15, 23, 42, 0.05);
+          color: var(--text-secondary, #64748B);
+          cursor: not-allowed;
+          box-shadow: none;
+        }
+      `}</style>
       <div 
-        className="custom-select-trigger"
+        className={`custom-select-trigger custom-select-trigger-default ${disabled ? 'disabled' : ''} ${className || ''}`}
         onClick={() => !disabled && setIsOpen(!isOpen)}
-        style={{
-          width: '100%',
-          padding: '0.75rem 1rem',
-          borderRadius: 'var(--radius-md)',
-          background: disabled ? 'rgba(15, 23, 42, 0.05)' : '#FFFFFF',
-          border: '1px solid var(--border-glass)',
-          color: disabled ? 'var(--text-secondary)' : 'var(--text-primary)',
-          cursor: disabled ? 'not-allowed' : 'pointer',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          minHeight: '42px',
-          userSelect: 'none',
-          boxShadow: disabled ? 'none' : '0 1px 2px rgba(0, 0, 0, 0.05)',
-          ...triggerStyle
-        }}
+        style={{ ...triggerStyle }}
         {...props}
       >
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

@@ -160,11 +160,17 @@ export default function CommonForm() {
       
       {/* DISCOM Rep */}
       <div><label style={labelStyle}>DISCOM Rep Present?</label>
-        <Select name="discomRepresentativePresent" value={formData.discomRepresentativePresent || ''} onChange={handleChange} style={inputStyle}>
-          <option value="">Select</option>
-          <option value="true">Yes</option>
-          <option value="false">No</option>
-        </Select>
+        <Select 
+          name="discomRepresentativePresent" 
+          value={formData.discomRepresentativePresent || ''} 
+          onChange={handleChange} 
+          style={inputStyle}
+          options={[
+            { value: '', label: 'Select' },
+            { value: 'true', label: 'Yes' },
+            { value: 'false', label: 'No' }
+          ]}
+        />
       </div>
       <div><label style={labelStyle}>DISCOM Rep Name</label><input name="discomRepresentativeName" value={formData.discomRepresentativeName || ''} onChange={handleChange} style={inputStyle} /></div>
       <div><label style={labelStyle}>DISCOM Rep Designation</label><input name="discomRepresentativeDesignation" value={formData.discomRepresentativeDesignation || ''} onChange={handleChange} style={inputStyle} /></div>
@@ -181,18 +187,30 @@ export default function CommonForm() {
 
       {/* Consent */}
       <div><label style={labelStyle}>Consent to Collect Info</label>
-        <Select name="consentToCollect" value={formData.consentToCollect || ''} onChange={handleChange} style={inputStyle}>
-          <option value="">Select</option>
-          <option value="true">Yes</option>
-          <option value="false">No</option>
-        </Select>
+        <Select 
+          name="consentToCollect" 
+          value={formData.consentToCollect || ''} 
+          onChange={handleChange} 
+          style={inputStyle}
+          options={[
+            { value: '', label: 'Select' },
+            { value: 'true', label: 'Yes' },
+            { value: 'false', label: 'No' }
+          ]}
+        />
       </div>
       <div><label style={labelStyle}>Consent to Photos</label>
-        <Select name="consentToPhotos" value={formData.consentToPhotos || ''} onChange={handleChange} style={inputStyle}>
-          <option value="">Select</option>
-          <option value="true">Yes</option>
-          <option value="false">No</option>
-        </Select>
+        <Select 
+          name="consentToPhotos" 
+          value={formData.consentToPhotos || ''} 
+          onChange={handleChange} 
+          style={inputStyle}
+          options={[
+            { value: '', label: 'Select' },
+            { value: 'true', label: 'Yes' },
+            { value: 'false', label: 'No' }
+          ]}
+        />
       </div>
     </div>
   );
@@ -217,11 +235,17 @@ export default function CommonForm() {
       <div><label style={labelStyle}>DTR Name/Code</label><input name="dtrName" value={formData.dtrName || ''} onChange={handleChange} style={inputStyle} /></div>
 
       <div style={{ gridColumn: '1 / -1' }}><label style={labelStyle}>More than one electricity connection/meter?</label>
-        <Select name="hasMultipleConnections" value={formData.hasMultipleConnections || ''} onChange={handleChange} style={inputStyle}>
-          <option value="">Select</option>
-          <option value="true">Yes</option>
-          <option value="false">No</option>
-        </Select>
+        <Select 
+          name="hasMultipleConnections" 
+          value={formData.hasMultipleConnections || ''} 
+          onChange={handleChange} 
+          style={inputStyle}
+          options={[
+            { value: '', label: 'Select' },
+            { value: 'true', label: 'Yes' },
+            { value: 'false', label: 'No' }
+          ]}
+        />
       </div>
       {formData.hasMultipleConnections === 'true' && (
         <>
@@ -250,13 +274,19 @@ export default function CommonForm() {
       <div><label style={labelStyle}>Occupancy</label><input name="occupancy" value={formData.occupancy || ''} onChange={handleChange} style={inputStyle} /></div>
       
       <div><label style={labelStyle}>Seasonality</label>
-        <Select name="seasonality" value={formData.seasonality || ''} onChange={handleChange} style={inputStyle}>
-          <option value="">Select</option>
-          <option value="Higher in summer">Higher in summer</option>
-          <option value="Higher in winter">Higher in winter</option>
-          <option value="Higher in monsoon">Higher in monsoon</option>
-          <option value="No Major Variation">No Major Variation</option>
-        </Select>
+        <Select 
+          name="seasonality" 
+          value={formData.seasonality || ''} 
+          onChange={handleChange} 
+          style={inputStyle}
+          options={[
+            { value: '', label: 'Select' },
+            { value: 'Higher in summer', label: 'Higher in summer' },
+            { value: 'Higher in winter', label: 'Higher in winter' },
+            { value: 'Higher in monsoon', label: 'Higher in monsoon' },
+            { value: 'No Major Variation', label: 'No Major Variation' }
+          ]}
+        />
       </div>
 
       <div style={{ gridColumn: '1 / -1' }}><label style={labelStyle}>On Site Alternative Sources</label></div>
@@ -274,11 +304,17 @@ export default function CommonForm() {
       </label></div>
 
       <div style={{ gridColumn: '1 / -1' }}><label style={labelStyle}>Frequent power outages?</label>
-        <Select name="frequentPowerOutages" value={formData.frequentPowerOutages || ''} onChange={handleChange} style={inputStyle}>
-          <option value="">Select</option>
-          <option value="true">Yes</option>
-          <option value="false">No</option>
-        </Select>
+        <Select 
+          name="frequentPowerOutages" 
+          value={formData.frequentPowerOutages || ''} 
+          onChange={handleChange} 
+          style={inputStyle}
+          options={[
+            { value: '', label: 'Select' },
+            { value: 'true', label: 'Yes' },
+            { value: 'false', label: 'No' }
+          ]}
+        />
       </div>
       <div style={{ gridColumn: '1 / -1' }}><label style={labelStyle}>Outage Remarks</label><input name="outageRemarks" value={formData.outageRemarks || ''} onChange={handleChange} style={inputStyle} /></div>
     </div>

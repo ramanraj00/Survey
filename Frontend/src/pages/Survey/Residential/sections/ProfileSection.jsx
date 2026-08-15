@@ -15,12 +15,18 @@ export default function ProfileSection({ data = {}, onChange }) {
         {/* C1.1 Type of Residence */}
         <div>
           <label className="form-label">Type of Residence (C1.1)</label>
-          <Select className="form-input" name="residenceType" value={data.residenceType || ''} onChange={handleChange}>
-            <option value="">Select</option>
-            <option value="Independent house">Independent house</option>
-            <option value="Apartment">Apartment</option>
-            <option value="Other">Other</option>
-          </Select>
+          <Select 
+            className="form-input" 
+            name="residenceType" 
+            value={data.residenceType || ''} 
+            onChange={handleChange}
+            options={[
+              { value: '', label: 'Select' },
+              { value: 'Independent house', label: 'Independent house' },
+              { value: 'Apartment', label: 'Apartment' },
+              { value: 'Other', label: 'Other' }
+            ]}
+          />
         </div>
 
         {/* C1.2 Approx Built Area */}
@@ -31,10 +37,16 @@ export default function ProfileSection({ data = {}, onChange }) {
           </div>
           <div style={{ flex: 1 }}>
              <label className="form-label">&nbsp;</label>
-             <Select className="form-input" name="builtAreaUnit" value={data.builtAreaUnit || ''} onChange={handleChange}>
-               <option value="sq/ft">sq/ft</option>
-               <option value="Not known">Not known</option>
-             </Select>
+             <Select 
+               className="form-input" 
+               name="builtAreaUnit" 
+               value={data.builtAreaUnit || ''} 
+               onChange={handleChange}
+               options={[
+                 { value: 'sq/ft', label: 'sq/ft' },
+                 { value: 'Not known', label: 'Not known' }
+               ]}
+             />
           </div>
         </div>
 
@@ -51,11 +63,17 @@ export default function ProfileSection({ data = {}, onChange }) {
         {/* C1.4 WFH */}
         <div>
           <label className="form-label">Anyone regularly WFH? (C1.4)</label>
-          <Select className="form-input" name="workFromHome" value={data.workFromHome === true ? 'true' : data.workFromHome === false ? 'false' : ''} onChange={e => onChange('workFromHome', e.target.value === 'true')}>
-            <option value="">Select</option>
-            <option value="true">Yes</option>
-            <option value="false">No</option>
-          </Select>
+          <Select 
+            className="form-input" 
+            name="workFromHome" 
+            value={data.workFromHome === true ? 'true' : data.workFromHome === false ? 'false' : ''} 
+            onChange={e => onChange('workFromHome', e.target.value === 'true')}
+            options={[
+              { value: '', label: 'Select' },
+              { value: 'true', label: 'Yes' },
+              { value: 'false', label: 'No' }
+            ]}
+          />
         </div>
 
         {data.workFromHome && (
@@ -74,24 +92,36 @@ export default function ProfileSection({ data = {}, onChange }) {
         {/* C1.5 Weekends */}
         <div>
           <label className="form-label">More people home on weekends? (C1.5)</label>
-          <Select className="form-input" name="morePeopleOnWeekend" value={data.morePeopleOnWeekend === true ? 'true' : data.morePeopleOnWeekend === false ? 'false' : ''} onChange={e => onChange('morePeopleOnWeekend', e.target.value === 'true')}>
-            <option value="">Select</option>
-            <option value="true">Yes</option>
-            <option value="false">No</option>
-          </Select>
+          <Select 
+            className="form-input" 
+            name="morePeopleOnWeekend" 
+            value={data.morePeopleOnWeekend === true ? 'true' : data.morePeopleOnWeekend === false ? 'false' : ''} 
+            onChange={e => onChange('morePeopleOnWeekend', e.target.value === 'true')}
+            options={[
+              { value: '', label: 'Select' },
+              { value: 'true', label: 'Yes' },
+              { value: 'false', label: 'No' }
+            ]}
+          />
         </div>
 
         {/* C1.6 Usage period */}
         <div>
           <label className="form-label">Highest usage period (C1.6)</label>
-          <Select className="form-input" name="highestUsagePeriod" value={data.highestUsagePeriod || ''} onChange={handleChange}>
-            <option value="">Select</option>
-            <option value="Morning">Morning</option>
-            <option value="Afternoon">Afternoon</option>
-            <option value="Evening">Evening</option>
-            <option value="Night">Night</option>
-            <option value="Not sure">Not sure</option>
-          </Select>
+          <Select 
+            className="form-input" 
+            name="highestUsagePeriod" 
+            value={data.highestUsagePeriod || ''} 
+            onChange={handleChange}
+            options={[
+              { value: '', label: 'Select' },
+              { value: 'Morning', label: 'Morning' },
+              { value: 'Afternoon', label: 'Afternoon' },
+              { value: 'Evening', label: 'Evening' },
+              { value: 'Night', label: 'Night' },
+              { value: 'Not sure', label: 'Not sure' }
+            ]}
+          />
         </div>
 
         {/* C1.7 Activities */}
@@ -103,13 +133,19 @@ export default function ProfileSection({ data = {}, onChange }) {
         {/* C1.8 Bill checking */}
         <div>
           <label className="form-label">Bill checking freq (C1.8)</label>
-          <Select className="form-input" name="billCheckingFrequency" value={data.billCheckingFrequency || ''} onChange={handleChange}>
-            <option value="">Select</option>
-            <option value="Every month">Every month</option>
-            <option value="Occasionally">Occasionally</option>
-            <option value="Only when the bill is high">Only when the bill is high</option>
-            <option value="Never">Never</option>
-          </Select>
+          <Select 
+            className="form-input" 
+            name="billCheckingFrequency" 
+            value={data.billCheckingFrequency || ''} 
+            onChange={handleChange}
+            options={[
+              { value: '', label: 'Select' },
+              { value: 'Every month', label: 'Every month' },
+              { value: 'Occasionally', label: 'Occasionally' },
+              { value: 'Only when the bill is high', label: 'Only when the bill is high' },
+              { value: 'Never', label: 'Never' }
+            ]}
+          />
         </div>
       </div>
       <style>{`

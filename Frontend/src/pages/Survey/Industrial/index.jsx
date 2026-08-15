@@ -153,7 +153,7 @@ export default function IndustrialForm() {
 
   const handlePrev = () => {
     if (currentStep === 1) {
-      navigate(`${baseRoute}/surveys/${id}/common`);
+      navigate(`${baseRoute}/surveys/${id}${isAdmin ? '/edit' : ''}/common`);
     } else {
       setCurrentStep(prev => Math.max(prev - 1, 1));
     }
@@ -164,7 +164,7 @@ export default function IndustrialForm() {
       if (currentStep < STEPS.length) {
         setCurrentStep(prev => prev + 1);
       } else {
-        navigate(`${baseRoute}/surveys/${id}/submit`);
+        navigate(`${baseRoute}/surveys/${id}${isAdmin ? '/edit' : ''}/submit`);
       }
       return;
     }
@@ -261,7 +261,7 @@ export default function IndustrialForm() {
       
       await saveSection('demandResponse', { industrialDR: mappedDR }, indResult.newVersion);
       
-      navigate(`${baseRoute}/surveys/${id}/submit`);
+      navigate(`${baseRoute}/surveys/${id}${isAdmin ? '/edit' : ''}/submit`);
     } catch (err) {
       setSaveError(err.message || 'Failed to save industrial details');
     } finally {

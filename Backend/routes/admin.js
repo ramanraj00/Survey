@@ -233,7 +233,10 @@ adminRouter.get('/surveys/:id', async (req, res) => {
       if (agentUser.length > 0) agentEmail = agentUser[0].email;
     }
 
-    res.json({ ...fullSurvey, agentEmail });
+    // Fetch audit logs
+    const auditLogs = await db.select().from(surveyAuditLogs).where(eq(surveyAuditLogs.surveyId, id)).orderBy(sql`${surveyAuditLogs.createdAt} DESC`);
+
+    res.json({ ...fullSurvey, agentEmail, auditLogs });
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch survey details" });
   }

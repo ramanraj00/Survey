@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { LogOut, Home, FileText, PlusCircle, Settings, Users } from 'lucide-react';
 
@@ -47,7 +47,7 @@ const AppLayout = memo(function AppLayout() {
         </div>
 
         <nav className="app-sidebar-nav">
-          {links.map((link) => {
+          {useMemo(() => links.map((link) => {
             const isActive = location.pathname.startsWith(link.to);
             return (
               <Link 
@@ -59,7 +59,7 @@ const AppLayout = memo(function AppLayout() {
                 <span className="nav-label">{link.label}</span>
               </Link>
             )
-          })}
+          }), [links, location.pathname])}
         </nav>
       </aside>
 

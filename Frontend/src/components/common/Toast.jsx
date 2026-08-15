@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 
-export default function Toast({ message, onClose }) {
+export default function Toast({ message, type, onClose }) {
   useEffect(() => {
     if (message) {
       const timer = setTimeout(() => {
@@ -42,7 +42,13 @@ export default function Toast({ message, onClose }) {
         whiteSpace: 'nowrap',
         maxWidth: '90vw'
       }}>
-        <CheckCircle2 size={18} color="#10B981" style={{ flexShrink: 0 }} />
+        {type === 'error' ? (
+          <XCircle size={18} color="#EF4444" style={{ flexShrink: 0 }} />
+        ) : type === 'warning' ? (
+          <AlertCircle size={18} color="#F59E0B" style={{ flexShrink: 0 }} />
+        ) : (
+          <CheckCircle2 size={18} color="#10B981" style={{ flexShrink: 0 }} />
+        )}
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{message}</span>
       </div>
     </>

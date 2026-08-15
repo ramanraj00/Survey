@@ -98,7 +98,7 @@ export default function CommercialForm() {
 
   const handlePrev = () => {
     if (currentStep === 1) {
-      navigate(`${baseRoute}/surveys/${id}/common`);
+      navigate(`${baseRoute}/surveys/${id}${isAdmin ? '/edit' : ''}/common`);
     } else {
       setCurrentStep(prev => Math.max(prev - 1, 1));
     }
@@ -109,7 +109,7 @@ export default function CommercialForm() {
       if (currentStep < STEPS.length) {
         setCurrentStep(prev => prev + 1);
       } else {
-        navigate(`${baseRoute}/surveys/${id}/submit`);
+        navigate(`${baseRoute}/surveys/${id}${isAdmin ? '/edit' : ''}/submit`);
       }
       return;
     }
@@ -191,7 +191,7 @@ export default function CommercialForm() {
       }, version);
 
       // Successfully saved all sections, navigate to submit
-      navigate(`${baseRoute}/surveys/${id}/submit`);
+      navigate(`${baseRoute}/surveys/${id}${isAdmin ? '/edit' : ''}/submit`);
 
     } catch (err) {
       console.error(err);
