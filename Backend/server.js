@@ -91,18 +91,21 @@ app.post("/api/auth/accept-invite", authRateLimiter, async (req, res) => {
 app.use("/api/auth", toNodeHandler(auth));
 
 const PORT = process.env.PORT || 3000;
-const server = app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
-
-// Graceful shutdown — closes DB pool cleanly on SIGTERM/SIGINT
-const shutdown = async (signal) => {
-  console.log(`${signal} received. Shutting down gracefully...`);
-  server.close(() => {
-    console.log('HTTP server closed.');
-    process.exit(0);
+if (process.env.NODE_ENV !== 'production') {
+  const server = app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
   });
-};
-process.on('SIGTERM', () => shutdown('SIGTERM'));
-process.on('SIGINT', () => shutdown('SIGINT'));
 
+  // Graceful shutdown
+  const shutdown = async (signal) => {
+    console.log(`${signal} received. Shutting down gracefully...`);
+    server.close(() => {
+      console.log('HTTP server closed.');
+      process.exit(0);
+    });
+  };
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
+}
+
+export default app;
