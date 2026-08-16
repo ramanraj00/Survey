@@ -83,7 +83,8 @@ app.post("/api/auth/accept-invite", authRateLimiter, async (req, res) => {
     res.json({ success: true, message: "Account created successfully. You can now login." });
   } catch (err) {
     console.error("Accept invite error:", err);
-    res.status(500).json({ error: "Failed to accept invitation. The email might already be registered." });
+    const errorMessage = err.message || "Failed to accept invitation. The email might already be registered.";
+    res.status(500).json({ error: errorMessage });
   }
 });
 
