@@ -41,6 +41,12 @@ adminRouter.post('/invitations', async (req, res) => {
   try {
     const { email, role = 'agent' } = req.body;
     if (!email) return res.status(400).json({ error: "Email is required" });
+    
+    // Validate role is one of the allowed values — prevents privilege escalation
+    const allowedRoles = ['agent', 'admin'];
+    if (!allowedRoles.includes(role)) {
+      return res.status(400).json({ error: `Invalid role. Must be one of: ${allowedRoles.join(', ')}` });
+    }
 
     // Check if invitation already exists
     const existingInvite = await db.select().from(invitations).where(eq(invitations.email, email)).limit(1);
@@ -98,8 +104,13 @@ async function generateElementAudits(tx, surveyId, userId, section, entityId, ol
     const oldVal = oldObj ? oldObj[key] : null;
     const newVal = newObj ? newObj[key] : null;
     
-    // Compare stringified values to avoid reference issues and safely compare numbers/booleans
-    if (JSON.stringify(oldVal) !== JSON.stringify(newVal)) {
+    // Normalize values to avoid fake audits from type coercion (e.g. 10 vs "10") or empty strings vs null
+    const normalize = (v) => (v === undefined || v === null || v === '') ? null : String(v);
+    
+    const oldNorm = normalize(oldVal);
+    const newNorm = normalize(newVal);
+    
+    if (oldNorm !== newNorm) {
       audits.push({
         surveyId,
         userId,
@@ -162,7 +173,17 @@ adminRouter.get('/stats', async (req, res) => {
 adminRouter.get('/surveys', async (req, res) => {
   try {
     const { page = 1, limit = 20, status, category, agentId, search, date, email } = req.query;
-    
+
+    // Validate enum params to prevent DB errors from invalid values
+    const validStatuses = ['DRAFT', 'SUBMITTED', 'APPROVED'];
+    const validCategories = ['RESIDENTIAL', 'COMMERCIAL', 'INDUSTRIAL', 'INVENTORY'];
+    if (status && !validStatuses.includes(status)) {
+      return res.status(400).json({ error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` });
+    }
+    if (category && !validCategories.includes(category)) {
+      return res.status(400).json({ error: `Invalid category. Must be one of: ${validCategories.join(', ')}` });
+    }
+
     const { user } = await import('../models/auth-schema.js');
     const { surveyCommonDetails } = await import('../models/schema.js');
 
@@ -427,7 +448,7 @@ adminRouter.patch('/surveys/:id/residential', async (req, res) => {
     res.json({ success: true, newVersion });
   } catch (error) {
     if (error.message === "VERSION_MISMATCH_OR_APPROVED") return res.status(409).json({ error: "Conflict: Version mismatch or survey is APPROVED" });
-    res.status(500).json({ error: "Transaction failed", details: error.message });
+    res.status(500).json({ error: "Transaction failed" });
   }
 });
 
@@ -478,7 +499,7 @@ adminRouter.patch('/surveys/:id/commercial', async (req, res) => {
     res.json({ success: true, newVersion });
   } catch (error) {
     if (error.message === "VERSION_MISMATCH_OR_APPROVED") return res.status(409).json({ error: "Conflict: Version mismatch or survey is APPROVED" });
-    res.status(500).json({ error: "Transaction failed", details: error.message });
+    res.status(500).json({ error: "Transaction failed" });
   }
 });
 
@@ -567,7 +588,7 @@ adminRouter.patch('/surveys/:id/industrial', async (req, res) => {
     res.json({ success: true, newVersion });
   } catch (error) {
     if (error.message === "VERSION_MISMATCH_OR_APPROVED") return res.status(409).json({ error: "Conflict: Version mismatch or survey is APPROVED" });
-    res.status(500).json({ error: "Transaction failed", details: error.message });
+    res.status(500).json({ error: "Transaction failed" });
   }
 });
 
@@ -621,7 +642,7 @@ adminRouter.patch('/surveys/:id/demand-response', async (req, res) => {
     res.json({ success: true, newVersion });
   } catch (error) {
     if (error.message === "VERSION_MISMATCH_OR_APPROVED") return res.status(409).json({ error: "Conflict: Version mismatch or survey is APPROVED" });
-    res.status(500).json({ error: "Transaction failed", details: error.message });
+    res.status(500).json({ error: "Transaction failed" });
   }
 });
 
@@ -645,9 +666,10 @@ adminRouter.post('/surveys/:id/approve', async (req, res) => {
         eq(surveys.id, id), 
         eq(surveys.status, 'SUBMITTED'),
         eq(surveys.version, version)
-      ));
+      ))
+      .returning({ id: surveys.id });
 
-    if (result.count === 0) return res.status(409).json({ error: "Conflict: Survey must be in SUBMITTED state and version must match" });
+    if (!result || result.length === 0) return res.status(409).json({ error: "Conflict: Survey must be in SUBMITTED state and version must match" });
 
     res.json({ success: true, status: 'APPROVED' });
   } catch (error) {

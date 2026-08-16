@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, boolean, integer, jsonb, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, timestamp, boolean, integer, jsonb, pgEnum, index } from "drizzle-orm/pg-core";
 import { user } from "./auth-schema.js";
 
 // ENUMS
@@ -10,7 +10,7 @@ export const commonLoadTypeEnum = pgEnum('common_load_type', ['LIFT', 'WATER_SEW
 // INVITATIONS
 export const invitations = pgTable("invitations", {
   id: uuid("id").primaryKey().defaultRandom(),
-  email: text("email").notNull(),
+  email: text("email").notNull().unique(), // Unique to prevent duplicate invites for same email
   tokenHash: text("token_hash").notNull(),
   role: text("role").default('agent').notNull(),
   expiresAt: timestamp("expires_at").notNull(),
@@ -37,7 +37,11 @@ export const surveys = pgTable("surveys", {
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+},
+(table) => [
+  index("surveys_agentId_idx").on(table.agentId),  // Speeds up agent dashboard list query
+  index("surveys_status_idx").on(table.status),     // Speeds up admin filter-by-status queries
+]);
 
 // AUDIT LOGS
 export const surveyAuditLogs = pgTable("survey_audit_logs", {

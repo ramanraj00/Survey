@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Activity } from 'lucide-react';
-import IsometricCubes from '../../components/common/IsometricCubes';
 import { SurveyAPI } from '../../services/api';
+import PixelWaveBg from '../../components/common/PixelWaveBg';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -62,56 +61,104 @@ export default function Login() {
     <div style={{
       minHeight: '100vh',
       display: 'flex',
+      flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
       padding: '1rem',
-      background: 'var(--bg-primary)',
-      overflow: 'hidden'
+      background: 'linear-gradient(180deg, #749CB4 0%, #D4DFDF 60%, #F5F1E5 100%)',
+      overflow: 'hidden',
+      position: 'relative'
     }}>
-      {/* 3D Background */}
-      <IsometricCubes />
       
+      {/* Edge Halftone Dot Pattern */}
+      <PixelWaveBg />
+
+
+
+      {/* Neumorphic 3D Embossed Title */}
+      <h1 style={{
+        position: 'relative',
+        zIndex: 10,
+        fontSize: 'clamp(2.5rem, 10vw, 4.5rem)', // Scales down automatically on mobile
+        fontWeight: 900,
+        color: '#a4bdc9', // Matches the background gradient vertically
+        textTransform: 'uppercase',
+        letterSpacing: '0.2em',
+        marginBottom: 'clamp(1rem, 4vw, 2rem)', // Responsive margin
+        // Layered shadows for depth, with reduced white glow:
+        // 1. Sharp white edge, 2. Subtle soft white glow, 3. Sharp dark edge, 4. Deep dark shadow
+        textShadow: '-2px -2px 3px rgba(255,255,255,0.7), -4px -4px 10px rgba(255,255,255,0.3), 2px 2px 3px rgba(0,0,0,0.08), 8px 8px 20px rgba(0,0,0,0.25)',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        userSelect: 'none'
+      }}>
+        Survey
+      </h1>
+
       <div style={{
         position: 'relative',
         zIndex: 10,
+        pointerEvents: 'auto',
         width: '100%',
         maxWidth: '400px',
-        background: isExpanded ? 'var(--bg-secondary)' : 'transparent',
-        border: isExpanded ? '1px solid var(--border-glass)' : '1px solid transparent',
+        backgroundColor: isExpanded ? 'rgba(255, 255, 255, 0.45)' : 'transparent',
+        backdropFilter: isExpanded ? 'blur(20px)' : 'none',
+        WebkitBackdropFilter: isExpanded ? 'blur(20px)' : 'none',
+        borderColor: isExpanded ? 'rgba(255, 255, 255, 0.6)' : 'transparent',
+        borderWidth: '1px',
+        borderStyle: 'solid',
         borderRadius: '24px',
         padding: isExpanded ? '2.5rem 2rem' : '0',
-        boxShadow: isExpanded ? '0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01)' : 'none',
-        transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+        boxShadow: isExpanded ? '0 25px 50px -12px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.8)' : 'none',
+        transition: isExpanded 
+          ? 'padding 0.4s ease 0.4s, background-color 0.4s ease 0.55s, border-color 0.4s ease 0.55s, box-shadow 0.4s ease 0.55s, backdrop-filter 0.4s ease 0.55s, -webkit-backdrop-filter 0.4s ease 0.55s' 
+          : 'all 0.4s ease',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
       }}>
         
-        {/* Collapsible Top Content */}
+        {/* Collapsible Logo & Text */}
         <div style={{
           width: '100%',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          maxHeight: isExpanded ? '400px' : '0',
+          maxHeight: isExpanded ? '150px' : '0',
           opacity: isExpanded ? 1 : 0,
           overflow: 'hidden',
-          transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: isExpanded 
+            ? 'max-height 0.4s ease 0.4s, opacity 0.4s ease 0.4s' 
+            : 'all 0.4s ease',
         }}>
-          <div style={{ paddingBottom: '1.5rem', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div style={{ 
+            paddingBottom: isExpanded ? '1.5rem' : '0', 
+            width: '100%', 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            transform: isExpanded ? 'translateY(0) scale(1)' : 'translateY(25px) scale(0.85)',
+            transition: isExpanded 
+              ? 'padding 0.4s ease 0.4s, transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) 0.45s' 
+              : 'all 0.4s ease'
+          }}>
               
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: '40px',
-                height: '40px',
-                borderRadius: '10px',
-                background: 'var(--accent-glow)',
+                width: '44px',
+                height: '44px',
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #749CB4 0%, #5A7E94 100%)',
+                boxShadow: '0 8px 16px rgba(90, 126, 148, 0.25), inset 0 2px 2px rgba(255, 255, 255, 0.2)',
                 marginBottom: '1.25rem',
               }}>
-                <Activity size={20} color="white" />
+                {/* Premium Abstract SaaS Logo for "Survey" */}
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="3" y="3" width="12" height="12" rx="3" fill="white" fillOpacity="0.9" />
+                  <rect x="9" y="9" width="12" height="12" rx="3" fill="white" fillOpacity="0.4" />
+                </svg>
               </div>
               
               <h1 style={{ 
@@ -123,6 +170,33 @@ export default function Login() {
               }}>
                 {isPasswordPhase ? 'Enter your password' : 'Log in to Survey'}
               </h1>
+          </div>
+        </div>
+
+        {/* Collapsible Input Area */}
+        <div style={{
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          maxHeight: isExpanded ? '250px' : '0',
+          opacity: isExpanded ? 1 : 0,
+          overflow: 'hidden',
+          transition: isExpanded 
+            ? 'max-height 0.4s ease 0.4s, opacity 0.4s ease 0.8s' 
+            : 'all 0.4s ease',
+        }}>
+          <div style={{ 
+            width: '100%', 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            paddingBottom: isExpanded ? '1.5rem' : '0', 
+            transform: isExpanded ? 'translateY(0) scale(1)' : 'translateY(12px) scale(0.96)',
+            transition: isExpanded 
+              ? 'padding 0.4s ease 0.4s, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.8s' 
+              : 'all 0.4s ease'
+          }}>
 
               {isPasswordPhase && (
                 <p style={{
@@ -161,22 +235,25 @@ export default function Login() {
                   style={{
                     width: '100%',
                     padding: '0.875rem 1rem',
-                    background: 'var(--bg-primary)',
-                    border: '1px solid var(--border-glass)',
+                    background: 'rgba(255, 255, 255, 0.6)',
+                    border: '1px solid rgba(255, 255, 255, 0.8)',
                     borderRadius: '12px',
-                    color: 'var(--text-primary)',
+                    color: '#0F172A',
                     fontSize: '0.9375rem',
                     outline: 'none',
                     textAlign: 'center',
-                    transition: 'border-color 0.2s, box-shadow 0.2s',
+                    transition: 'all 0.3s ease',
+                    boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.02)',
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = 'var(--accent-primary)';
-                    e.target.style.boxShadow = '0 0 0 2px rgba(59, 130, 246, 0.2)';
+                    e.target.style.background = 'rgba(255, 255, 255, 0.9)';
+                    e.target.style.borderColor = '#749CB4';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(116, 156, 180, 0.15)';
                   }}
                   onBlur={(e) => {
-                    e.target.style.borderColor = 'var(--border-glass)';
-                    e.target.style.boxShadow = 'none';
+                    e.target.style.background = 'rgba(255, 255, 255, 0.6)';
+                    e.target.style.borderColor = 'rgba(255, 255, 255, 0.8)';
+                    e.target.style.boxShadow = 'inset 0 2px 4px rgba(0, 0, 0, 0.02)';
                   }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleContinueEmail(e);
@@ -193,23 +270,26 @@ export default function Login() {
                     style={{
                       width: '100%',
                       padding: '0.875rem 1rem',
-                      background: 'var(--bg-primary)',
-                      border: '1px solid var(--border-glass)',
+                      background: 'rgba(255, 255, 255, 0.6)',
+                      border: '1px solid rgba(255, 255, 255, 0.8)',
                       borderRadius: '12px',
-                      color: 'var(--text-primary)',
+                      color: '#0F172A',
                       fontSize: '0.9375rem',
                       outline: 'none',
                       textAlign: 'center',
-                      transition: 'border-color 0.2s, box-shadow 0.2s',
-                      letterSpacing: '2px'
+                      transition: 'all 0.3s ease',
+                      letterSpacing: '2px',
+                      boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.02)',
                     }}
                     onFocus={(e) => {
-                      e.target.style.borderColor = 'var(--accent-primary)';
-                      e.target.style.boxShadow = '0 0 0 2px rgba(59, 130, 246, 0.2)';
+                      e.target.style.background = 'rgba(255, 255, 255, 0.9)';
+                      e.target.style.borderColor = '#749CB4';
+                      e.target.style.boxShadow = '0 0 0 3px rgba(116, 156, 180, 0.15)';
                     }}
                     onBlur={(e) => {
-                      e.target.style.borderColor = 'var(--border-glass)';
-                      e.target.style.boxShadow = 'none';
+                      e.target.style.background = 'rgba(255, 255, 255, 0.6)';
+                      e.target.style.borderColor = 'rgba(255, 255, 255, 0.8)';
+                      e.target.style.boxShadow = 'inset 0 2px 4px rgba(0, 0, 0, 0.02)';
                     }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') handleLogin(e);
@@ -244,10 +324,13 @@ export default function Login() {
           </div>
         </div>
 
-        {/* The Animated Button */}
-        <button 
-          onClick={
-            step === 'START' ? handleStart 
+        {/* Button Wrapper */}
+        <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', width: isExpanded ? '100%' : 'auto' }}>
+          
+          {/* The Animated Button */}
+          <button 
+            onClick={
+              step === 'START' ? handleStart 
             : (step === 'EMAIL' ? handleContinueEmail : handleLogin)
           }
           onMouseEnter={() => setIsHovered(true)}
@@ -256,23 +339,25 @@ export default function Login() {
           style={{
             width: isExpanded ? '100%' : '124px',
             height: '46px',
-            background: 'linear-gradient(180deg, #4275F4 0%, #2954D1 100%)',
+            background: 'linear-gradient(180deg, #6C91A8 0%, #517185 100%)',
             color: 'white',
             border: 'none',
-            borderRadius: '9999px',
-            fontSize: '1.05rem',
-            fontWeight: 500,
+            borderRadius: '14px',
+            fontSize: '1rem',
+            fontWeight: 600,
             letterSpacing: '0.3px',
             cursor: isLoading ? 'not-allowed' : 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             position: 'relative',
-            transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+            transition: isExpanded 
+              ? 'width 0.4s ease 0s, box-shadow 0.3s ease, transform 0.3s ease' 
+              : 'all 0.4s ease',
             boxShadow: isHovered && !isLoading
-              ? '0 6px 16px rgba(41, 84, 209, 0.3), inset 0 3px 6px rgba(0, 0, 0, 0.12), inset 0 -1.5px 1px rgba(0, 0, 0, 0.15)' 
-              : '0 2px 6px rgba(41, 84, 209, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.1), inset 0 -1.5px 1px rgba(0, 0, 0, 0.15)',
-            transform: isHovered && !isLoading ? 'translateY(-1px)' : 'translateY(0)',
+              ? '0 8px 20px rgba(81, 113, 133, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.25)' 
+              : '0 4px 12px rgba(81, 113, 133, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.2)',
+            transform: isHovered && !isLoading ? 'translateY(-2px)' : 'translateY(0)',
             textShadow: '0 1px 2px rgba(0,0,0,0.1)'
           }}
         >
@@ -317,7 +402,7 @@ export default function Login() {
             </>
           )}
         </button>
-
+      </div>
       </div>
     </div>
   );

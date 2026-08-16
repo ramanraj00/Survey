@@ -451,6 +451,6 @@ exportRouter.get('/surveys/:id/export', async (req, res) => {
 
   } catch (error) {
     console.error('Export error:', error);
-    res.status(500).json({ error: 'Failed to export survey', details: error.message });
+    res.status(500).json({ error: 'Failed to export survey' });
   }
 });

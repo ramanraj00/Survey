@@ -73,7 +73,22 @@ export default function SurveySubmit({ isAdmin }) {
 
   if (isSubmitted || isApproved) {
     return (
-      <div style={{ maxWidth: '800px', margin: '0 auto', paddingTop: '4rem' }}>
+      <div className="review-container">
+        <style>{`
+          .review-container {
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem 4rem;
+            box-sizing: border-box;
+          }
+          @media (max-width: 768px) {
+            .review-container {
+              padding: 2rem 1rem;
+            }
+          }
+          
+        `}</style>
         <Card padding="3rem" style={{ textAlign: 'center' }}>
           <CheckCircle size={48} color="var(--success)" style={{ marginBottom: '1rem' }} />
           <h2>Survey Submitted Successfully</h2>
@@ -87,7 +102,81 @@ export default function SurveySubmit({ isAdmin }) {
   }
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', paddingBottom: '4rem' }}>
+    <div className="review-container">
+      <style>{`
+        .review-container {
+          width: 100%;
+          max-width: 1600px;
+          margin: 0 auto;
+          padding: 2rem 4rem;
+          box-sizing: border-box;
+        }
+        @media (max-width: 768px) {
+          .review-container {
+            padding: 2rem 1rem;
+          }
+        }
+        
+        /* Dashboard Warnings Table Styles */
+        .warnings-table-container {
+          border: 1px solid #cbd5e1;
+          border-radius: 8px;
+          overflow: hidden;
+          background: #ffffff;
+          max-height: 500px;
+          overflow-y: auto;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .warnings-table {
+          width: 100%;
+          border-collapse: collapse;
+          text-align: left;
+        }
+        .warnings-table th {
+          position: sticky;
+          top: 0;
+          background: #f1f5f9;
+          padding: 1rem 1.5rem;
+          font-size: 0.875rem;
+          font-weight: 700;
+          color: #334155;
+          border-bottom: 2px solid #cbd5e1;
+          z-index: 10;
+        }
+        .warnings-table td {
+          padding: 1rem 1.5rem;
+          border-bottom: 1px solid #e2e8f0;
+          font-size: 0.95rem;
+          color: #1e293b;
+          vertical-align: middle;
+        }
+        .warnings-table tr:last-child td {
+          border-bottom: none;
+        }
+        .warnings-table tr:hover {
+          background-color: #f8fafc;
+        }
+        .badge {
+          display: inline-flex;
+          align-items: center;
+          padding: 0.25rem 0.75rem;
+          border-radius: 9999px;
+          font-size: 0.75rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+        .badge.error {
+          background: #fef2f2;
+          color: #ef4444;
+          border: 1px solid #fca5a5;
+        }
+        .badge.warning {
+          background: #fffbeb;
+          color: #d97706;
+          border: 1px solid #fcd34d;
+        }
+      `}</style>
       <h1 style={{ marginBottom: '1.5rem', color: '#0F172A', fontSize: '1.75rem', fontWeight: 700 }}>Review Survey Data</h1>
       
       <Card>
@@ -111,26 +200,35 @@ export default function SurveySubmit({ isAdmin }) {
               <AlertTriangle size={24} />
               <h3 style={{ margin: 0, color: '#0F172A' }}>Validation Warnings ({warnings.length})</h3>
             </div>
-            <p style={{ color: '#64748B', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
+            <p style={{ color: '#64748B', fontSize: '0.95rem', marginBottom: '2rem' }}>
               Some fields were left blank or need your attention. You can go back and complete them, or choose to finish editing anyway.
             </p>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: '400px', overflowY: 'auto', paddingRight: '0.5rem' }}>
-              {warnings.map((w, idx) => (
-                <div key={idx} style={{ 
-                  background: w.severity === 'error' ? 'rgba(239, 68, 68, 0.05)' : 'rgba(245, 158, 11, 0.05)', 
-                  borderLeft: `4px solid ${w.severity === 'error' ? 'var(--error)' : 'var(--warning)'}`,
-                  padding: '1rem',
-                  borderRadius: '0 var(--radius-sm) var(--radius-sm) 0'
-                }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.25rem', color: '#1E293B' }}>
-                    {w.section.replace(/_/g, ' ').toUpperCase()} • {formatFieldName(w.field)}
-                  </div>
-                  <div style={{ color: '#475569', fontSize: '0.875rem' }}>
-                    {w.message.replace(/^[a-zA-Z0-9_]+(\[[0-9]+\])?/, "This field")}
-                  </div>
-                </div>
-              ))}
+            <div className="warnings-table-container">
+              <table className="warnings-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: '10%' }}>Severity</th>
+                    <th style={{ width: '20%' }}>Section</th>
+                    <th style={{ width: '35%' }}>Field</th>
+                    <th style={{ width: '35%' }}>Message</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {warnings.map((w, idx) => (
+                    <tr key={idx}>
+                      <td>
+                        <span className={`badge ${w.severity || 'warning'}`}>
+                          {w.severity === 'error' ? 'Error' : 'Warning'}
+                        </span>
+                      </td>
+                      <td style={{ fontWeight: 500 }}>{w.section.replace(/_/g, ' ').toUpperCase()}</td>
+                      <td style={{ color: '#334155' }}>{formatFieldName(w.field)}</td>
+                      <td style={{ color: '#475569' }}>{w.message.replace(/^[a-zA-Z0-9_]+(\[[0-9]+\])?/, "This field")}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}

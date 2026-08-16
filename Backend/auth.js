@@ -20,5 +20,5 @@ export const auth = betterAuth({
       },
     },
   },
-  trustedOrigins: ["http://localhost:5173"],
+  trustedOrigins: [process.env.ALLOWED_ORIGIN || "http://localhost:5173"],
 });

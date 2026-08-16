@@ -92,7 +92,11 @@ surveyRouter.post('/', async (req, res) => {
   if (!consumerCategory) return res.status(400).json({ error: "consumerCategory is required" });
 
   try {
-    const surveyNumber = `SUR-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
+    // Generate a collision-resistant survey number using the current DB count atomically
+    const [{ surveyCount }] = await db.select({ surveyCount: sql`count(*)::int` }).from(surveys);
+    const paddedNum = String(Number(surveyCount) + 1).padStart(6, '0');
+    const surveyNumber = `SUR-${new Date().getFullYear()}-${paddedNum}`;
+
     const [newSurvey] = await db.insert(surveys).values({
       agentId: req.user.id,
       consumerCategory,
@@ -132,7 +136,8 @@ surveyRouter.put('/:id/common', checkSurveyOwnership, checkSurveyStatus(['DRAFT'
     res.json({ success: true, newVersion });
   } catch (error) {
     if (error.message === "VERSION_MISMATCH") return res.status(409).json({ error: "Conflict: Version mismatch" });
-    console.error("Tx error:", error); res.status(500).json({ error: error.message, stack: error.stack });
+    console.error("[PUT /common] Tx error:", error);
+    res.status(500).json({ error: "Failed to save common details" });
   }
 });
 
@@ -151,7 +156,8 @@ surveyRouter.put('/:id/inventory', checkSurveyOwnership, checkSurveyStatus(['DRA
     res.json({ success: true, newVersion });
   } catch (error) {
     if (error.message === "VERSION_MISMATCH") return res.status(409).json({ error: "Conflict: Version mismatch" });
-    console.error("Tx error:", error); res.status(500).json({ error: error.message, stack: error.stack });
+    console.error("[PUT /inventory] Tx error:", error);
+    res.status(500).json({ error: "Failed to save inventory items" });
   }
 });
 
@@ -196,7 +202,8 @@ surveyRouter.put('/:id/residential', checkSurveyOwnership, checkSurveyStatus(['D
     res.json({ success: true, newVersion });
   } catch (error) {
     if (error.message === "VERSION_MISMATCH") return res.status(409).json({ error: "Conflict: Version mismatch" });
-    res.status(500).json({ error: "Transaction failed", details: error.message });
+    console.error("[PUT /residential] Tx error:", error);
+    res.status(500).json({ error: "Failed to save residential data" });
   }
 });
 
@@ -217,7 +224,8 @@ surveyRouter.put('/:id/commercial', checkSurveyOwnership, checkSurveyStatus(['DR
     res.json({ success: true, newVersion });
   } catch (error) {
     if (error.message === "VERSION_MISMATCH") return res.status(409).json({ error: "Conflict: Version mismatch" });
-    console.error("Tx error:", error); res.status(500).json({ error: error.message, stack: error.stack });
+    console.error("[PUT /commercial] Tx error:", error);
+    res.status(500).json({ error: "Failed to save commercial data" });
   }
 });
 
@@ -239,8 +247,6 @@ surveyRouter.put('/:id/industrial', checkSurveyOwnership, checkSurveyStatus(['DR
       }
       
       if (processDependencies) {
-        // Need to import processDependencies table model at the top of the file. Wait, I should import it.
-        // I will do that in the next tool call. Let me assume I import it as `processDependenciesTable`.
         await tx.delete(processDependenciesTable).where(eq(processDependenciesTable.surveyId, req.survey.id));
         if (processDependencies.length > 0) await tx.insert(processDependenciesTable).values(cleanArrayData(processDependencies).map(pd => ({ surveyId: req.survey.id, ...pd })));
       }
@@ -250,7 +256,8 @@ surveyRouter.put('/:id/industrial', checkSurveyOwnership, checkSurveyStatus(['DR
     res.json({ success: true, newVersion });
   } catch (error) {
     if (error.message === "VERSION_MISMATCH") return res.status(409).json({ error: "Conflict: Version mismatch" });
-    console.error("Tx error:", error); res.status(500).json({ error: error.message, stack: error.stack });
+    console.error("[PUT /industrial] Tx error:", error);
+    res.status(500).json({ error: "Failed to save industrial data" });
   }
 });
 
@@ -275,7 +282,8 @@ surveyRouter.put('/:id/demand-response', checkSurveyOwnership, checkSurveyStatus
     res.json({ success: true, newVersion });
   } catch (error) {
     if (error.message === "VERSION_MISMATCH") return res.status(409).json({ error: "Conflict: Version mismatch" });
-    console.error("Tx error:", error); res.status(500).json({ error: error.message, stack: error.stack });
+    console.error("[PUT /demand-response] Tx error:", error);
+    res.status(500).json({ error: "Failed to save demand response data" });
   }
 });
 
@@ -313,9 +321,10 @@ surveyRouter.post('/:id/submit', checkSurveyOwnership, checkSurveyStatus(['DRAFT
         validationWarnings: validationResult.warnings,
         version: sql`${surveys.version} + 1`
       })
-      .where(and(eq(surveys.id, req.survey.id), eq(surveys.status, 'DRAFT'), eq(surveys.version, version)));
+      .where(and(eq(surveys.id, req.survey.id), eq(surveys.status, 'DRAFT'), eq(surveys.version, version)))
+      .returning({ id: surveys.id });
 
-    if (result.count === 0) {
+    if (!result || result.length === 0) {
       return res.status(409).json({ error: "Conflict: Survey already submitted or modified by another process. Please refresh and try again." });
     }
     

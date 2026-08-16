@@ -41,6 +41,7 @@ export const commercialDemandResponse = pgTable("commercial_demand_response", {
   shiftedLoadTiming: text("shifted_load_timing"),
   participationBarriers: text("participation_barriers"),
   incentiveType: text("incentive_type"),
+  adjustmentType: text("adjustment_type"),
 });
 
 export const industrialDemandResponse = pgTable("industrial_demand_response", {

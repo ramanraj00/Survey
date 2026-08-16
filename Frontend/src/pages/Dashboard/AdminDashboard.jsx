@@ -175,8 +175,8 @@ export default function AdminDashboard() {
             <h3 style={{ margin: 0, color: '#0F172A', fontSize: '1.1rem', fontWeight: 700 }}>Category Breakdown</h3>
           </div>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1, justifyContent: 'center' }}>
-            {['RESIDENTIAL', 'COMMERCIAL', 'INDUSTRIAL', 'INVENTORY'].map(cat => {
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem', marginTop: '1.5rem' }}>
+            {['RESIDENTIAL', 'COMMERCIAL', 'INDUSTRIAL'].map(cat => {
               const count = stats?.byCategory?.[cat.toLowerCase()] || 0;
               const percentage = totalSurveys > 0 ? (count / totalSurveys) * 100 : 0;
               return (

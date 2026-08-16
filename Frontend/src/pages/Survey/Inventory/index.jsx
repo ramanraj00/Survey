@@ -4,6 +4,7 @@ import { useSurvey } from '../../../context/SurveyContext';
 import { useBaseRoute } from '../../../hooks/useBaseRoute';
 import { Plus, Trash2 } from 'lucide-react';
 import Select from '../../../components/common/Select';
+import Card from '../../../components/common/Card';
 
 export default function InventoryForm() {
   const navigate = useNavigate();
@@ -105,19 +106,23 @@ export default function InventoryForm() {
   if (contextError) return <div style={{ color: 'red', padding: '2rem' }}>Error loading survey: {contextError}</div>;
   if (!surveyData || contextLoading) return <div style={{ padding: '2rem', color: '#64748B' }}>Loading inventory data...</div>;
 
-  const inputStyle = {
-    width: '100%', padding: '0.875rem 1rem', borderRadius: '12px', border: '1px solid #E2E8F0',
-    backgroundColor: '#F8FAFC', color: '#0F172A', fontSize: '0.95rem',
-    transition: 'all 0.2s ease', outline: 'none', boxSizing: 'border-box'
-  };
-
-  const labelStyle = {
-    display: 'block', fontSize: '0.875rem', fontWeight: '600', color: '#475569', marginBottom: '0.5rem'
-  };
+  // Removed inline styles in favor of global CSS classes .form-input and .form-label
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '2rem 1rem' }}>
+    <div className="inventory-container">
       <style>{`
+        .inventory-container {
+          width: 100%;
+          max-width: 1600px;
+          margin: 0 auto;
+          padding: 2rem 4rem;
+          box-sizing: border-box;
+        }
+        @media (max-width: 768px) {
+          .inventory-container {
+            padding: 2rem 1rem;
+          }
+        }
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
         .card-enter { animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -128,6 +133,119 @@ export default function InventoryForm() {
           }
           .footer-actions button {
             width: 100%;
+          }
+        }
+        
+        /* Table Layout Styles */
+        .inventory-table-container {
+          display: flex;
+          flex-direction: column;
+          border: 1px solid var(--border-glass);
+          border-radius: 8px;
+          overflow: hidden;
+          background: #ffffff;
+        }
+        .table-row, .table-header-row {
+          display: flex;
+          border-bottom: 1px solid var(--border-glass);
+        }
+        .table-row:last-child {
+          border-bottom: none;
+        }
+        .table-header-row {
+          background: #dcfce7; /* Light green to match reference */
+          font-weight: 700;
+          color: #166534;
+        }
+        .col-id {
+          width: 50px;
+          min-width: 50px;
+          padding: 1rem;
+          border-right: 1px solid var(--border-glass);
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+        }
+        .col-desc {
+          width: 300px;
+          min-width: 300px;
+          padding: 1rem;
+          border-right: 1px solid var(--border-glass);
+          font-weight: 500;
+          display: flex;
+          align-items: center;
+        }
+        .col-val {
+          flex: 1;
+        }
+        .table-input {
+          width: 100%;
+          height: 100%;
+          border: none;
+          padding: 1rem;
+          background: transparent;
+          outline: none;
+          font-family: inherit;
+          font-size: 1rem;
+        }
+        .table-input:focus {
+          background: rgba(0,0,0,0.01);
+        }
+        .col-options {
+          flex: 1;
+          display: flex;
+        }
+        .radio-cell {
+          flex: 1;
+          padding: 1rem;
+          border-right: 1px solid var(--border-glass);
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          cursor: pointer;
+        }
+        .radio-cell:last-child {
+          border-right: none;
+        }
+        
+        @media (max-width: 768px) {
+          .inventory-container {
+            padding: 1rem 0.5rem;
+          }
+          .table-row, .table-header-row {
+            flex-direction: column;
+            width: 100%;
+          }
+          .col-id {
+            display: none; /* Hide ID column on mobile to save space */
+          }
+          .col-desc {
+            width: 100%;
+            min-width: unset;
+            box-sizing: border-box;
+            border-right: none;
+            border-bottom: 1px solid var(--border-glass);
+            background: #f8fafc;
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+          }
+          .col-val, .table-input {
+            width: 100%;
+            box-sizing: border-box;
+          }
+          .col-options {
+            flex-direction: column;
+            width: 100%;
+          }
+          .radio-cell {
+            border-right: none;
+            border-bottom: 1px solid var(--border-glass);
+            padding: 0.75rem 1rem;
+            width: 100%;
+            box-sizing: border-box;
+          }
+          .radio-cell:last-child {
+            border-bottom: none;
           }
         }
       `}</style>
@@ -143,10 +261,8 @@ export default function InventoryForm() {
 
       <fieldset disabled={isReadOnly} style={{ border: 'none', padding: 0, margin: 0 }}>
         {items.map((item, index) => (
-          <div key={index} className="card-enter" style={{
-            background: '#FFFFFF', borderRadius: '16px', padding: '2rem', marginBottom: '2rem',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
-            border: '1px solid #E2E8F0', position: 'relative'
+          <Card key={index} className="card-enter" style={{
+            position: 'relative', marginBottom: '2rem'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid #F1F5F9', paddingBottom: '1rem' }}>
               <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: '700', color: '#0F172A' }}>Equipment #{index + 1}</h3>
@@ -165,85 +281,163 @@ export default function InventoryForm() {
               )}
             </div>
 
-            <div className="form-grid">
-              <div>
-                <label style={labelStyle}>Consumer Category (B1)</label>
-                <input style={inputStyle} value={item.consumerCategory || ''} onChange={e => handleChange(index, 'consumerCategory', e.target.value)} />
+            <div className="inventory-table-container">
+              {/* Header Row */}
+              <div className="table-header-row">
+                <div className="col-id">B</div>
+                <div className="col-desc">Equipment and Flexible Load Inventory</div>
+                <div className="col-val"></div>
               </div>
-              <div>
-                <label style={labelStyle}>Process / Use (B2)</label>
-                <input style={inputStyle} value={item.processOrUse || ''} onChange={e => handleChange(index, 'processOrUse', e.target.value)} />
+
+              {/* B1 */}
+              <div className="table-row">
+                <div className="col-id">B1</div>
+                <div className="col-desc">Consumer Category</div>
+                <div className="col-val">
+                  <input className="table-input" value={item.consumerCategory || ''} onChange={e => handleChange(index, 'consumerCategory', e.target.value)} disabled={isReadOnly} />
+                </div>
               </div>
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label style={labelStyle}>Equipment / Load Description (B3)</label>
-                <input style={inputStyle} value={item.equipmentDescription || ''} onChange={e => handleChange(index, 'equipmentDescription', e.target.value)} />
+
+              {/* B2 */}
+              <div className="table-row">
+                <div className="col-id">B2</div>
+                <div className="col-desc">Process / Use</div>
+                <div className="col-val">
+                  <input className="table-input" value={item.processOrUse || ''} onChange={e => handleChange(index, 'processOrUse', e.target.value)} disabled={isReadOnly} />
+                </div>
               </div>
-              <div>
-                <label style={labelStyle}>Number of Units (B4)</label>
-                <input type="number" style={inputStyle} value={item.numberOfUnits || ''} onChange={e => handleChange(index, 'numberOfUnits', e.target.value)} />
+
+              {/* B3 */}
+              <div className="table-row">
+                <div className="col-id">B3</div>
+                <div className="col-desc">Equipment / Load Description</div>
+                <div className="col-val">
+                  <input className="table-input" value={item.equipmentDescription || ''} onChange={e => handleChange(index, 'equipmentDescription', e.target.value)} disabled={isReadOnly} />
+                </div>
               </div>
-              <div>
-                <label style={labelStyle}>Rated Capacity (B5)</label>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <input style={{ ...inputStyle, flex: 2 }} value={item.ratedCapacity || ''} onChange={e => handleChange(index, 'ratedCapacity', e.target.value)} placeholder="e.g. 100" />
-                  <Select style={{ ...inputStyle, flex: 1 }} value={item.capacityUnit || ''} onChange={e => handleChange(index, 'capacityUnit', e.target.value)}>
+
+              {/* B4 */}
+              <div className="table-row">
+                <div className="col-id">B4</div>
+                <div className="col-desc">Number of units</div>
+                <div className="col-val">
+                  <input type="number" className="table-input" value={item.numberOfUnits || ''} onChange={e => handleChange(index, 'numberOfUnits', e.target.value)} disabled={isReadOnly} />
+                </div>
+              </div>
+
+              {/* B5 */}
+              <div className="table-row">
+                <div className="col-id">B5</div>
+                <div className="col-desc">Rated capacity per unit (kW, kVA, HP, TR)</div>
+                <div className="col-val" style={{ display: 'flex' }}>
+                  <input className="table-input" style={{ flex: 2, borderRight: '1px solid var(--border-glass)' }} value={item.ratedCapacity || ''} onChange={e => handleChange(index, 'ratedCapacity', e.target.value)} placeholder="e.g. 100" disabled={isReadOnly} />
+                  <select className="table-input" style={{ flex: 1, backgroundColor: 'transparent' }} value={item.capacityUnit || ''} onChange={e => handleChange(index, 'capacityUnit', e.target.value)} disabled={isReadOnly}>
                     <option value="">Unit</option>
                     <option value="kW">kW</option>
                     <option value="kVA">kVA</option>
                     <option value="HP">HP</option>
                     <option value="TR">TR</option>
-                  </Select>
+                  </select>
                 </div>
               </div>
-              <div>
-                <label style={labelStyle}>Typical Start Time (B6)</label>
-                <input type="time" style={inputStyle} value={item.typicalStartTime || ''} onChange={e => handleChange(index, 'typicalStartTime', e.target.value)} />
+
+              {/* B6 */}
+              <div className="table-row">
+                <div className="col-id">B6</div>
+                <div className="col-desc">Typical Start Time</div>
+                <div className="col-val">
+                  <input type="time" className="table-input" value={item.typicalStartTime || ''} onChange={e => handleChange(index, 'typicalStartTime', e.target.value)} disabled={isReadOnly} />
+                </div>
               </div>
-              <div>
-                <label style={labelStyle}>Typical End Time (B7)</label>
-                <input type="time" style={inputStyle} value={item.typicalEndTime || ''} onChange={e => handleChange(index, 'typicalEndTime', e.target.value)} />
+
+              {/* B7 */}
+              <div className="table-row">
+                <div className="col-id">B7</div>
+                <div className="col-desc">Typical End Time</div>
+                <div className="col-val">
+                  <input type="time" className="table-input" value={item.typicalEndTime || ''} onChange={e => handleChange(index, 'typicalEndTime', e.target.value)} disabled={isReadOnly} />
+                </div>
               </div>
-              <div>
-                <label style={labelStyle}>Operates during peak hours? (B8)</label>
-                <Select style={inputStyle} value={item.operatesDuringPeak || ''} onChange={e => handleChange(index, 'operatesDuringPeak', e.target.value)}>
-                  <option value="">Select</option>
-                  <option value="Yes">Yes</option>
-                  <option value="No">No</option>
-                  <option value="Sometimes">Sometimes</option>
-                </Select>
+
+              {/* B8 */}
+              <div className="table-row multi-options">
+                <div className="col-id">B8</div>
+                <div className="col-desc">Operates during peak hours? (Yes / No)</div>
+                <div className="col-options">
+                  <label className="radio-cell">
+                    <input type="radio" name={`b8-${index}`} checked={item.operatesDuringPeak === 'Yes'} onChange={() => handleChange(index, 'operatesDuringPeak', 'Yes')} disabled={isReadOnly} /> Yes
+                  </label>
+                  <label className="radio-cell">
+                    <input type="radio" name={`b8-${index}`} checked={item.operatesDuringPeak === 'No'} onChange={() => handleChange(index, 'operatesDuringPeak', 'No')} disabled={isReadOnly} /> No
+                  </label>
+                  <label className="radio-cell">
+                    <input type="radio" name={`b8-${index}`} checked={item.operatesDuringPeak === 'Sometimes'} onChange={() => handleChange(index, 'operatesDuringPeak', 'Sometimes')} disabled={isReadOnly} /> Sometimes
+                  </label>
+                </div>
               </div>
-              <div>
-                <label style={labelStyle}>Load Criticality (B9)</label>
-                <Select style={inputStyle} value={item.loadCriticality || ''} onChange={e => handleChange(index, 'loadCriticality', e.target.value)}>
-                  <option value="">Select</option>
-                  <option value="Critical">Critical</option>
-                  <option value="Essential">Essential</option>
-                  <option value="Non-critical">Non-critical</option>
-                </Select>
+
+              {/* B9 */}
+              <div className="table-row multi-options">
+                <div className="col-id">B9</div>
+                <div className="col-desc">Load Criticality</div>
+                <div className="col-options">
+                  <label className="radio-cell">
+                    <input type="radio" name={`b9-${index}`} checked={item.loadCriticality === 'Critical'} onChange={() => handleChange(index, 'loadCriticality', 'Critical')} disabled={isReadOnly} /> Critical
+                  </label>
+                  <label className="radio-cell">
+                    <input type="radio" name={`b9-${index}`} checked={item.loadCriticality === 'Essential'} onChange={() => handleChange(index, 'loadCriticality', 'Essential')} disabled={isReadOnly} /> Essential
+                  </label>
+                  <label className="radio-cell">
+                    <input type="radio" name={`b9-${index}`} checked={item.loadCriticality === 'Non-critical'} onChange={() => handleChange(index, 'loadCriticality', 'Non-critical')} disabled={isReadOnly} /> Non-critical
+                  </label>
+                </div>
               </div>
-              <div>
-                <label style={labelStyle}>Can be shifted outside peak? (B10)</label>
-                <Select style={inputStyle} value={item.shiftable || ''} onChange={e => handleChange(index, 'shiftable', e.target.value)}>
-                  <option value="">Select</option>
-                  <option value="Yes">Yes</option>
-                  <option value="No">No</option>
-                  <option value="Partly">Partly</option>
-                </Select>
+
+              {/* B10 */}
+              <div className="table-row multi-options">
+                <div className="col-id">B10</div>
+                <div className="col-desc">Can operations be shifted outside peak hours? (Yes/Partly/No)</div>
+                <div className="col-options">
+                  <label className="radio-cell">
+                    <input type="radio" name={`b10-${index}`} checked={item.shiftable === 'Yes'} onChange={() => handleChange(index, 'shiftable', 'Yes')} disabled={isReadOnly} /> Yes
+                  </label>
+                  <label className="radio-cell">
+                    <input type="radio" name={`b10-${index}`} checked={item.shiftable === 'No'} onChange={() => handleChange(index, 'shiftable', 'No')} disabled={isReadOnly} /> No
+                  </label>
+                  <label className="radio-cell">
+                    <input type="radio" name={`b10-${index}`} checked={item.shiftable === 'Partly'} onChange={() => handleChange(index, 'shiftable', 'Partly')} disabled={isReadOnly} /> Partly
+                  </label>
+                </div>
               </div>
-              <div>
-                <label style={labelStyle}>Max shiftable duration (mins) (B11)</label>
-                <input type="number" style={inputStyle} value={item.maximumShiftableDuration || ''} onChange={e => handleChange(index, 'maximumShiftableDuration', e.target.value)} />
+
+              {/* B11 */}
+              <div className="table-row">
+                <div className="col-id">B11</div>
+                <div className="col-desc">Maximum shiftable duration</div>
+                <div className="col-val">
+                  <input type="number" className="table-input" value={item.maximumShiftableDuration || ''} onChange={e => handleChange(index, 'maximumShiftableDuration', e.target.value)} disabled={isReadOnly} />
+                </div>
               </div>
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label style={labelStyle}>Operational Constraints (B12)</label>
-                <textarea style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }} value={item.operationalConstraints || ''} onChange={e => handleChange(index, 'operationalConstraints', e.target.value)} />
+
+              {/* B12 */}
+              <div className="table-row">
+                <div className="col-id">B12</div>
+                <div className="col-desc">Operational Constraints</div>
+                <div className="col-val">
+                  <textarea className="table-input" style={{ minHeight: '60px', resize: 'vertical' }} value={item.operationalConstraints || ''} onChange={e => handleChange(index, 'operationalConstraints', e.target.value)} disabled={isReadOnly} />
+                </div>
               </div>
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label style={labelStyle}>Remarks (B13)</label>
-                <textarea style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }} value={item.remarks || ''} onChange={e => handleChange(index, 'remarks', e.target.value)} />
+
+              {/* B13 */}
+              <div className="table-row">
+                <div className="col-id">B13</div>
+                <div className="col-desc">Remarks (if any)</div>
+                <div className="col-val">
+                  <textarea className="table-input" style={{ minHeight: '60px', resize: 'vertical' }} value={item.remarks || ''} onChange={e => handleChange(index, 'remarks', e.target.value)} disabled={isReadOnly} />
+                </div>
               </div>
             </div>
-          </div>
+            </Card>
         ))}
       </fieldset>
 

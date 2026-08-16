@@ -3,7 +3,9 @@ import Card from '../../../../components/common/Card';
 import Select from '../../../../components/common/Select';
 import { D2_FIXED_EQUIPMENT } from '../constants';
 
-export default function FlexibilitySection({ data, onChange, isReadOnly }) {
+export default function FlexibilitySection({ data, onChange, isReadOnly, inventoryItems = [] }) {
+  const dynamicEquipmentList = inventoryItems.map(item => item.equipmentDescription).filter(Boolean);
+  const equipmentOptions = dynamicEquipmentList.length > 0 ? dynamicEquipmentList : D2_FIXED_EQUIPMENT;
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     onChange({ [name]: type === 'checkbox' ? checked : value });
@@ -63,10 +65,10 @@ export default function FlexibilitySection({ data, onChange, isReadOnly }) {
                 D4.2 Which loads could be adjusted? (Select all that apply)
               </label>
               <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
-                {D2_FIXED_EQUIPMENT.map((equip) => {
+                {equipmentOptions.map((equip, idx) => {
                   const isSelected = (data.constraints || '').includes(equip);
                   return (
-                    <label key={equip} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', cursor: isReadOnly ? 'default' : 'pointer' }}>
+                    <label key={`${equip}-${idx}`} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', cursor: isReadOnly ? 'default' : 'pointer' }}>
                       <input
                         type="checkbox"
                         checked={isSelected}

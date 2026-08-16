@@ -120,7 +120,22 @@ export default function AgentSurveyList() {
 
   return (
     <div style={{ width: '100%', paddingBottom: '4rem' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
+      <div className="survey-list-header">
+        <style>{`
+          .survey-list-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+          }
+          @media (max-width: 640px) {
+            .survey-list-header {
+              flex-direction: column;
+              align-items: center;
+              gap: 1rem;
+            }
+          }
+        `}</style>
         <h1 style={{ margin: 0, lineHeight: '1', display: 'flex', alignItems: 'center' }}>My Surveys</h1>
         <Button onClick={handleNewSurvey}>+ New Survey</Button>
       </div>

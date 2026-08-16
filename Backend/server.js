@@ -2,28 +2,42 @@ import express from "express";
 import cors from "cors";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./auth.js";
-import { inviteRouter } from "./routes/invite.js";
 import { surveyRouter } from "./routes/surveys.js";
 import { adminRouter } from "./routes/admin.js";
 import { exportRouter } from "./routes/export.js";
+import rateLimit from "express-rate-limit";
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGIN || 'http://localhost:5173',
+  credentials: true,
+}));
 app.use(express.json());
 
+// Rate Limiter for sensitive auth endpoints
+const authRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 20, // max 20 attempts per window
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: { error: 'Too many requests from this IP. Please try again after 15 minutes.' },
+});
+
 // Main App API Routes
-app.use("/api/invite", inviteRouter);
 app.use("/api/surveys", surveyRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/admin", exportRouter);
 
 // Block public signup explicitly to enforce invite-only
-app.post("/api/auth/sign-up/email", (req, res) => {
+app.post("/api/auth/sign-up/email", authRateLimiter, (req, res) => {
   res.status(403).json({ error: "Public signup is disabled. Please use an invitation link." });
 });
 
-// Accept Invitation Endpoint
-app.post("/api/auth/accept-invite", async (req, res) => {
+// Apply rate limiter to sign-in
+app.use("/api/auth/sign-in", authRateLimiter);
+
+// Accept Invitation Endpoint (rate-limited)
+app.post("/api/auth/accept-invite", authRateLimiter, async (req, res) => {
   try {
     const { token, name, password } = req.body;
     if (!token || !name || !password) return res.status(400).json({ error: "Missing required fields" });
@@ -33,7 +47,7 @@ app.post("/api/auth/accept-invite", async (req, res) => {
 
     const { db } = await import('./db.js');
     const { invitations } = await import('./models/schema.js');
-    const { eq, and, gt } = await import('drizzle-orm');
+    const { eq, and, gt, sql } = await import('drizzle-orm');
 
     const [invite] = await db.select()
       .from(invitations)
@@ -58,8 +72,8 @@ app.post("/api/auth/accept-invite", async (req, res) => {
 
     if (!authRes?.user) throw new Error("Failed to create user in auth provider");
 
-    // Update role
-    await db.execute(`UPDATE "user" SET role = '${invite.role}' WHERE email = '${invite.email}'`);
+    // Update role safely using parameterized query to prevent SQL Injection
+    await db.execute(sql`UPDATE "user" SET role = ${invite.role} WHERE email = ${invite.email}`);
 
     // Mark invite as used
     await db.update(invitations)
@@ -77,6 +91,18 @@ app.post("/api/auth/accept-invite", async (req, res) => {
 app.use("/api/auth", toNodeHandler(auth));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+// Graceful shutdown — closes DB pool cleanly on SIGTERM/SIGINT
+const shutdown = async (signal) => {
+  console.log(`${signal} received. Shutting down gracefully...`);
+  server.close(() => {
+    console.log('HTTP server closed.');
+    process.exit(0);
+  });
+};
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
+

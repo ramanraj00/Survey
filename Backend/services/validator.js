@@ -58,6 +58,7 @@ export function validateSurveyData(data) {
     if (!com.shifts || com.shifts.length === 0) {
       warnings.push({ field: 'commercial.shifts', section: 'commercial_shifts', message: 'At least one operating shift is required', severity: 'warning' });
     }
+    ignorePaths.add('demandResponse.industrialDR');
   } else if (data.survey && data.survey.consumerCategory === 'INDUSTRIAL') {
     if (!ind.shifts || ind.shifts.length === 0) {
       warnings.push({ field: 'industrial.shifts', section: 'industrial_shifts', message: 'At least one operating shift is required', severity: 'warning' });
@@ -65,6 +66,17 @@ export function validateSurveyData(data) {
     if (!ind.processes || ind.processes.length === 0) {
       warnings.push({ field: 'industrial.processes', section: 'production_processes', message: 'At least one production process is required', severity: 'warning' });
     }
+    ignorePaths.add('demandResponse.commercialDR');
+    ignorePaths.add('demandResponse.profiles');
+
+    // Ignore deprecated / old fields in industrial demand response
+    const deprecatedIndDR = [
+      'adjustmentScope', 'nonParticipationPeriods', 'canIncreaseProductionBeforePeak',
+      'canCompleteAfterPeak', 'createsNewDemandPeak', 'canDeclineIndividualRequests',
+      'equipmentDataVerificationConsent', 'drPenaltyConcern', 'drPriorParticipation',
+      'drIncentivePreference', 'drFinancialIncentive', 'drNotificationMethod', 'drAutomationLevel'
+    ];
+    deprecatedIndDR.forEach(field => ignorePaths.add(`demandResponse.industrialDR.${field}`));
   }
 
   // ============================================================================

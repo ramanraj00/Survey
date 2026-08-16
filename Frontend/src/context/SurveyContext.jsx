@@ -111,7 +111,6 @@ export function SurveyProvider({ children }) {
     setSurveyData, // Exposing setter for real-time form updates (controlled inputs)
     isLoading,
     error,
-    contextError: error,
     currentVersion,
     loadSurvey,
     saveSection,

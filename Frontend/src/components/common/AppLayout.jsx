@@ -1,6 +1,8 @@
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { LogOut, Home, FileText, PlusCircle, Settings, Users } from 'lucide-react';
+import { LogOut, Home, FileText, Users } from 'lucide-react';
+import { SurveyAPI } from '../../services/api';
+import { SurveyProvider } from '../../context/SurveyContext';
 
 const agentLinks = [
   { to: '/agent/dashboard', label: 'Dashboard', icon: <Home size={18} /> },
@@ -18,8 +20,12 @@ const AppLayout = memo(function AppLayout() {
   const location = useLocation();
   const role = localStorage.getItem('userRole') || 'agent';
 
-  const handleLogout = () => {
-    // Clear auth
+  const handleLogout = async () => {
+    try {
+      await SurveyAPI.signOut(); // Invalidate server session cookie
+    } catch (e) {
+      // Proceed with local logout even if API call fails
+    }
     localStorage.removeItem('userRole');
     navigate('/login');
   };
@@ -47,7 +53,7 @@ const AppLayout = memo(function AppLayout() {
         </div>
 
         <nav className="app-sidebar-nav">
-          {useMemo(() => links.map((link) => {
+          {links.map((link) => {
             const isActive = location.pathname.startsWith(link.to);
             return (
               <Link 
@@ -59,14 +65,16 @@ const AppLayout = memo(function AppLayout() {
                 <span className="nav-label">{link.label}</span>
               </Link>
             )
-          }), [links, location.pathname])}
+          })}
         </nav>
       </aside>
 
       {/* Main Content Area */}
       <main className="app-main">
         <div style={{ padding: 0, width: '100%', maxWidth: '100%' }}>
-          <Outlet />
+          <SurveyProvider>
+            <Outlet />
+          </SurveyProvider>
         </div>
       </main>
     </div>
