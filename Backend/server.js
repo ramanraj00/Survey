@@ -87,6 +87,11 @@ app.post("/api/auth/accept-invite", authRateLimiter, async (req, res) => {
   }
 });
 
+// Health Check Route
+app.get("/", (req, res) => {
+  res.json({ status: "Backend is running successfully!", version: "1.0.0" });
+});
+
 // Better Auth API Route
 app.use("/api/auth", toNodeHandler(auth));
 
