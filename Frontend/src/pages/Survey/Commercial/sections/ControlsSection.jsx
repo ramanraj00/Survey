@@ -37,7 +37,7 @@ export default function ControlsSection({ data, onChange, isReadOnly }) {
       {/* Group 1: Automatic Controls */}
       <div style={{ marginBottom: '2.5rem' }}>
         <SectionHeader title="Automatic Controls" />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', alignItems: 'end' }}>
+        <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', alignItems: 'end' }}>
           
           <div style={{ gridColumn: '1 / -1' }}>
             <label className="form-label">
@@ -60,7 +60,7 @@ export default function ControlsSection({ data, onChange, isReadOnly }) {
               <label style={{ display: 'block', marginBottom: '1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
                 D3.2 Which loads are controlled? (Select all that apply)
               </label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
+              <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
                 {D2_FIXED_EQUIPMENT.map((equip) => {
                   const isSelected = (data.controlledInventoryItemIds || []).includes(equip);
                   return (
@@ -84,7 +84,7 @@ export default function ControlsSection({ data, onChange, isReadOnly }) {
       {/* Group 2: Building Management System (BMS) */}
       <div style={{ marginBottom: '2.5rem' }}>
         <SectionHeader title="Building Management System (BMS)" />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', alignItems: 'end' }}>
+        <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', alignItems: 'end' }}>
           <div>
             <label className="form-label">
               D3.3 Is a BMS or central control system available?
@@ -120,12 +120,12 @@ export default function ControlsSection({ data, onChange, isReadOnly }) {
       {/* Group 3: Backup Energy Resources */}
       <div>
         <SectionHeader title="Backup Energy Resources" />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', alignItems: 'end' }}>
+        <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', alignItems: 'end' }}>
           <div>
             <label className="form-label">
               D3.5 Is rooftop solar available?
             </label>
-            <div style={{ display: 'flex', gap: '1rem' }}>
+            <div className="flex-row-mobile" style={{ display: 'flex', gap: '1rem' }}>
               <Select
                 value={data.hasSolar !== undefined && data.hasSolar !== null ? data.hasSolar.toString() : ''}
                 onChange={(e) => handleSelectChange('hasSolar', e.target.value === 'true' ? true : e.target.value === 'false' ? false : null)}
@@ -154,7 +154,7 @@ export default function ControlsSection({ data, onChange, isReadOnly }) {
             <label className="form-label">
               D3.6 Is a DG set available?
             </label>
-            <div style={{ display: 'flex', gap: '1rem' }}>
+            <div className="flex-row-mobile" style={{ display: 'flex', gap: '1rem' }}>
               <Select
                 value={data.hasDG !== undefined && data.hasDG !== null ? data.hasDG.toString() : ''}
                 onChange={(e) => handleSelectChange('hasDG', e.target.value === 'true' ? true : e.target.value === 'false' ? false : null)}
@@ -183,7 +183,7 @@ export default function ControlsSection({ data, onChange, isReadOnly }) {
             <label className="form-label">
               D3.7 Is UPS or battery storage available?
             </label>
-            <div style={{ display: 'flex', gap: '1rem' }}>
+            <div className="flex-row-mobile" style={{ display: 'flex', gap: '1rem' }}>
               <Select
                 value={data.hasUPS !== undefined && data.hasUPS !== null ? data.hasUPS.toString() : ''}
                 onChange={(e) => handleSelectChange('hasUPS', e.target.value === 'true' ? true : e.target.value === 'false' ? false : null)}
@@ -212,7 +212,7 @@ export default function ControlsSection({ data, onChange, isReadOnly }) {
             <label className="form-label">
               D3.8 Is EV charging available for staff or customers?
             </label>
-            <div style={{ display: 'flex', gap: '1rem' }}>
+            <div className="flex-row-mobile" style={{ display: 'flex', gap: '1rem' }}>
               <Select
                 value={data.hasEVCharging !== undefined && data.hasEVCharging !== null ? data.hasEVCharging.toString() : ''}
                 onChange={(e) => handleSelectChange('hasEVCharging', e.target.value === 'true' ? true : e.target.value === 'false' ? false : null)}

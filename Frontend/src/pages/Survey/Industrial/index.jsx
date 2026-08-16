@@ -153,7 +153,7 @@ export default function IndustrialForm() {
 
   const handlePrev = () => {
     if (currentStep === 1) {
-      navigate(`${baseRoute}/surveys/${id}${isAdmin ? '/edit' : ''}/common`);
+      navigate(`${baseRoute}/surveys/${id}${isAdmin ? '/edit' : ''}/inventory`);
     } else {
       setCurrentStep(prev => Math.max(prev - 1, 1));
     }

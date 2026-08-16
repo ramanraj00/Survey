@@ -5,6 +5,7 @@ import { auth } from "./auth.js";
 import { inviteRouter } from "./routes/invite.js";
 import { surveyRouter } from "./routes/surveys.js";
 import { adminRouter } from "./routes/admin.js";
+import { exportRouter } from "./routes/export.js";
 
 const app = express();
 app.use(cors());
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use("/api/invite", inviteRouter);
 app.use("/api/surveys", surveyRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/admin", exportRouter);
 
 // Block public signup explicitly to enforce invite-only
 app.post("/api/auth/sign-up/email", (req, res) => {

@@ -186,4 +186,28 @@ export const AdminAPI = {
       body: JSON.stringify(payload)
     });
   },
+
+  // Export approved survey to Excel
+  exportSurvey: async (id) => {
+    const response = await fetch(`${API_BASE}/admin/surveys/${id}/export`, {
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      let errMsg = 'Export failed';
+      try { const d = await response.json(); errMsg = d.error || errMsg; } catch {}
+      throw new Error(errMsg);
+    }
+    const blob = await response.blob();
+    const disposition = response.headers.get('Content-Disposition') || '';
+    const match = disposition.match(/filename="?([^"]+)"?/);
+    const filename = match ? match[1] : `Survey_Export.xlsx`;
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  },
 };

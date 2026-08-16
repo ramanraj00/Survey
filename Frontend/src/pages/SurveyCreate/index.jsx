@@ -11,7 +11,6 @@ const CATEGORY_OPTIONS = [
   { value: 'RESIDENTIAL', label: 'Residential' },
   { value: 'COMMERCIAL', label: 'Commercial' },
   { value: 'INDUSTRIAL', label: 'Industrial' },
-  { value: 'INVENTORY', label: 'Inventory' },
 ];
 
 const SELECT_STYLE = {

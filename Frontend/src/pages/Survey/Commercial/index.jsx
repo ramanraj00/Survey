@@ -8,16 +8,13 @@ import { isFormEmpty } from '../../../utils/formUtils';
 
 // Sections
 import ProfileSection from './sections/ProfileSection';
-import ElectricalLoadsSection from './sections/ElectricalLoadsSection';
-import { D2_FIXED_EQUIPMENT } from './constants';
 import ControlsSection from './sections/ControlsSection';
 import FlexibilitySection from './sections/FlexibilitySection';
 
 const STEPS = [
   { id: 1, title: 'Business Profile' },
-  { id: 2, title: 'Electrical Loads' },
-  { id: 3, title: 'Controls & Backup' },
-  { id: 4, title: 'DR Flexibility' }
+  { id: 2, title: 'Controls & Backup' },
+  { id: 3, title: 'DR Flexibility' }
 ];
 
 export default function CommercialForm() {
@@ -35,8 +32,6 @@ export default function CommercialForm() {
   const [shifts, setShifts] = useState([]);
   const [controls, setControls] = useState({});
 
-  // 2. Inventory Data (D2)
-  const [inventoryItems, setInventoryItems] = useState([]);
 
   // 3. Demand Response Data (D4)
   const [drData, setDrData] = useState({});
@@ -57,18 +52,6 @@ export default function CommercialForm() {
       // D3
       if (surveyData.commercial?.controls) setControls(surveyData.commercial.controls);
       
-      // D2
-      const existingItems = surveyData.inventoryItems || [];
-      const populatedItems = D2_FIXED_EQUIPMENT.map(equip => {
-        const found = existingItems.find(item => item.equipmentDescription === equip);
-        if (found) {
-          // If it exists in DB, it implies hasItem is true, unless we saved it with hasItem=false previously
-          return { ...found, hasItem: true };
-        }
-        return { equipmentDescription: equip, hasItem: '' };
-      });
-      setInventoryItems(populatedItems);
-
       // D4 (merge from demandResponse profiles and commercialDR)
       const mergedDr = {
         ...(surveyData.demandResponse?.profiles || {}),
@@ -98,7 +81,7 @@ export default function CommercialForm() {
 
   const handlePrev = () => {
     if (currentStep === 1) {
-      navigate(`${baseRoute}/surveys/${id}${isAdmin ? '/edit' : ''}/common`);
+      navigate(`${baseRoute}/surveys/${id}${isAdmin ? '/edit' : ''}/inventory`);
     } else {
       setCurrentStep(prev => Math.max(prev - 1, 1));
     }
@@ -147,15 +130,6 @@ export default function CommercialForm() {
       }, version);
       
       version = commResult.newVersion; // update version for next request
-
-      // 2. Save Inventory Data (D2)
-      // Only save items marked as Yes
-      const itemsToSave = inventoryItems
-        .filter(item => item.hasItem === true || item.hasItem === 'true')
-        .map(item => cleanData(item));
-      
-      const invResult = await saveSection('inventory', { items: itemsToSave }, version);
-      version = invResult.newVersion;
 
       // 3. Save Demand Response Data (D4)
       const cleanedDrData = cleanData(drData);
@@ -255,28 +229,20 @@ export default function CommercialForm() {
           />
         )}
         {currentStep === 2 && (
-          <ElectricalLoadsSection 
-            items={inventoryItems} 
-            onUpdateItem={(index, field, value) => {
-              const newItems = [...inventoryItems];
-              newItems[index] = { ...newItems[index], [field]: value };
-              setInventoryItems(newItems);
-            }} 
-            isReadOnly={isReadOnly} 
-          />
-        )}
-        {currentStep === 3 && (
           <ControlsSection 
             data={controls} 
-            onChange={(updates) => setControls(prev => ({...prev, ...updates}))} 
-            isReadOnly={isReadOnly} 
+            onChange={(updates) => setControls(prev => ({ ...prev, ...updates }))} 
+            isReadOnly={isReadOnly}
+            inventoryItems={surveyData?.inventoryItems || []}
           />
         )}
-        {currentStep === 4 && (
+
+        {currentStep === 3 && (
           <FlexibilitySection 
             data={drData} 
-            onChange={(updates) => setDrData(prev => ({...prev, ...updates}))} 
-            isReadOnly={isReadOnly} 
+            onChange={(updates) => setDrData(prev => ({ ...prev, ...updates }))} 
+            isReadOnly={isReadOnly}
+            inventoryItems={surveyData?.inventoryItems || []}
           />
         )}
       </div>

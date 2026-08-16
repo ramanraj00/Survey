@@ -49,13 +49,8 @@ export default function CommonForm() {
       if (currentStep < totalSteps) {
         setCurrentStep(prev => prev + 1);
       } else {
-        const cat = surveyData?.survey?.consumerCategory?.toLowerCase();
-        if (cat) {
-          const basePath = window.location.pathname.split('/common')[0];
-          navigate(`${basePath}/${cat}`);
-        } else {
-          navigate(-1);
-        }
+        const basePath = window.location.pathname.split('/common')[0];
+        navigate(`${basePath}/inventory`);
       }
       return;
     }
@@ -86,13 +81,8 @@ export default function CommonForm() {
       if (currentStep < totalSteps) {
         setCurrentStep(prev => prev + 1);
       } else {
-        const cat = surveyData?.survey?.consumerCategory?.toLowerCase();
-        if (cat) {
-          const basePath = window.location.pathname.split('/common')[0];
-          navigate(`${basePath}/${cat}`);
-        } else {
-          navigate(-1);
-        }
+        const basePath = window.location.pathname.split('/common')[0];
+        navigate(`${basePath}/inventory`);
       }
     } catch (error) {
       console.error("Save failed:", error);
@@ -266,7 +256,7 @@ export default function CommonForm() {
       
       <div><label style={labelStyle}>Operating Days</label><input name="operatingDays" value={formData.operatingDays || ''} onChange={handleChange} style={inputStyle} /></div>
       <div><label style={labelStyle}>Operating Timings</label>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div className="flex-row-mobile" style={{ display: 'flex', gap: '0.5rem' }}>
           <input type="time" name="operatingStartTime" value={formData.operatingStartTime || ''} onChange={handleChange} style={inputStyle} />
           <input type="time" name="operatingEndTime" value={formData.operatingEndTime || ''} onChange={handleChange} style={inputStyle} />
         </div>
@@ -346,10 +336,23 @@ export default function CommonForm() {
             grid-template-columns: 1fr;
           }
           .main-container {
-            padding: 1rem !important;
+            padding: 0 !important;
+            height: auto !important;
           }
           .card-container {
-            padding: 1.5rem !important;
+            padding: 1rem !important;
+            width: 100%;
+            box-sizing: border-box;
+          }
+          input:not([type="checkbox"]):not([type="radio"]), select {
+            width: 100%;
+            box-sizing: border-box;
+            min-width: 0;
+          }
+          .flex-row-mobile {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
           }
           .footer-actions {
             flex-direction: column-reverse;
@@ -361,22 +364,24 @@ export default function CommonForm() {
         }
       `}</style>
       <div className="main-container" style={{
-        padding: '1.5rem 2rem',
+        padding: '0',
         width: '100%',
-        height: '100vh',
-        overflow: 'hidden',
+        minHeight: '100%',
         backgroundColor: '#FFFFFF',
         boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',
+        borderRadius: '12px',
+        overflow: 'hidden'
       }}>
         <Toast message={toastMessage} onClose={() => setToastMessage('')} />
         <div className="card-container" style={{
           flex: 1,
-          minHeight: 0,
+          padding: '1.5rem 2rem',
           display: 'flex',
           flexDirection: 'column',
           backgroundColor: '#FFFFFF',
+          boxSizing: 'border-box'
         }}>
         <fieldset disabled={isReadOnly} style={{ border: 'none', padding: 0, margin: 0, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
         {/* Header */}

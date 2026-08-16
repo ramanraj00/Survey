@@ -48,7 +48,7 @@ export default function ProfileSection({ data, onChange, shifts, onShiftsChange,
       {/* Group 1: Establishment Details */}
       <div style={{ marginBottom: '2.5rem' }}>
         <SectionHeader title="Establishment Details" />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', alignItems: 'end' }}>
+        <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', alignItems: 'end' }}>
           <div>
             <label className="form-label">D1.1 Type of Business / Establishment</label>
             <input
@@ -79,7 +79,7 @@ export default function ProfileSection({ data, onChange, shifts, onShiftsChange,
 
           <div>
             <label className="form-label">D1.3 No of floors / operational areas</label>
-            <div style={{ display: 'flex', gap: '1rem' }}>
+            <div className="flex-row-mobile" style={{ display: 'flex', gap: '1rem' }}>
               <input
                 type="number"
                 name="floorCount"
@@ -106,11 +106,11 @@ export default function ProfileSection({ data, onChange, shifts, onShiftsChange,
       {/* Group 2: Operating Schedule */}
       <div style={{ marginBottom: '2.5rem' }}>
         <SectionHeader title="Operating Schedule" />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', alignItems: 'end' }}>
+        <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', alignItems: 'end' }}>
           
           <div>
             <label className="form-label">D1.4 Typical operating days</label>
-            <div style={{ display: 'flex', gap: '1rem' }}>
+            <div className="flex-row-mobile" style={{ display: 'flex', gap: '1rem' }}>
               <input
                 type="number"
                 name="operatingDays"
@@ -134,7 +134,7 @@ export default function ProfileSection({ data, onChange, shifts, onShiftsChange,
 
           <div>
             <label className="form-label">D1.5 Typical operating hours (Opening - Closing)</label>
-            <div style={{ display: 'flex', gap: '1rem' }}>
+            <div className="flex-row-mobile" style={{ display: 'flex', gap: '1rem' }}>
               <input
                 type="time"
                 name="openingTime"
@@ -261,12 +261,12 @@ export default function ProfileSection({ data, onChange, shifts, onShiftsChange,
       {/* Group 3: Decision Maker */}
       <div>
         <SectionHeader title="Decision Maker" />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', alignItems: 'end' }}>
+        <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', alignItems: 'end' }}>
           <div style={{ gridColumn: '1 / -1' }}>
             <label className="form-label">
               D1.10 Who can approve / implement a change in the operating time of use for electrical loads?
             </label>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', maxWidth: '800px' }}>
+        <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', maxWidth: '800px' }}>
               <input
                 type="text"
                 name="approverName"

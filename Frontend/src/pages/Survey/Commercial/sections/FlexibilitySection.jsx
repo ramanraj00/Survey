@@ -37,7 +37,7 @@ export default function FlexibilitySection({ data, onChange, isReadOnly }) {
       {/* Group 1: Flexibility Readiness */}
       <div style={{ marginBottom: '2.5rem' }}>
         <SectionHeader title="Flexibility Readiness" />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', alignItems: 'end' }}>
+        <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', alignItems: 'end' }}>
           
           <div style={{ gridColumn: '1 / -1' }}>
             <label className="form-label">
@@ -62,7 +62,7 @@ export default function FlexibilitySection({ data, onChange, isReadOnly }) {
               <label style={{ display: 'block', marginBottom: '1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
                 D4.2 Which loads could be adjusted? (Select all that apply)
               </label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
+              <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
                 {D2_FIXED_EQUIPMENT.map((equip) => {
                   const isSelected = (data.constraints || '').includes(equip);
                   return (
@@ -103,7 +103,7 @@ export default function FlexibilitySection({ data, onChange, isReadOnly }) {
       {/* Group 2: Operational Parameters */}
       <div style={{ marginBottom: '2.5rem' }}>
         <SectionHeader title="Operational Parameters" />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', alignItems: 'end' }}>
+        <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', alignItems: 'end' }}>
           
           <div>
             <label className="form-label">
@@ -205,7 +205,7 @@ export default function FlexibilitySection({ data, onChange, isReadOnly }) {
       {/* Group 3: Communication & Incentives */}
       <div>
         <SectionHeader title="Communication & Incentives" />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', alignItems: 'end' }}>
+        <div className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', alignItems: 'end' }}>
           
           <div>
             <label className="form-label">

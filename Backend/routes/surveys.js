@@ -56,7 +56,7 @@ const cleanArrayData = (arr) => {
   return arr.map(item => {
     const cleanItem = {};
     for (const [k, v] of Object.entries(item)) {
-      if (v !== undefined) {
+      if (v !== undefined && !['id', 'surveyId', 'createdAt', 'updatedAt'].includes(k)) {
         cleanItem[k] = v === '' ? null : v;
       }
     }

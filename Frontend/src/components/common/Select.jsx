@@ -91,7 +91,7 @@ const Select = memo(function Select({
         style={{ ...triggerStyle }}
         {...props}
       >
-        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <span style={{ wordBreak: 'break-word', paddingRight: '0.5rem', flex: 1, textAlign: 'left' }}>
           {selectedOption ? selectedOption.label : '-- Select --'}
         </span>
         <ChevronDown size={16} style={{ 

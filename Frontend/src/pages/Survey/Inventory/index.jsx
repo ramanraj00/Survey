@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useSurvey } from '../../../context/SurveyContext';
+import { useBaseRoute } from '../../../hooks/useBaseRoute';
 import { Plus, Trash2 } from 'lucide-react';
 import Select from '../../../components/common/Select';
 
 export default function InventoryForm() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const baseRoute = useBaseRoute();
   const { surveyData, saveSection, isLoading: contextLoading, error: contextError } = useSurvey();
   const [items, setItems] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -55,12 +58,12 @@ export default function InventoryForm() {
 
 
   const handleSaveAndContinue = async () => {
+    const cat = surveyData?.survey?.consumerCategory?.toLowerCase();
+    const editSegment = isAdmin ? '/edit' : '';
+    const nextPath = `${baseRoute}/surveys/${id}${editSegment}/${cat}`;
+
     if (isReadOnly) {
-      if (isAdmin) {
-        navigate('/admin/surveys');
-      } else {
-        navigate('/agent/surveys');
-      }
+      navigate(nextPath);
       return;
     }
 
@@ -68,6 +71,13 @@ export default function InventoryForm() {
     try {
       const sanitizedItems = items.map(item => {
         const sanitized = { ...item };
+        
+        // Remove system fields to prevent Drizzle bulk insert errors when mixing existing and new items
+        delete sanitized.id;
+        delete sanitized.surveyId;
+        delete sanitized.createdAt;
+        delete sanitized.updatedAt;
+
         for (const [key, value] of Object.entries(sanitized)) {
           if (value === '') sanitized[key] = null;
         }
@@ -83,11 +93,7 @@ export default function InventoryForm() {
       });
 
       await saveSection('inventory', sanitizedItems);
-      if (isAdmin) {
-        navigate('/admin/surveys');
-      } else {
-        navigate('/agent/surveys');
-      }
+      navigate(nextPath);
     } catch (error) {
       console.error("Save failed:", error);
       alert("Failed to save. Please try again.");
@@ -115,6 +121,15 @@ export default function InventoryForm() {
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
         .card-enter { animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 640px) {
+          .footer-actions {
+            flex-direction: column-reverse !important;
+            gap: 1rem;
+          }
+          .footer-actions button {
+            width: 100%;
+          }
+        }
       `}</style>
       
       <div style={{ marginBottom: '2.5rem', textAlign: 'center' }}>
@@ -253,13 +268,16 @@ export default function InventoryForm() {
       )}
 
       {/* Navigation Footer */}
-      <div style={{
+      <div className="footer-actions" style={{
         marginTop: 'auto', paddingTop: '2rem', borderTop: '1px solid #E2E8F0',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         position: 'sticky', bottom: 0, backgroundColor: '#F8FAFC', paddingBottom: '1rem', zIndex: 10
       }}>
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => {
+            const editSegment = isAdmin ? '/edit' : '';
+            navigate(`${baseRoute}/surveys/${id}${editSegment}/common`);
+          }}
           style={{
             padding: '0.75rem 1.5rem', borderRadius: '100px', border: '1px solid #CBD5E1',
             backgroundColor: '#FFFFFF', color: '#475569', fontWeight: '600',
@@ -276,10 +294,11 @@ export default function InventoryForm() {
             padding: '0.75rem 2rem', borderRadius: '100px', border: 'none',
             backgroundColor: isSaving ? '#94A3B8' : '#0F172A', color: '#FFFFFF',
             fontWeight: '600', cursor: isSaving ? 'not-allowed' : 'pointer',
-            transition: 'all 0.2s ease', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+            transition: 'all 0.2s ease', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+            whiteSpace: 'nowrap'
           }}
         >
-          {isSaving ? 'Saving...' : (isReadOnly ? 'Finish' : 'Save & Finish')}
+          {isSaving ? 'Saving...' : (isReadOnly ? 'Next' : 'Save & Continue')}
         </button>
       </div>
     </div>

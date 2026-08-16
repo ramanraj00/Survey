@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Card from '../../../components/common/Card';
 import Button from '../../../components/common/Button';
-import { SurveyAPI } from '../../../services/api';
-import { CheckCircle, Shield, History, ArrowLeft, Edit3 } from 'lucide-react';
+import { SurveyAPI, AdminAPI } from '../../../services/api';
+import { CheckCircle, Shield, History, ArrowLeft, Edit3, Download } from 'lucide-react';
 
 export default function AdminSurveyView() {
   const { id } = useParams();
@@ -11,6 +11,7 @@ export default function AdminSurveyView() {
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isApproving, setIsApproving] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState(null);
 
   const fetchSurvey = async () => {
@@ -42,6 +43,17 @@ export default function AdminSurveyView() {
       }
     } finally {
       setIsApproving(false);
+    }
+  };
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      await AdminAPI.exportSurvey(id);
+    } catch (err) {
+      alert(err.message || 'Failed to export survey');
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -84,6 +96,11 @@ export default function AdminSurveyView() {
           {!isApproved && data.survey.status === 'SUBMITTED' && (
             <Button onClick={handleApprove} isLoading={isApproving} style={{ background: '#111827', color: '#FFFFFF', border: 'none', fontWeight: 600, padding: '0.5rem 1rem', borderRadius: '6px', fontSize: '0.875rem', display: 'flex', alignItems: 'center' }}>
               <CheckCircle size={16} style={{ marginRight: '0.375rem' }} /> Approve Survey
+            </Button>
+          )}
+          {isApproved && (
+            <Button onClick={handleExport} isLoading={isExporting} style={{ background: '#059669', color: '#FFFFFF', border: 'none', fontWeight: 600, padding: '0.5rem 1rem', borderRadius: '6px', fontSize: '0.875rem', display: 'flex', alignItems: 'center' }}>
+              <Download size={16} style={{ marginRight: '0.375rem' }} /> {isExporting ? 'Exporting...' : 'Export to Excel'}
             </Button>
           )}
         </div>

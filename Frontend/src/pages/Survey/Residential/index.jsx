@@ -213,8 +213,8 @@ export default function ResidentialForm() {
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', paddingTop: '1.5rem', borderTop: '1px solid #E2E8F0' }}>
           <div>
             {currentStep === 1 ? (
-              <Button type="button" variant="secondary" onClick={() => navigate(`${baseRoute}/surveys/${id}${isAdmin ? '/edit' : ''}/common`)}>
-                Back to Common Details
+              <Button type="button" variant="secondary" onClick={() => navigate(`${baseRoute}/surveys/${id}${isAdmin ? '/edit' : ''}/inventory`)}>
+                Back to Inventory
               </Button>
             ) : (
               <Button type="button" variant="secondary" onClick={handlePrev}>
