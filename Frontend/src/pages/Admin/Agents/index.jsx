@@ -57,15 +57,32 @@ export default function AdminAgentsList() {
   };
 
   const handleCopy = async () => {
-    if (copiedToken) {
-      const inviteLink = `${window.location.origin}/signup?token=${copiedToken}`;
-      try {
+    if (!copiedToken) return;
+    const inviteLink = `${window.location.origin}/signup?token=${copiedToken}`;
+    
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(inviteLink);
-        setShowToast(true);
-        setTimeout(() => setShowToast(false), 3000);
-      } catch (err) {
-        console.warn('Could not copy');
+      } else {
+        // Fallback for browsers that block clipboard API
+        const textArea = document.createElement("textarea");
+        textArea.value = inviteLink;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+        } catch (error) {
+          console.error('Fallback copy failed', error);
+        } finally {
+          textArea.remove();
+        }
       }
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    } catch (err) {
+      console.warn('Could not copy', err);
     }
   };
 
