@@ -1,7 +1,8 @@
 // src/services/api.js
 // Base API utility using native fetch
 
-const API_BASE = import.meta.env.VITE_API_URL || '/api';
+// Force /api in production so it uses the same origin (proxied by Vercel) to avoid cross-domain cookie blocks.
+const API_BASE = import.meta.env.MODE === 'development' ? 'http://localhost:3000/api' : '/api';
 
 /**
  * Generic API fetcher that handles response parsing and standard errors
