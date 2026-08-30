@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SurveyAPI } from '../../services/api';
-import PixelWaveBg from '../../components/common/PixelWaveBg';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -65,23 +64,41 @@ export default function Login() {
       alignItems: 'center',
       justifyContent: 'center',
       padding: '1rem',
-      background: 'linear-gradient(180deg, #749CB4 0%, #D4DFDF 60%, #F5F1E5 100%)',
+      background: 'linear-gradient(135deg, #F5E6D3 0%, #EACFCF 20%, #D4A9B0 40%, #C9A0C9 60%, #B89ED4 80%, #9B8EC2 100%)',
       overflow: 'hidden',
       position: 'relative'
     }}>
       
-      {/* Edge Halftone Dot Pattern */}
-      <PixelWaveBg />
-
-
-
+      {/* Smooth Vertical Column Gradient Overlay - Morning Haze style */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: `
+          linear-gradient(90deg, 
+            rgba(245, 230, 213, 0.6) 0%, 
+            rgba(234, 207, 207, 0.3) 15%, 
+            transparent 30%, 
+            rgba(212, 169, 176, 0.2) 45%, 
+            transparent 55%, 
+            rgba(201, 160, 201, 0.3) 70%, 
+            transparent 80%, 
+            rgba(155, 142, 194, 0.4) 100%
+          )
+        `,
+        zIndex: 1,
+        pointerEvents: 'none',
+        filter: 'blur(40px)',
+      }} />
       {/* Neumorphic 3D Embossed Title */}
       <h1 style={{
         position: 'relative',
         zIndex: 10,
         fontSize: 'clamp(2.5rem, 10vw, 4.5rem)', // Scales down automatically on mobile
         fontWeight: 900,
-        color: '#a4bdc9', // Matches the background gradient vertically
+        color: '#c4a0b8',
         textTransform: 'uppercase',
         letterSpacing: '0.2em',
         marginBottom: 'clamp(1rem, 4vw, 2rem)', // Responsive margin
@@ -150,8 +167,8 @@ export default function Login() {
                 width: '44px',
                 height: '44px',
                 borderRadius: '12px',
-                background: 'linear-gradient(135deg, #749CB4 0%, #5A7E94 100%)',
-                boxShadow: '0 8px 16px rgba(90, 126, 148, 0.25), inset 0 2px 2px rgba(255, 255, 255, 0.2)',
+                background: 'linear-gradient(135deg, #C9A0C9 0%, #9B7EA8 100%)',
+                boxShadow: '0 8px 16px rgba(155, 126, 168, 0.25), inset 0 2px 2px rgba(255, 255, 255, 0.2)',
                 marginBottom: '1.25rem',
               }}>
                 {/* Premium Abstract SaaS Logo for "Survey" */}
@@ -247,8 +264,8 @@ export default function Login() {
                   }}
                   onFocus={(e) => {
                     e.target.style.background = 'rgba(255, 255, 255, 0.9)';
-                    e.target.style.borderColor = '#749CB4';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(116, 156, 180, 0.15)';
+                    e.target.style.borderColor = '#B890B8';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(184, 144, 184, 0.15)';
                   }}
                   onBlur={(e) => {
                     e.target.style.background = 'rgba(255, 255, 255, 0.6)';
@@ -339,7 +356,7 @@ export default function Login() {
           style={{
             width: isExpanded ? '100%' : '124px',
             height: '46px',
-            background: 'linear-gradient(180deg, #6C91A8 0%, #517185 100%)',
+            background: 'linear-gradient(180deg, #B890B8 0%, #9B7EA8 100%)',
             color: 'white',
             border: 'none',
             borderRadius: '14px',
@@ -355,8 +372,8 @@ export default function Login() {
               ? 'width 0.4s ease 0s, box-shadow 0.3s ease, transform 0.3s ease' 
               : 'all 0.4s ease',
             boxShadow: isHovered && !isLoading
-              ? '0 8px 20px rgba(81, 113, 133, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.25)' 
-              : '0 4px 12px rgba(81, 113, 133, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.2)',
+              ? '0 8px 20px rgba(155, 126, 168, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.25)' 
+              : '0 4px 12px rgba(155, 126, 168, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.2)',
             transform: isHovered && !isLoading ? 'translateY(-2px)' : 'translateY(0)',
             textShadow: '0 1px 2px rgba(0,0,0,0.1)'
           }}

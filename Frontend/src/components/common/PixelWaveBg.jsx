@@ -17,9 +17,8 @@ export default function PixelWaveBg() {
     const imgData = ctx.createImageData(width, height);
     const data = imgData.data;
     
-    // Color: Deep Navy Blue with very low opacity to act as a subtle, premium texture
-    // This syncs beautifully with the Slate Blue background
-    const r = 20, g = 40, b = 60, a = 35;
+    // Color: Warm mauve to blend with the Morning Haze background
+    const r = 80, g = 40, b = 70, a = 30;
 
     // Clustered-dot Halftone Matrix (4x4)
     // Unlike Bayer (which scatters pixels like static), this grows a single circular dot 
